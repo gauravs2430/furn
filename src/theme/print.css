@@ -1,0 +1,239 @@
+.print-stage {
+  min-height: 100vh;
+  padding: 18px 12px 40px;
+  background: #d5dde1;
+}
+
+.print-toolbar {
+  width: min(210mm, 100%);
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.print-toolbar strong {
+  display: block;
+}
+
+.print-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.print-sheet {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 8mm;
+  background: white;
+  color: #161616;
+  box-shadow: 0 10px 28px rgba(20, 38, 46, 0.16);
+}
+
+.wo-banner,
+.inv-title-block h1 {
+  margin: 0 0 6px;
+  text-align: center;
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.08em;
+}
+
+.wo-meta,
+.wo-options,
+.wo-grid,
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.wo-meta th,
+.wo-meta td,
+.wo-options th,
+.wo-options td,
+.wo-grid th,
+.wo-grid td,
+.inv-table th,
+.inv-table td {
+  border: 1px solid #222;
+  padding: 2px 4px;
+  vertical-align: top;
+}
+
+.wo-meta th,
+.wo-options th,
+.wo-grid th,
+.inv-table th {
+  font-weight: 650;
+  text-align: left;
+  background: #f3f3f3;
+}
+
+.wo-options caption,
+.wo-grid caption {
+  caption-side: top;
+  padding: 6px 0 2px;
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.wo-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 8px;
+  margin-top: 8px;
+  align-items: start;
+}
+
+.wo-drawing {
+  border: 1px solid #222;
+  height: 118mm;
+  padding: 4px;
+  background: #fff;
+}
+
+.wo-drawing-caption {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.wo-drawing .drawing-frame {
+  min-height: 0;
+  height: calc(100% - 16px);
+  background: #fff;
+}
+
+.wo-grid {
+  margin-top: 6px;
+}
+
+.inv-head,
+.inv-parties {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 16px;
+}
+
+.inv-parties {
+  grid-template-columns: repeat(3, 1fr);
+  margin: 14px 0;
+  padding: 8px 0;
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+}
+
+.inv-brand {
+  font-size: 28px;
+  line-height: 0.9;
+}
+
+.inv-tag,
+.inv-head p,
+.inv-parties p,
+.inv-table p {
+  margin: 0;
+  font-size: 11px;
+}
+
+.inv-title-block {
+  text-align: right;
+}
+
+.inv-title-block h1 {
+  text-align: right;
+  letter-spacing: 0.12em;
+}
+
+.inv-parties h2,
+.inv-table strong {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 14px;
+}
+
+.inv-thumb {
+  width: 32mm;
+  height: 24mm;
+}
+
+.inv-table {
+  font-size: 11px;
+}
+
+.inv-table th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inv-totals {
+  width: 72mm;
+  margin-left: auto;
+  margin-top: 10px;
+}
+
+.inv-grand {
+  border-top: 2px solid #111;
+  font-size: 18px;
+}
+
+.inv-foot {
+  margin-top: 16px;
+  font-size: 10px;
+  color: #333;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 8mm;
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .no-print,
+  .topbar,
+  .toast-wrap,
+  .bottom-bar {
+    display: none !important;
+  }
+
+  .print-stage {
+    background: white;
+    padding: 0;
+  }
+
+  .print-sheet {
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    break-after: page;
+  }
+
+  .print-sheet:last-child {
+    break-after: auto;
+  }
+
+  .avoid-break,
+  .wo-top,
+  .inv-head {
+    break-inside: avoid;
+  }
+
+  .wo-drawing,
+  .print-sheet,
+  .print-sheet * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
