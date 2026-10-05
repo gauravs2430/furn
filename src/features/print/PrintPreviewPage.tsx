@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useReactToPrint } from 'react-to-print'
-import { useAppStore } from '../../store/useAppStore.ts'
+import type { Quote } from '../../domain/models.ts'
+import { quoteRepository, useAppStore } from '../../store/useAppStore.ts'
 import { Button } from '../../components/ui/Button.tsx'
 import { WorkOrderDocument } from './WorkOrderPrint.tsx'
 import { InvoiceDocument } from './InvoicePrint.tsx'
@@ -14,16 +15,36 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
   const { id } = useParams()
   const navigate = useNavigate()
   const hydrated = useAppStore((state) => state.hydrated)
-  const quote = useAppStore((state) => state.quotes.find((entry) => entry.id === id))
+  const stored = useAppStore((state) => state.quotes.find((entry) => entry.id === id))
   const pricingConfig = useAppStore((state) => state.pricingConfig)
+  const [fetched, setFetched] = useState<{ id: string; quote: Quote | null } | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [printedAt] = useState(() => new Date().toISOString())
+
+  useEffect(() => {
+    if (!hydrated || !id || stored) return
+    let cancelled = false
+    setFetched(null)
+    void quoteRepository
+      .read(id)
+      .then((row) => {
+        if (!cancelled) setFetched({ id, quote: row?.quote ?? null })
+      })
+      .catch(() => {
+        if (!cancelled) setFetched({ id, quote: null })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [hydrated, id, stored])
+
+  const quote = stored ?? (fetched && fetched.id === id ? fetched.quote : null)
   const handlePrint = useReactToPrint({
     contentRef,
     documentTitle: quote ? `${kind === 'work-order' ? 'Work Order' : 'Quotation'} ${quote.jobNo}` : 'Document',
   })
 
-  if (!hydrated) return <p className="boot">Preparing the document…</p>
+  if (!hydrated || (!stored && fetched?.id !== id)) return <p className="boot">Preparing the document…</p>
   if (!quote) {
     return (
       <div className="empty">

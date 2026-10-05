@@ -50,6 +50,39 @@ export function quoteFromDocument(value: unknown): Quote | null {
   return quote
 }
 
+export interface QuoteAccessRow {
+  quote: Quote
+  userId: string
+  ownerEmail: string
+  updatedAt: string
+}
+
+function profileEmail(value: unknown): string {
+  const entry = Array.isArray(value) ? value[0] : value
+  if (!entry || typeof entry !== 'object' || !('email' in entry)) return ''
+  return typeof entry.email === 'string' ? entry.email : ''
+}
+
+export function quoteAccessFromRow(value: unknown): QuoteAccessRow | null {
+  if (!value || typeof value !== 'object') return null
+  const row = value as { id?: unknown; user_id?: unknown; document?: unknown; updated_at?: unknown; profiles?: unknown }
+  if (typeof row.user_id !== 'string' || !row.user_id) return null
+  const parsed = quoteFromDocument(row.document)
+  if (!parsed) return null
+  const quote = typeof row.id === 'string' && row.id ? { ...parsed, id: row.id } : parsed
+  const updatedAt = typeof row.updated_at === 'string' && row.updated_at ? row.updated_at : quote.updatedAt
+  return {
+    quote,
+    userId: row.user_id,
+    ownerEmail: profileEmail(row.profiles),
+    updatedAt,
+  }
+}
+
+export function ownerCanWrite(existingUserId: string | null, currentUserId: string): boolean {
+  return existingUserId === null || existingUserId === currentUserId
+}
+
 function requireClient() {
   if (!supabase) throw new Error('Supabase is not configured.')
   return supabase
@@ -100,10 +133,39 @@ export class SupabaseQuoteRepository implements QuoteRepository {
     return quoteFromDocument(data.document)
   }
 
+  async listAll(): Promise<QuoteAccessRow[]> {
+    const { data, error } = await requireClient()
+      .from('quotes')
+      .select('id, user_id, document, updated_at, profiles(email)')
+      .order('updated_at', { ascending: false })
+    if (error) throw error
+    const rows: QuoteAccessRow[] = []
+    for (const row of data ?? []) {
+      const parsed = quoteAccessFromRow(row)
+      if (parsed) rows.push(parsed)
+    }
+    return rows
+  }
+
+  async read(id: string): Promise<QuoteAccessRow | null> {
+    const { data, error } = await requireClient()
+      .from('quotes')
+      .select('id, user_id, document, updated_at')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw error
+    return quoteAccessFromRow(data)
+  }
+
   async save(quote: Quote): Promise<Quote> {
     const userId = await currentUserId()
+    const client = requireClient()
+    const { data: existing, error: readError } = await client.from('quotes').select('user_id').eq('id', quote.id).maybeSingle()
+    if (readError) throw readError
+    const existingUserId = existing && typeof existing.user_id === 'string' ? existing.user_id : null
+    if (!ownerCanWrite(existingUserId, userId)) throw new Error('Only the owner can change this order.')
     const row = quoteToRow(quote, userId)
-    const { error } = await requireClient().from('quotes').upsert(row, { onConflict: 'id' })
+    const { error } = await client.from('quotes').upsert(row, { onConflict: 'id' })
     if (error) throw error
     return row.document
   }

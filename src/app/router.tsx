@@ -3,6 +3,7 @@ import { RequireAuth } from '../auth/RequireAuth.tsx'
 import { AppShell } from '../components/layout/AppShell.tsx'
 import { AccountPage } from '../features/account/AccountPage.tsx'
 import { AdminPage } from '../features/admin/AdminPage.tsx'
+import { AdminOrdersPage } from '../features/admin/OrdersPage.tsx'
 import { PricesPage } from '../features/admin/PricesPage.tsx'
 import { ConfiguratorPage } from '../features/configurator/ConfiguratorPage.tsx'
 import { DashboardPage } from '../features/dashboard/DashboardPage.tsx'
@@ -21,6 +22,7 @@ export function AppRouter() {
           <Route path="/account" element={<AccountPage />} />
           <Route path="/admin/users" element={<AdminPage />} />
           <Route path="/admin/prices" element={<PricesPage />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
           <Route path="/quote/:id" element={<ConfiguratorPage />} />
           <Route path="/quote/:id/print/work-order" element={<PrintPreviewPage kind="work-order" />} />
           <Route path="/quote/:id/print/quote" element={<PrintPreviewPage kind="quote" />} />

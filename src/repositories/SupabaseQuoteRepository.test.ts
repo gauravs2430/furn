@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createQuote } from '../domain/factories.ts'
-import { assertJobNo, quoteFromDocument, quoteToRow } from './SupabaseQuoteRepository.ts'
+import { assertJobNo, ownerCanWrite, quoteAccessFromRow, quoteFromDocument, quoteToRow } from './SupabaseQuoteRepository.ts'
 
 describe('quote rows', () => {
   it('stores the whole quote and the list columns for the signed-in user', () => {
@@ -26,6 +26,43 @@ describe('quote rows', () => {
     expect(parsed?.id).toBe(quote.id)
     expect(parsed).not.toHaveProperty('owner')
     expect(quoteFromDocument({ id: 'x', jobNo: 'SP-0002', status: 'sent' })).toBeNull()
+  })
+
+  it('reads an admin list row with the owner email from profiles', () => {
+    const quote = createQuote('SP-0003', 20)
+    quote.customer.name = 'Ada'
+    const row = quoteAccessFromRow({
+      id: quote.id,
+      user_id: 'user-2',
+      updated_at: '2026-01-02T00:00:00.000Z',
+      document: quote,
+      profiles: { email: 'ada@example.com' },
+    })
+    expect(row?.userId).toBe('user-2')
+    expect(row?.ownerEmail).toBe('ada@example.com')
+    expect(row?.quote.id).toBe(quote.id)
+    expect(row?.quote.customer.name).toBe('Ada')
+    expect(row?.updatedAt).toBe('2026-01-02T00:00:00.000Z')
+    expect(row?.quote).not.toHaveProperty('owner')
+  })
+
+  it('reads a profile email when the join comes back as a list', () => {
+    const quote = createQuote('SP-0004', 20)
+    const row = quoteAccessFromRow({
+      user_id: 'user-3',
+      document: { ...quote, owner: 'someone-else' },
+      profiles: [{ email: 'sam@example.com' }],
+    })
+    expect(row?.ownerEmail).toBe('sam@example.com')
+    expect(row?.quote).not.toHaveProperty('owner')
+    expect(quoteAccessFromRow({ document: quote, profiles: { email: 'a@b.c' } })).toBeNull()
+    expect(quoteAccessFromRow({ user_id: 'user-3', document: { id: 'x' } })).toBeNull()
+  })
+
+  it('refuses a save over another user’s row', () => {
+    expect(ownerCanWrite(null, 'user-1')).toBe(true)
+    expect(ownerCanWrite('user-1', 'user-1')).toBe(true)
+    expect(ownerCanWrite('user-2', 'user-1')).toBe(false)
   })
 
   it('accepts job numbers from next_job_no', () => {

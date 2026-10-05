@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Printer } from 'lucide-react'
-import type { QuoteItem } from '../../domain/models.ts'
+import type { Quote, QuoteItem } from '../../domain/models.ts'
+import { useAuthStore } from '../../auth/session.ts'
 import { createQuoteItem } from '../../domain/factories.ts'
 import { calculateItemPrice, calculateQuoteTotals } from '../../domain/pricing.ts'
 import { validateCustomer, validateItem, clampPercent } from '../../domain/validation.ts'
 import { LIMITS } from '../../data/pricingDefaults.ts'
-import { useAppStore } from '../../store/useAppStore.ts'
+import { quoteRepository, useAppStore } from '../../store/useAppStore.ts'
 import { createId } from '../../utils/ids.ts'
 import { formatMoney } from '../../utils/money.ts'
 import { Button } from '../../components/ui/Button.tsx'
@@ -34,8 +35,11 @@ export function ConfiguratorPage() {
   const setStatus = useAppStore((state) => state.setStatus)
   const flushQuote = useAppStore((state) => state.flushQuote)
   const pushToast = useAppStore((state) => state.pushToast)
+  const userId = useAuthStore((state) => state.profile?.id)
 
   const [item, setItem] = useState<QuoteItem | null>(null)
+  const [lookupId, setLookupId] = useState<string | null>(null)
+  const [lockedQuote, setLockedQuote] = useState<Quote | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<QuoteItem | null>(null)
   const [bookOpen, setBookOpen] = useState(false)
@@ -46,6 +50,28 @@ export function ConfiguratorPage() {
   useEffect(() => {
     booted.current = false
   }, [id])
+
+  useEffect(() => {
+    if (!hydrated || !id || quote) return
+    let cancelled = false
+    setLookupId(null)
+    setLockedQuote(null)
+    void quoteRepository
+      .read(id)
+      .then((row) => {
+        if (cancelled) return
+        setLockedQuote(row && row.userId !== userId ? row.quote : null)
+        setLookupId(id)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setLockedQuote(null)
+        setLookupId(id)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [hydrated, id, quote, userId])
 
   useEffect(() => {
     if (!hydrated || !quote || booted.current) return
@@ -79,10 +105,33 @@ export function ConfiguratorPage() {
 
   useEffect(() => {
     if (!booted.current || !id || !item) return
+    if (!useAppStore.getState().quotes.some((entry) => entry.id === id)) return
     void updateQuote(id, { configDraft: item, editingItemId: editingId }, { touch: false })
   }, [item, editingId, id, updateQuote])
 
   if (!hydrated) return <p className="boot">Opening the workspace…</p>
+  if (!quote && lookupId !== id) return <p className="boot">Opening the workspace…</p>
+  if (!quote && lockedQuote) {
+    return (
+      <div className="page">
+        <div className="empty">
+          <p className="empty-title">Only the owner can change this order</p>
+          <p>
+            Job {lockedQuote.jobNo}
+            {lockedQuote.customer.name.trim() ? ` · ${lockedQuote.customer.name.trim()}` : ''}
+          </p>
+          <div className="page-links">
+            <Link className="btn btn-sm" to={`/quote/${lockedQuote.id}/print/quote`}>
+              Print quote
+            </Link>
+            <Link className="btn btn-sm btn-secondary" to={`/quote/${lockedQuote.id}/print/work-order`}>
+              Print work order
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
   if (!quote) {
     return (
       <div className="empty">

@@ -405,6 +405,52 @@ h1 {
   line-height: 1;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.admin-orders {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.admin-orders th,
+.admin-orders td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-orders th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-orders tr:last-child td {
+  border-bottom: 0;
+}
+
+.page > .page-links {
+  margin-top: 16px;
+}
+
+.page-links a:not(.btn) {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.empty .page-links {
+  margin-top: 12px;
+}
+
 .job-no {
   color: var(--muted);
   font-size: 13px;
@@ -486,6 +532,7 @@ h1 {
   background: #374151;
   color: #ffffff;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .btn:hover:not(:disabled) {
