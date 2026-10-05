@@ -114,8 +114,27 @@ p {
 
 .nav-links {
   display: flex;
+  flex: 1;
   align-items: stretch;
   gap: 18px;
+}
+
+.nav-side {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.nav-email {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+button.nav-link {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
 }
 
 .nav-link {
@@ -158,6 +177,66 @@ p {
 
 .home-box p {
   color: var(--muted);
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(420px, 100%);
+  margin: 0;
+}
+
+.login-card h1 {
+  margin-bottom: 4px;
+}
+
+.login-card .btn {
+  width: 100%;
+}
+
+.account-facts {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0 28px;
+}
+
+.account-facts div {
+  display: grid;
+  gap: 2px;
+}
+
+.account-facts dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.account-facts dd {
+  margin: 0;
+}
+
+.account-id {
+  overflow-wrap: anywhere;
+}
+
+.account-password {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.account-password h2 {
+  font-size: 22px;
 }
 
 .app-main {
@@ -1193,6 +1272,17 @@ h1 {
   }
 
   .nav-link {
+    padding: 12px 14px;
+  }
+
+  .nav-side {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-left: 0;
+  }
+
+  .nav-email {
     padding: 12px 14px;
   }
 

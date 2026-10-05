@@ -1,4 +1,3 @@
-```sql
 -- SunnyPlast internal tool. Run once in the Supabase SQL editor.
 
 create table public.profiles (
@@ -191,4 +190,3 @@ grant select, update on public.pricing_config to authenticated;
 grant execute on function public.next_job_no() to authenticated;
 grant execute on function public.is_admin() to authenticated;
 grant execute on function public.is_active_user() to authenticated;
-```
