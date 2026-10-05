@@ -7,8 +7,8 @@ export interface QuoteAccess {
 }
 
 /**
- * Browser storage for the prototype.
- * Swap this class for an ApiQuoteRepository without changing the screens.
+ * In-memory quote list used by the QuoteRepository contract.
+ * The app stores quotes through SupabaseQuoteRepository.
  */
 export class LocalQuoteRepository implements QuoteRepository {
   private readonly access: QuoteAccess

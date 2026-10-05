@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../../store/useAppStore.ts'
 
@@ -5,6 +6,7 @@ export function HomePage() {
   const navigate = useNavigate()
   const hydrated = useAppStore((state) => state.hydrated)
   const createQuote = useAppStore((state) => state.createQuote)
+  const [starting, setStarting] = useState(false)
 
   if (!hydrated) return <p className="boot">Opening the workspace…</p>
 
@@ -20,9 +22,14 @@ export function HomePage() {
         <button
           type="button"
           className="home-box"
+          disabled={starting}
           onClick={() => {
-            const quote = createQuote()
-            navigate(`/quote/${quote.id}`)
+            if (starting) return
+            setStarting(true)
+            void createQuote().then((quote) => {
+              if (quote) navigate(`/quote/${quote.id}`)
+              else setStarting(false)
+            })
           }}
         >
           <h2>New quote</h2>

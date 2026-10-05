@@ -107,12 +107,6 @@ export function createQuote(jobNo: string, taxPercent = pricingDefaults.taxPerce
   }
 }
 
-export function nextJobNo(quotes: Quote[]): string {
-  const numbers = quotes.map((quote) => Number.parseInt(quote.jobNo, 10)).filter((value) => Number.isFinite(value))
-  const max = numbers.length > 0 ? Math.max(...numbers) : 224
-  return String(max + 1)
-}
-
 export function describeConfiguration(panels: Panel[]): string {
   const preset = matchPreset(panels.map((panel) => panel.kind))
   if (preset) return preset.label

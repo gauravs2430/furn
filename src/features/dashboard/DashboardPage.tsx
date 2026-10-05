@@ -20,6 +20,16 @@ export function DashboardPage() {
   const pushToast = useAppStore((state) => state.pushToast)
   const [query, setQuery] = useState('')
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
+
+  function startQuote() {
+    if (starting) return
+    setStarting(true)
+    void createQuote().then((quote) => {
+      if (quote) navigate(`/quote/${quote.id}`)
+      else setStarting(false)
+    })
+  }
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -46,13 +56,7 @@ export function DashboardPage() {
           <h1>Quotes & orders</h1>
           <p className="lede">Configure an opening with the customer, price it, and print the work order or the quote.</p>
         </div>
-        <Button
-          icon={<Plus size={18} />}
-          onClick={() => {
-            const quote = createQuote()
-            navigate(`/quote/${quote.id}`)
-          }}
-        >
+        <Button icon={<Plus size={18} />} disabled={starting} onClick={startQuote}>
           New quote
         </Button>
       </div>
@@ -86,13 +90,8 @@ export function DashboardPage() {
       {quotes.length === 0 ? (
         <div className="empty">
           <p className="empty-title">No saved jobs yet</p>
-          <p>Start a quote, add a window or door, and it will stay in this browser.</p>
-          <Button
-            onClick={() => {
-              const quote = createQuote()
-              navigate(`/quote/${quote.id}`)
-            }}
-          >
+          <p>Start a quote, add a window or door, and it will show in your orders.</p>
+          <Button disabled={starting} onClick={startQuote}>
             New quote
           </Button>
         </div>
@@ -136,11 +135,11 @@ export function DashboardPage() {
                     variant="secondary"
                     icon={<Copy size={15} />}
                     onClick={() => {
-                      const copy = duplicateQuote(quote.id)
-                      if (copy) {
+                      void duplicateQuote(quote.id).then((copy) => {
+                        if (!copy) return
                         pushToast('Quote duplicated')
                         navigate(`/quote/${copy.id}`)
-                      }
+                      })
                     }}
                   >
                     Duplicate
@@ -166,18 +165,19 @@ export function DashboardPage() {
       <ConfirmDialog
         open={pendingDelete !== null}
         title="Delete this quote?"
-        description="It will be removed from this browser. This demo has no server copy."
+        description="It will be removed from your orders."
         confirmLabel="Delete quote"
         tone="danger"
         onOpenChange={(open) => {
           if (!open) setPendingDelete(null)
         }}
         onConfirm={() => {
-          if (pendingDelete) {
-            deleteQuote(pendingDelete)
-            pushToast('Quote deleted', 'info')
-          }
+          const id = pendingDelete
           setPendingDelete(null)
+          if (!id) return
+          void deleteQuote(id).then((ok) => {
+            if (ok) pushToast('Quote deleted', 'info')
+          })
         }}
       />
     </div>

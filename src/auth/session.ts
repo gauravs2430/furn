@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase.ts'
+import { clearLoadedQuotes, loadQuotesForSession } from '../store/useAppStore.ts'
 
 export interface StaffProfile {
   id: string
@@ -35,9 +36,21 @@ async function syncSession(session: Session | null) {
   if (!supabase) return
 
   if (!session) {
+    clearLoadedQuotes()
+    if (current !== ticket) return
     useAuthStore.setState({ loading: false, session: null, profile: null })
     return
   }
+
+  const existing = useAuthStore.getState()
+  if (existing.profile?.id === session.user.id && existing.profile.active) {
+    if (current !== ticket) return
+    useAuthStore.setState({ session, loading: false })
+    loadQuotesForSession(session.user.id)
+    return
+  }
+
+  if (existing.profile && existing.profile.id !== session.user.id) clearLoadedQuotes()
 
   useAuthStore.setState({ loading: true, session })
   const { data, error } = await supabase
@@ -49,12 +62,14 @@ async function syncSession(session: Session | null) {
   if (current !== ticket) return
 
   if (error) {
+    clearLoadedQuotes()
     useAuthStore.setState({ loading: false, session: null, profile: null, notice: error.message })
     await supabase.auth.signOut()
     return
   }
 
   if (!data) {
+    clearLoadedQuotes()
     useAuthStore.setState({
       loading: false,
       session: null,
@@ -66,6 +81,7 @@ async function syncSession(session: Session | null) {
   }
 
   if (data.active !== true) {
+    clearLoadedQuotes()
     useAuthStore.setState({ loading: false, session: null, profile: null, notice: turnedOff })
     await supabase.auth.signOut()
     return
@@ -83,6 +99,8 @@ async function syncSession(session: Session | null) {
       active: true,
     },
   })
+  if (current !== ticket) return
+  loadQuotesForSession(session.user.id)
 }
 
 export function listenToAuth(): () => void {
