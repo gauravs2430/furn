@@ -229,10 +229,15 @@ button.nav-link {
   overflow-wrap: anywhere;
 }
 
+.account-name,
 .account-password {
   display: grid;
   gap: 12px;
   max-width: 420px;
+}
+
+.account-name {
+  margin-top: 18px;
 }
 
 .account-password h2 {
@@ -412,21 +417,29 @@ h1 {
   border-radius: var(--radius);
 }
 
-.admin-orders {
+.admin-orders,
+.people-table {
   width: 100%;
   min-width: 760px;
   border-collapse: collapse;
 }
 
+.people-table {
+  min-width: 880px;
+}
+
 .admin-orders th,
-.admin-orders td {
+.admin-orders td,
+.people-table th,
+.people-table td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: middle;
 }
 
-.admin-orders th {
+.admin-orders th,
+.people-table th {
   color: var(--muted);
   font-size: 12px;
   font-weight: 600;
@@ -434,8 +447,36 @@ h1 {
   text-transform: uppercase;
 }
 
-.admin-orders tr:last-child td {
+.admin-orders tr:last-child td,
+.people-table tr:last-child td {
   border-bottom: 0;
+}
+
+.people-table .input {
+  width: auto;
+  min-width: 8rem;
+}
+
+.people-id {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.row-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.row-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.page-head .page-links {
+  margin-top: 12px;
 }
 
 .page > .page-links {

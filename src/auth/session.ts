@@ -30,6 +30,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 const turnedOff = 'This account is turned off. Ask an admin.'
 
 let ticket = 0
+let reloadTicket = 0
 
 function leaveSession() {
   clearLoadedQuotes()
@@ -128,4 +129,50 @@ export function listenToAuth(): () => void {
 export async function signOut(): Promise<void> {
   if (!supabase) return
   await supabase.auth.signOut()
+}
+
+/** Re-read the staff row after navigation so a turned-off account hits the login notice. */
+export async function reloadProfile(): Promise<void> {
+  if (!supabase) return
+  const session = useAuthStore.getState().session
+  if (!session) return
+
+  const current = ++reloadTicket
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, email, full_name, role, active')
+    .eq('id', session.user.id)
+    .maybeSingle()
+
+  if (current !== reloadTicket) return
+  if (useAuthStore.getState().session?.user.id !== session.user.id) return
+  if (error || !data) return
+
+  if (data.active !== true) {
+    ticket += 1
+    leaveSession()
+    useAuthStore.setState({ loading: false, session: null, profile: null, notice: turnedOff })
+    await supabase.auth.signOut()
+    return
+  }
+
+  const next = {
+    id: data.id,
+    email: data.email,
+    full_name: data.full_name,
+    role: data.role === 'admin' ? 'admin' : 'user',
+    active: true,
+  } as const
+  const currentProfile = useAuthStore.getState().profile
+  if (
+    currentProfile &&
+    currentProfile.id === next.id &&
+    currentProfile.email === next.email &&
+    currentProfile.full_name === next.full_name &&
+    currentProfile.role === next.role
+  ) {
+    return
+  }
+
+  useAuthStore.setState({ profile: { ...next } })
 }

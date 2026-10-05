@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { signOut, useAuthStore } from '../../auth/session.ts'
+import { reloadProfile, signOut, useAuthStore } from '../../auth/session.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { cx } from '../../utils/cx.ts'
 import { Toasts } from '../ui/Toast.tsx'
@@ -18,11 +18,22 @@ export function AppShell() {
   const pricingStatus = useAppStore((state) => state.pricingStatus)
   const pricingNotice = useAppStore((state) => state.pricingNotice)
   const [menuOpen, setMenuOpen] = useState(false)
+  const skipProfileReload = useRef(true)
   const nav = profile?.role === 'admin' ? [...links, { to: '/admin/users', label: 'Admin', end: false }] : links
 
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!profile?.id) return
+    // Refresh already read the profile. The next navigation reads it again.
+    if (skipProfileReload.current) {
+      skipProfileReload.current = false
+      return
+    }
+    void reloadProfile()
+  }, [location.pathname, profile?.id])
 
   async function logOut() {
     setMenuOpen(false)

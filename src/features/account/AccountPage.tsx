@@ -8,9 +8,45 @@ import { useAppStore } from '../../store/useAppStore.ts'
 export function AccountPage() {
   const profile = useAuthStore((state) => state.profile)
   const pushToast = useAppStore((state) => state.pushToast)
+  const [name, setName] = useState(profile?.full_name ?? '')
+  const [seenName, setSeenName] = useState(profile?.full_name ?? '')
+  const [nameError, setNameError] = useState<string | null>(null)
+  const [nameBusy, setNameBusy] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  if (profile && profile.full_name !== seenName) {
+    setSeenName(profile.full_name)
+    if (name === seenName) setName(profile.full_name)
+  }
+
+  async function onSaveName(event: FormEvent) {
+    event.preventDefault()
+    if (!supabase || !profile) return
+    const fullName = name.trim()
+    setNameError(null)
+    setNameBusy(true)
+    const { data, error: updateError } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName })
+      .eq('id', profile.id)
+      .select('full_name')
+    setNameBusy(false)
+    if (updateError) {
+      setNameError(updateError.message)
+      return
+    }
+    const saved = Array.isArray(data) ? data[0] : null
+    if (!saved || typeof saved.full_name !== 'string') {
+      setNameError('Could not save your name.')
+      return
+    }
+    setName(saved.full_name)
+    useAuthStore.setState((state) => ({
+      profile: state.profile ? { ...state.profile, full_name: saved.full_name } : state.profile,
+    }))
+    pushToast('Name saved')
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
@@ -36,11 +72,14 @@ export function AccountPage() {
   return (
     <div className="page">
       <h1>Account</h1>
+      <form className="account-name" onSubmit={onSaveName}>
+        <TextField label="Name" value={name} autoComplete="name" onChange={setName} />
+        {nameError ? <p className="form-error">{nameError}</p> : null}
+        <Button type="submit" disabled={nameBusy}>
+          {nameBusy ? 'Saving…' : 'Save name'}
+        </Button>
+      </form>
       <dl className="account-facts">
-        <div>
-          <dt>Name</dt>
-          <dd>{profile.full_name.trim() || '—'}</dd>
-        </div>
         <div>
           <dt>Email</dt>
           <dd>{profile.email}</dd>
