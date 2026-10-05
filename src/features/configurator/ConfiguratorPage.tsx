@@ -17,7 +17,6 @@ import { OpeningForm } from './OpeningForm.tsx'
 import { AppearanceForm } from './AppearanceForm.tsx'
 import { TechnicalForm } from './TechnicalForm.tsx'
 import { PreviewCard } from './PreviewCard.tsx'
-import { PricingSetupDialog } from './PricingSetupDialog.tsx'
 import { OrderList } from '../quote/OrderList.tsx'
 import { TotalsCard } from '../quote/TotalsCard.tsx'
 
@@ -40,7 +39,6 @@ export function ConfiguratorPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<QuoteItem | null>(null)
   const [bookOpen, setBookOpen] = useState(false)
-  const [ratesOpen, setRatesOpen] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
   const booted = useRef(false)
   const saveMark = useRef(0)
@@ -266,12 +264,6 @@ export function ConfiguratorPage() {
         </div>
       </section>
 
-      <div className="page-links">
-        <button type="button" className="text-link" onClick={() => setRatesOpen(true)}>
-          Pricing setup
-        </button>
-      </div>
-
       <div className="bottom-bar">
         <div>
           <strong>{formatMoney(pricing.lineTotal)}</strong>
@@ -324,7 +316,6 @@ export function ConfiguratorPage() {
           })
         }}
       />
-      <PricingSetupDialog open={ratesOpen} onOpenChange={setRatesOpen} />
     </div>
   )
 }

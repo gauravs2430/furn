@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { signOut, useAuthStore } from '../../auth/session.ts'
+import { useAppStore } from '../../store/useAppStore.ts'
 import { cx } from '../../utils/cx.ts'
 import { Toasts } from '../ui/Toast.tsx'
 
@@ -14,6 +15,8 @@ export function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const profile = useAuthStore((state) => state.profile)
+  const pricingStatus = useAppStore((state) => state.pricingStatus)
+  const pricingNotice = useAppStore((state) => state.pricingNotice)
   const [menuOpen, setMenuOpen] = useState(false)
   const nav = profile?.role === 'admin' ? [...links, { to: '/admin/users', label: 'Admin', end: false }] : links
 
@@ -65,7 +68,12 @@ export function AppShell() {
         </nav>
       </header>
       <main className="app-main">
-        <Outlet />
+        {pricingNotice ? (
+          <p className="form-error prices-banner" role="alert">
+            {pricingNotice}
+          </p>
+        ) : null}
+        {pricingStatus === 'loading' ? <p className="boot">Loading prices…</p> : <Outlet />}
       </main>
       <Toasts />
     </div>

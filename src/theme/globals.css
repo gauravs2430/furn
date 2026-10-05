@@ -919,6 +919,11 @@ h1 {
   font-weight: 600;
 }
 
+.prices-banner {
+  max-width: 1180px;
+  margin: 0 auto 12px;
+}
+
 .text-link {
   border: 0;
   padding: 0;

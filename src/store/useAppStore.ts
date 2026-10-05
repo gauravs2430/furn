@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { PricingConfig, Quote, QuoteItem, QuoteStatus, ThemeMode } from '../domain/models.ts'
 import { createQuote } from '../domain/factories.ts'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
+import { fetchPricingConfig } from '../repositories/PricingConfigRepository.ts'
 import { fetchNextJobNo, SupabaseQuoteRepository } from '../repositories/SupabaseQuoteRepository.ts'
 import { createId } from '../utils/ids.ts'
 import { nowIso } from '../utils/dates.ts'
@@ -17,6 +18,8 @@ interface AppState {
   quotes: Quote[]
   theme: ThemeMode
   pricingConfig: PricingConfig
+  pricingStatus: 'loading' | 'ready' | 'error'
+  pricingNotice: string | null
   hydrated: boolean
   toasts: ToastMessage[]
   createQuote: () => Promise<Quote | null>
@@ -31,7 +34,6 @@ interface AppState {
   flushQuote: (id: string) => Promise<boolean>
   setTheme: (theme: ThemeMode) => void
   setPricingConfig: (config: PricingConfig) => void
-  resetPricingConfig: () => void
   pushToast: (message: string, tone?: ToastMessage['tone']) => void
   dismissToast: (id: string) => void
 }
@@ -50,9 +52,17 @@ function forgetStoredQuotes() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return
     const parsed = JSON.parse(raw) as { state?: Record<string, unknown> }
-    if (!parsed?.state || !('quotes' in parsed.state)) return
-    delete parsed.state.quotes
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed))
+    if (!parsed?.state) return
+    let changed = false
+    if ('quotes' in parsed.state) {
+      delete parsed.state.quotes
+      changed = true
+    }
+    if ('pricingConfig' in parsed.state) {
+      delete parsed.state.pricingConfig
+      changed = true
+    }
+    if (changed) localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed))
   } catch {
     localStorage.removeItem(STORAGE_KEY)
   }
@@ -85,6 +95,8 @@ let creatingQuote = false
 const duplicatingIds = new Set<string>()
 let loadedUserId: string | null = null
 let loadTicket = 0
+let loadedPricingUserId: string | null = null
+let pricingTicket = 0
 
 function rememberQuote(quote: Quote) {
   useAppStore.setState((state) => {
@@ -202,12 +214,43 @@ export function clearLoadedQuotes() {
   useAppStore.setState({ quotes: [], hydrated: false })
 }
 
+async function fetchPricingIntoStore() {
+  const ticket = ++pricingTicket
+  useAppStore.setState({ pricingStatus: 'loading', pricingNotice: null })
+  try {
+    const pricingConfig = await fetchPricingConfig()
+    if (ticket !== pricingTicket) return
+    useAppStore.setState({ pricingConfig, pricingStatus: 'ready', pricingNotice: null })
+  } catch (error) {
+    if (ticket !== pricingTicket) return
+    useAppStore.setState({ pricingStatus: 'error', pricingNotice: messageFrom(error) })
+  }
+}
+
+export function loadPricingForSession(userId: string) {
+  if (loadedPricingUserId === userId) return
+  loadedPricingUserId = userId
+  void fetchPricingIntoStore()
+}
+
+export function clearLoadedPricing() {
+  loadedPricingUserId = null
+  pricingTicket += 1
+  useAppStore.setState({
+    pricingConfig: pricingDefaults,
+    pricingStatus: 'loading',
+    pricingNotice: null,
+  })
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       quotes: [],
       theme: preferredTheme(),
       pricingConfig: pricingDefaults,
+      pricingStatus: 'loading',
+      pricingNotice: null,
       hydrated: false,
       toasts: [],
 
@@ -360,8 +403,7 @@ export const useAppStore = create<AppState>()(
       flushQuote: (id) => flushQuoteSave(id),
 
       setTheme: (theme) => set({ theme }),
-      setPricingConfig: (pricingConfig) => set({ pricingConfig }),
-      resetPricingConfig: () => set({ pricingConfig: pricingDefaults }),
+      setPricingConfig: (pricingConfig) => set({ pricingConfig, pricingStatus: 'ready', pricingNotice: null }),
 
       pushToast: (message, tone = 'success') => {
         const id = createId()
@@ -378,16 +420,11 @@ export const useAppStore = create<AppState>()(
       version: 1,
       partialize: (state) => ({
         theme: state.theme,
-        pricingConfig: state.pricingConfig,
       }),
       merge: (persistedState, currentState) => {
-        const persisted = (persistedState ?? {}) as Partial<Pick<AppState, 'theme' | 'pricingConfig'>> & { theme?: string }
+        const persisted = (persistedState ?? {}) as { theme?: string }
         const theme = persisted.theme === 'dark' || persisted.theme === 'light' ? persisted.theme : currentState.theme
-        const pricingConfig =
-          persisted.pricingConfig && typeof persisted.pricingConfig === 'object'
-            ? persisted.pricingConfig
-            : currentState.pricingConfig
-        return { ...currentState, theme, pricingConfig }
+        return { ...currentState, theme }
       },
     },
   ),

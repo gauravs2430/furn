@@ -1,7 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase.ts'
-import { clearLoadedQuotes, loadQuotesForSession } from '../store/useAppStore.ts'
+import { clearLoadedPricing, clearLoadedQuotes, loadPricingForSession, loadQuotesForSession } from '../store/useAppStore.ts'
 
 export interface StaffProfile {
   id: string
@@ -31,12 +31,17 @@ const turnedOff = 'This account is turned off. Ask an admin.'
 
 let ticket = 0
 
+function leaveSession() {
+  clearLoadedQuotes()
+  clearLoadedPricing()
+}
+
 async function syncSession(session: Session | null) {
   const current = ++ticket
   if (!supabase) return
 
   if (!session) {
-    clearLoadedQuotes()
+    leaveSession()
     if (current !== ticket) return
     useAuthStore.setState({ loading: false, session: null, profile: null })
     return
@@ -47,10 +52,11 @@ async function syncSession(session: Session | null) {
     if (current !== ticket) return
     useAuthStore.setState({ session, loading: false })
     loadQuotesForSession(session.user.id)
+    loadPricingForSession(session.user.id)
     return
   }
 
-  if (existing.profile && existing.profile.id !== session.user.id) clearLoadedQuotes()
+  if (existing.profile && existing.profile.id !== session.user.id) leaveSession()
 
   useAuthStore.setState({ loading: true, session })
   const { data, error } = await supabase
@@ -62,14 +68,14 @@ async function syncSession(session: Session | null) {
   if (current !== ticket) return
 
   if (error) {
-    clearLoadedQuotes()
+    leaveSession()
     useAuthStore.setState({ loading: false, session: null, profile: null, notice: error.message })
     await supabase.auth.signOut()
     return
   }
 
   if (!data) {
-    clearLoadedQuotes()
+    leaveSession()
     useAuthStore.setState({
       loading: false,
       session: null,
@@ -81,7 +87,7 @@ async function syncSession(session: Session | null) {
   }
 
   if (data.active !== true) {
-    clearLoadedQuotes()
+    leaveSession()
     useAuthStore.setState({ loading: false, session: null, profile: null, notice: turnedOff })
     await supabase.auth.signOut()
     return
@@ -101,6 +107,7 @@ async function syncSession(session: Session | null) {
   })
   if (current !== ticket) return
   loadQuotesForSession(session.user.id)
+  loadPricingForSession(session.user.id)
 }
 
 export function listenToAuth(): () => void {
