@@ -63,7 +63,7 @@ export function ConfiguratorPage() {
     return (
       <div className="empty">
         <p className="empty-title">This quote is not on this device</p>
-        <Button onClick={() => navigate('/')}>Back to dashboard</Button>
+        <Button onClick={() => navigate('/orders')}>Orders</Button>
       </div>
     )
   }
@@ -124,8 +124,8 @@ export function ConfiguratorPage() {
     <div className="page quote-page">
       <div className="quote-bar">
         <div className="quote-identity">
-          <Button variant="ghost" size="sm" icon={<ArrowLeft size={16} />} onClick={() => navigate('/')}>
-            Dashboard
+          <Button variant="ghost" size="sm" icon={<ArrowLeft size={16} />} onClick={() => navigate('/orders')}>
+            Orders
           </Button>
           <div>
             <p className="eyebrow">Job {activeQuote.jobNo}</p>

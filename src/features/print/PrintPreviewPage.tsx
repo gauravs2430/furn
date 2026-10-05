@@ -28,7 +28,7 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
     return (
       <div className="empty">
         <p className="empty-title">This quote is not on this device</p>
-        <Button onClick={() => navigate('/')}>Back to dashboard</Button>
+        <Button onClick={() => navigate('/orders')}>Orders</Button>
       </div>
     )
   }

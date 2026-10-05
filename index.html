@@ -4,25 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Measure & Order</title>
+    <title>SunnyPlast</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=Roboto+Slab:wght@500;600;700&family=Roboto:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script>
-      try {
-        const raw = localStorage.getItem('measure-order.v1')
-        const theme = raw ? JSON.parse(raw).state.theme : 'system'
-        const dark =
-          theme === 'dark' ||
-          (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-      } catch (error) {
-        document.documentElement.dataset.theme = 'light'
-      }
-    </script>
   </head>
   <body>
     <div id="root"></div>

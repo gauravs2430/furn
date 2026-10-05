@@ -1,18 +1,23 @@
-import { useEffect } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
-import { useAppStore } from '../../store/useAppStore.ts'
-import { ThemeToggle } from './ThemeToggle.tsx'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { cx } from '../../utils/cx.ts'
 import { Toasts } from '../ui/Toast.tsx'
 
+const links = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/orders', label: 'Orders', end: false },
+  { to: '/account', label: 'Account', end: false },
+  { to: '/admin/users', label: 'Admin', end: false },
+]
+
 export function AppShell() {
-  const theme = useAppStore((state) => state.theme)
   const location = useLocation()
   const printing = location.pathname.includes('/print/')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    document.documentElement.style.colorScheme = theme
-  }, [theme])
+    setMenuOpen(false)
+  }, [location.pathname])
 
   if (printing) {
     return (
@@ -26,21 +31,33 @@ export function AppShell() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32">
-              <rect x="3" y="5" width="26" height="22" rx="2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-              <path d="M3 5 L16 16 L3 27" fill="none" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M29 5 L16 16 L29 27" fill="none" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M16 5 V27" stroke="currentColor" strokeWidth="1.2" />
-            </svg>
-          </span>
-          <span>
-            <span className="brand-name">Measure & Order</span>
-            <span className="brand-sub">Doors and windows</span>
-          </span>
-        </Link>
-        <ThemeToggle />
+        <div className="topbar-bar">
+          <Link to="/" className="brand">
+            <span className="brand-name">SunnyPlast</span>
+          </Link>
+          <button
+            type="button"
+            className="menu-button"
+            aria-expanded={menuOpen}
+            aria-controls="site-nav"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            Menu
+          </button>
+        </div>
+        <nav id="site-nav" className={cx('nav-links', menuOpen && 'is-open')} aria-label="Primary">
+          {links.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              className={({ isActive }) => cx('nav-link', isActive && 'is-active')}
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
       <main className="app-main">
         <Outlet />
