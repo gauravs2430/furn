@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Measure &amp; Order: doors and windows</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8edef;--panel:#f7f9fa;--ink:#14262e;--mute:#5a6f77;--line:#b9c8ce;--glass:#1f6f8b;--brass:#c98f00;--danger:#a63d2f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a1f;--panel:#172329;--ink:#e3ecef;--mute:#8ba0a8;--line:#2c3f47;--glass:#5ab6d3;--brass:#e0a91f;--danger:#e07b6c}}
+:root[data-theme="dark"]{--bg:#0f1a1f;--panel:#172329;--ink:#e3ecef;--mute:#8ba0a8;--line:#2c3f47;--glass:#5ab6d3;--brass:#e0a91f;--danger:#e07b6c}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Barlow,system-ui,sans-serif}
+h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;margin:0;letter-spacing:.01em}
+h1{font-size:34px;font-weight:700}h2{font-size:22px;font-weight:700;margin-bottom:10px}
+header{padding:20px 20px 4px;max-width:1120px;margin:auto}header p{margin:2px 0 0;color:var(--mute)}
+main{max-width:1120px;margin:auto;padding:14px 20px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+.wide{grid-column:1/-1}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+label{display:block;font-weight:600;font-size:13px;color:var(--mute)}
+input,select{width:100%;margin-top:3px;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--glass);outline-offset:1px}
+button{font:inherit;font-weight:600;padding:9px 14px;border-radius:4px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+button.x{padding:2px 8px;border-color:var(--line);background:transparent;color:var(--danger)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+#preview{background:var(--bg);border:1px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;min-height:250px}
+#preview svg{width:100%;height:270px}
+.est{font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:700;margin-top:8px}.est small{font:500 13px Barlow,sans-serif;color:var(--mute)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:13px;color:var(--mute)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tot{margin-left:auto;max-width:300px;margin-top:12px}.tot div{display:flex;justify-content:space-between;padding:3px 0}
+.tot .g{font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:700;border-top:2px solid var(--ink);margin-top:4px;padding-top:6px}
+.pt input{width:90px;margin:0;text-align:right}.pt td{vertical-align:middle}
+.empty{color:var(--mute);padding:14px 0}
+details summary{cursor:pointer;font-weight:600}
+.saved li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}.saved{list-style:none;padding:0;margin:0}
+@media(max-width:800px){main{grid-template-columns:minmax(0,1fr)}}
+@media print{body{background:#fff;color:#000}section:not(#order),header p,.noprint,button{display:none!important}main{display:block;padding:0}#order{border:0}}
+</style>
+</head>
+<body>
+<header><h1>Measure &amp; Order</h1><p>Enter each opening's size, check it against the drawing, and build a priced order.</p></header>
+<main>
+<section class="noprint">
+  <h2>Add an opening</h2>
+  <div class="grid">
+    <label>Room or location<input id="loc" placeholder="Front room"></label>
+    <label>Product<select id="type"></select></label>
+    <label>Width (mm)<input id="w" type="number" min="200" max="6000" value="1200"></label>
+    <label>Height (mm)<input id="h" type="number" min="200" max="3000" value="1350"></label>
+    <label>Opening style<select id="style"></select></label>
+    <label>Quantity<input id="qty" type="number" min="1" value="1"></label>
+    <label>Frame material<select id="mat"></select></label>
+    <label>Glazing<select id="glz"></select></label>
+    <label>Colour<select id="col"><option>White</option><option>Anthracite grey</option><option>Black</option><option>Woodgrain oak</option><option>Cream</option></select></label>
+    <label>Handing / notes<input id="note" placeholder="Opens left, obscure glass"></label>
+  </div>
+  <div class="row"><button id="add">Add to order</button><button class="alt" id="clear">Reset form</button></div>
+  <div id="err" class="empty" style="color:var(--danger)" role="alert"></div>
+  <details><summary>Parts catalogue prices</summary>
+    <div class="grid" id="rates" style="margin-top:8px"></div>
+    <p style="color:var(--mute);margin:8px 0 0">Base price of each part. Frame profile is multiplied by the material factor and glass units get the glazing add-on. Quantities come from the opening size.</p>
+  </details>
+</section>
+<section class="noprint">
+  <h2>To-scale drawing</h2>
+  <div id="preview"></div>
+  <div class="est" id="est"></div>
+</section>
+<section class="wide noprint">
+  <h2>3D preview</h2>
+  <div id="v3" style="height:400px;border:1px dashed var(--line);border-radius:4px;background:var(--bg);cursor:grab;overflow:hidden"></div>
+  <div class="row"><button class="alt" id="rv">Reset view</button><span style="color:var(--mute)">Drag to rotate, scroll to zoom. Set into a rendered wall, in the frame colour you chose.</span></div>
+</section>
+<section class="wide noprint">
+  <h2>Parts for this opening</h2>
+  <div class="tw"><table><thead><tr><th>Part</th><th>Unit</th><th class="n">Qty</th><th class="n">Unit price £</th><th class="n">Cost</th><th></th></tr></thead><tbody id="dparts" class="pt"></tbody></table></div>
+  <div class="row"><button class="alt" id="restore" style="display:none">Restore removed parts</button></div>
+  <div class="grid" style="grid-template-columns:2fr 1fr 1fr auto;align-items:end;margin-top:10px"><label>Add another part<input id="xn" placeholder="e.g. Letterplate"></label><label>Quantity<input id="xq" type="number" min="0" value="1"></label><label>Unit price £<input id="xp" type="number" min="0" step="0.01"></label><button id="xa">Add part</button></div>
+  <div class="tot"><div><span>Parts cost each</span><span id="pcost"></span></div><div><span>Markup %</span><input id="mk" type="number" min="0" style="width:80px;margin:0"></div><div class="g"><span>Price each</span><span id="psell"></span></div></div>
+</section>
+<section class="wide" id="order">
+  <h2>Order</h2>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr)" >
+    <label>Customer<input id="cust" placeholder="Customer name"></label>
+    <label>Site address<input id="addr" placeholder="Site address"></label>
+    <label>Reference<input id="ref"></label>
+  </div>
+  <div class="tw"><table><thead><tr><th>#</th><th>Item</th><th>Spec</th><th class="n">Size (mm)</th><th class="n">m²</th><th class="n">Qty</th><th class="n">Line total</th><th class="noprint"></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div id="plist"></div>
+  <div id="none" class="empty">No openings yet. Add one above and it will appear here.</div>
+  <div class="tot">
+    <div><span>Subtotal</span><span id="sub"></span></div>
+    <div class="noprint"><span>Discount %</span><input id="disc" type="number" min="0" max="100" value="0" style="width:80px;margin:0"></div>
+    <div><span>VAT 20%</span><span id="vat"></span></div>
+    <div class="g"><span>Total</span><span id="tot"></span></div>
+  </div>
+  <div class="row noprint"><button id="save">Save order</button><button class="alt" id="print">Print / save PDF</button><button class="alt" id="copy">Copy cut list</button><button class="alt" id="new">New order</button><span id="msg" style="color:var(--mute)"></span></div>
+</section>
+<section class="wide noprint"><h2>Saved orders</h2><ul class="saved" id="saved"></ul><div id="nosaved" class="empty">Nothing saved yet.</div></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const TYPES={"Window":1,"Door":1.35,"Patio door":1.6,"Bi-fold door":2.2};
+const STYLES={"Window":["Fixed","Casement","Tilt and turn","Sliding sash"],"Door":["Single, solid","Single, half glazed","French pair"],"Patio door":["Sliding 2-pane","Sliding 3-pane"],"Bi-fold door":["3 panels","4 panels"]};
+let RATES={p:{},mat:{"uPVC":1,"Aluminium":1.8,"Timber":2.3},glz:{"Double":0,"Triple":45,"Acoustic":60}};
+const A=i=>i.w*i.h/1e6,Pm=i=>2*(i.w+i.h)/1000,Wm=i=>i.w/1000,np=i=>+((i.style.match(/\d/)||[2])[0]),isD=i=>i.type==="Door",fr=i=>/French/i.test(i.style),glzOn=i=>!isD(i)||/half|French/i.test(i.style);
+const PARTS=[
+{id:"frame",name:"Frame profile",u:"m",price:15,mat:1,ok:i=>1,q:Pm},
+{id:"glass",name:"Sealed glass unit",u:"m²",price:55,glz:1,ok:glzOn,q:i=>A(i)*(!isD(i)?.9:fr(i)?.75:.5)},
+{id:"leaf",name:"Door leaf panel",u:"m²",price:70,ok:i=>isD(i)&&!fr(i),q:i=>A(i)*(/Solid/i.test(i.style)?.95:.5)},
+{id:"french",name:"French door leaf",u:"each",price:120,ok:i=>isD(i)&&fr(i),q:i=>2},
+{id:"panel",name:"Sliding or folding panel frame",u:"each",price:85,ok:i=>/Patio|Bi-fold/.test(i.type),q:np},
+{id:"track",name:"Track and runner set",u:"each",price:95,ok:i=>/Patio|Bi-fold/.test(i.type)||/Sliding/.test(i.style),q:i=>1},
+{id:"sash",name:"Opening sash",u:"each",price:38,ok:i=>/Casement|Tilt|sash/i.test(i.style),q:i=>1},
+{id:"hinge",name:"Hinge",u:"each",price:9,ok:i=>/Casement|Tilt|Single|French|Bi-fold/.test(i.style+i.type),q:i=>isD(i)?(fr(i)?6:3):i.type==="Window"?2:np(i)+1},
+{id:"lock",name:"Multi-point lock",u:"each",price:35,ok:i=>!/Fixed/.test(i.style),q:i=>1},
+{id:"handle",name:"Handle set",u:"each",price:18,ok:i=>!/Fixed/.test(i.style),q:i=>1},
+{id:"cyl",name:"Euro cylinder",u:"each",price:16,ok:i=>i.type!=="Window",q:i=>1},
+{id:"thresh",name:"Threshold",u:"m",price:22,ok:i=>i.type!=="Window",q:Wm},
+{id:"cill",name:"Cill",u:"m",price:12,ok:i=>i.type==="Window",q:Wm},
+{id:"seal",name:"Weather seals",u:"m",price:1.6,ok:i=>1,q:Pm},
+{id:"bead",name:"Glazing beads",u:"m",price:2.5,ok:glzOn,q:Pm},
+{id:"fix",name:"Fixings and sundries",u:"each",price:8,ok:i=>1,q:i=>1},
+{id:"lab",name:"Fabrication labour",u:"hr",price:28,ok:i=>1,q:i=>1.5+A(i)*.8}
+];
+const fresh=()=>({qty:{},price:{},off:{},extra:[]});
+let MK=30,mods=fresh();
+function unitP(p,i){return (RATES.p[p.id]??p.price)*(p.mat?(RATES.mat[i.mat]||1):1)+(p.glz?(RATES.glz[i.glz]||0):0)}
+function buildParts(i,useMods){const out=PARTS.filter(p=>p.ok(i)).map(p=>({id:p.id,name:p.name,u:p.u,qty:+(+p.q(i)).toFixed(2),unit:+unitP(p,i).toFixed(2)}));
+ if(!useMods)return out;
+ return out.filter(p=>!mods.off[p.id]).map(p=>({...p,qty:mods.qty[p.id]??p.qty,unit:mods.price[p.id]??p.unit})).concat(mods.extra.map((e,k)=>({...e,id:"x"+k})))}
+let items=[],store={saved:[]};
+const money=n=>"£"+n.toFixed(2);
+try{const r=localStorage.getItem("mq-rates2");if(r)RATES=JSON.parse(r);const m=localStorage.getItem("mq-mk");if(m!==null)MK=+m;const s=localStorage.getItem("mq-store");if(s)store=JSON.parse(s)}catch(e){}
+function persist(){try{localStorage.setItem("mq-store",JSON.stringify(store));localStorage.setItem("mq-mk",String(MK));localStorage.setItem("mq-rates2",JSON.stringify(RATES))}catch(e){}}
+function fill(sel,arr){$(sel).innerHTML=arr.map(a=>`<option>${a}</option>`).join("")}
+fill("type",Object.keys(TYPES));fill("mat",Object.keys(RATES.mat));fill("glz",Object.keys(RATES.glz));
+function styles(){mods=fresh();fill("style",STYLES[$("type").value]);draw()}
+function ratesUI(){const inp=(g,id,v)=>`<input type="number" step="0.1" min="0" data-g="${g}" data-id="${id}" value="${v}">`;
+$("rates").innerHTML=PARTS.map(p=>`<label>${p.name} £/${p.u}${inp("p",p.id,RATES.p[p.id]??p.price)}</label>`).join("")+Object.entries(RATES.mat).map(([k,v])=>`<label>${k} frame factor${inp("mat",k,v)}</label>`).join("")+Object.entries(RATES.glz).map(([k,v])=>`<label>${k} glass add £/m²${inp("glz",k,v)}</label>`).join("")}
+ratesUI();
+$("rates").addEventListener("input",e=>{const t=e.target.dataset;if(!t.g)return;RATES[t.g][t.id]=+e.target.value||0;persist();draw();render()});
+function cur(){return{loc:$("loc").value.trim(),type:$("type").value,style:$("style").value,w:+$("w").value,h:+$("h").value,qty:Math.max(1,+$("qty").value||1),mat:$("mat").value,glz:$("glz").value,col:$("col").value,note:$("note").value.trim()}}
+function calc(i){const cost=(i.parts||[]).reduce((a,p)=>a+p.qty*p.unit,0),unit=cost*(1+MK/100);return{area:A(i),cost,unit,line:unit*i.qty}}
+function draw(){
+  const i=cur();if(!(i.w>0&&i.h>0)){return}
+  const W=560,H=270,pad=46,s=Math.min((W-2*pad)/i.w,(H-2*pad)/i.h),w=i.w*s,h=i.h*s,x=(W-w)/2,y=(H-h)/2-4,f=Math.max(5,Math.min(w,h)*.06);
+  const isDoor=i.type!=="Window",st=i.style;let panes="";
+  const n=/3/.test(st)?3:/4/.test(st)?4:/pair|2-pane/i.test(st)?2:1;
+  const iw=w-2*f,ih=h-2*f;
+  for(let k=0;k<n;k++){const px=x+f+k*iw/n;panes+=`<rect x="${px}" y="${y+f}" width="${iw/n}" height="${ih}" fill="var(--glass)" fill-opacity=".22" stroke="var(--ink)" stroke-width="1.5"/>`}
+  if(/Solid/i.test(st))panes=`<rect x="${x+f}" y="${y+f}" width="${iw}" height="${ih}" fill="var(--ink)" fill-opacity=".14" stroke="var(--ink)" stroke-width="1.5"/>`;
+  let extra="";
+  if(/Casement|Tilt/.test(st)){extra=`<path d="M${x+f} ${y+f} L${x+w-f} ${y+h/2} L${x+f} ${y+h-f}" fill="none" stroke="var(--ink)" stroke-dasharray="5 4"/>`+(/Tilt/.test(st)?`<path d="M${x+f} ${y+h-f} L${x+w/2} ${y+f} L${x+w-f} ${y+h-f}" fill="none" stroke="var(--ink)" stroke-dasharray="2 4"/>`:"")}
+  if(/half/i.test(st)){extra=`<line x1="${x+f}" y1="${y+h*.5}" x2="${x+w-f}" y2="${y+h*.5}" stroke="var(--ink)" stroke-width="1.5"/>`}
+  if(/Sliding/.test(st)){extra=`<path d="M${x+w*.35} ${y+h/2} h${w*.3} m-8 -6 l8 6 l-8 6" fill="none" stroke="var(--ink)" stroke-width="1.5"/>`}
+  if(isDoor&&!/Bi-fold|Sliding/.test(st+i.type)){extra+=`<circle cx="${x+w-f-8}" cy="${y+h*.55}" r="4" fill="var(--brass)"/>`}
+  const dim=(a,b,c,d,t,rot)=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--brass)" stroke-width="1.5"/><text x="${(a+c)/2}" y="${(b+d)/2}" fill="var(--ink)" font-size="13" font-family="Barlow,sans-serif" text-anchor="middle" ${rot?`transform="rotate(-90 ${(a+c)/2} ${(b+d)/2})" dy="-6"`:'dy="17"'}>${t}</text>`;
+  $("preview").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Drawing of ${i.type} ${i.w} by ${i.h} mm"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/>${panes}${extra}${dim(x,y+h+14,x+w,y+h+14,i.w+" mm")}${dim(x-14,y,x-14,y+h,i.h+" mm",1)}</svg>`;
+  renderParts();build3d();
+}
+function validate(i){if(!(i.w>=200&&i.w<=6000))return"Width must be between 200 and 6000 mm.";if(!(i.h>=200&&i.h<=3000))return"Height must be between 200 and 3000 mm.";if(i.type==="Door"&&/Solid/i.test(i.style)&&i.w>1100)return"A single door wider than 1100 mm needs a pair or a different style.";return""}
+let T3=null;
+function init3d(){
+ const box=$("v3");
+ if(!window.THREE){box.innerHTML='<p class="empty" style="padding:16px">The 3D view could not load. Check your connection and reload the page.</p>';return}
+ let r;try{r=new THREE.WebGLRenderer({antialias:true,alpha:true})}catch(e){box.innerHTML='<p class="empty" style="padding:16px">This browser cannot draw 3D graphics.</p>';return}
+ r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));box.appendChild(r.domElement);
+ const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(35,1,.1,60),g=new THREE.Group();sc.add(g);
+ sc.add(new THREE.HemisphereLight(0xffffff,0x8a9aa0,.9));
+ const d=new THREE.DirectionalLight(0xffffff,.8);d.position.set(3,4,5);sc.add(d);
+ T3={r,sc,cam,g,ry:-.5,rx:.15,dist:4};
+ const size=()=>{const w=box.clientWidth||600,h=box.clientHeight||400;r.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();paint()};
+ if(window.ResizeObserver)new ResizeObserver(size).observe(box);else size();
+ const el=r.domElement;let drag=null;el.style.touchAction="none";
+ el.onpointerdown=e=>{drag=[e.clientX,e.clientY];el.setPointerCapture(e.pointerId);box.style.cursor="grabbing"};
+ el.onpointermove=e=>{if(!drag)return;T3.ry+=(e.clientX-drag[0])*.008;T3.rx=Math.max(-.6,Math.min(.6,T3.rx+(e.clientY-drag[1])*.008));drag=[e.clientX,e.clientY];paint()};
+ el.onpointerup=el.onpointercancel=()=>{drag=null;box.style.cursor="grab"};
+ el.onwheel=e=>{e.preventDefault();T3.dist=Math.max(1.5,Math.min(20,T3.dist*(1+e.deltaY*.001)));paint()};
+}
+function paint(){if(!T3)return;const{r,sc,cam,g}=T3;g.rotation.set(T3.rx,T3.ry,0);cam.position.set(0,0,T3.dist);cam.lookAt(0,0,0);r.render(sc,cam)}
+const COL={"White":0xf2f2ef,"Anthracite grey":0x3a4145,"Black":0x1b1b1b,"Woodgrain oak":0xa5723d,"Cream":0xe8dcbc};
+function build3d(){
+ if(!T3)return;const i=cur();if(!(i.w>=200&&i.h>=200&&i.w<=6000&&i.h<=3000))return;
+ const g=T3.g;while(g.children.length){const c=g.children[0];g.remove(c);c.geometry&&c.geometry.dispose()}
+ const W=i.w/1000,H=i.h/1000,al=i.mat==="Aluminium",tm=i.mat==="Timber";
+ const fm=new THREE.MeshStandardMaterial({color:COL[i.col]||0xffffff,roughness:al?.35:tm?.8:.5,metalness:al?.5:0});
+ const gm=new THREE.MeshStandardMaterial({color:0x8fc4d9,transparent:true,opacity:i.glz==="Double"?.3:.42,roughness:.05,metalness:.2,side:THREE.DoubleSide});
+ const wm=new THREE.MeshStandardMaterial({color:0xcfcac0,roughness:.95});
+ const hm=new THREE.MeshStandardMaterial({color:0xbfbfbf,metalness:.9,roughness:.25});
+ const add=(w,h,d,x,y,z,m)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);b.position.set(x,y,z);g.add(b);return b};
+ const wt=.22,M=Math.max(.5,Math.max(W,H)*.35);
+ add(W+2*M,M,wt,0,H/2+M/2,0,wm);add(W+2*M,M,wt,0,-H/2-M/2,0,wm);add(M,H,wt,-W/2-M/2,0,0,wm);add(M,H,wt,W/2+M/2,0,0,wm);
+ const bars=(x,y,w,h,t,d,z)=>{add(w,t,d,x,y+h/2-t/2,z,fm);add(w,t,d,x,y-h/2+t/2,z,fm);add(t,h-2*t,d,x-w/2+t/2,y,z,fm);add(t,h-2*t,d,x+w/2-t/2,y,z,fm)};
+ const glass=(x,y,w,h,z)=>add(w,h,.024,x,y,z,gm),panel=(x,y,w,h,z)=>add(w,h,.04,x,y,z,fm);
+ const handle=(x,y,z)=>{add(.025,.15,.012,x,y,z+.035,hm);add(.1,.02,.02,x-.045,y+.04,z+.05,hm)};
+ const leaf=(x,y,w,h,z,kind,t)=>{bars(x,y,w,h,t,.06,z);const a=w-2*t,b=h-2*t;
+  if(kind==="glass")glass(x,y,a,b,z);else if(kind==="solid")panel(x,y,a,b,z);else{panel(x,y-b/4,a,b/2,z);glass(x,y+b/4,a,b/2,z)}};
+ const fw=.07;bars(0,0,W,H,fw,.1,0);
+ const iw=W-2*fw,ih=H-2*fw,st=i.style,n=+((st.match(/\d/)||[2])[0]),hy=-H/2+Math.min(1,H*.45);
+ if(i.type==="Window"){
+  add(W+.1,.04,.16,0,-H/2-.02,.08,fm);
+  if(/Fixed/.test(st))glass(0,0,iw,ih,0);
+  else if(/Sliding/.test(st)){leaf(-iw/4,0,iw/2+.02,ih,-.025,"glass",.05);leaf(iw/4,0,iw/2+.02,ih,.03,"glass",.05);handle(-.03,0,.03)}
+  else{leaf(0,0,iw,ih,.01,"glass",.05);handle(iw/2-.07,0,.01)}
+ }else if(i.type==="Door"){
+  add(W,.03,.16,0,-H/2+.015,.05,hm);
+  if(/French/.test(st)){leaf(-iw/4,0,iw/2,ih,.01,"glass",.07);leaf(iw/4,0,iw/2,ih,.01,"glass",.07);handle(-.05,hy,.01);handle(.05,hy,.01)}
+  else{leaf(0,0,iw,ih,.01,/half/i.test(st)?"half":"solid",.07);handle(iw/2-.08,hy,.01)}
+ }else{
+  add(W,.03,.16,0,-H/2+.015,.05,hm);
+  const pw=iw/n;for(let k=0;k<n;k++){const z=i.type==="Patio door"?(k%2?.03:-.02):(k%2?.04:0);leaf(-iw/2+pw*(k+.5),0,pw+.01,ih,z,"glass",.05)}
+  handle(-iw/2+pw-.03,hy,.03);
+ }
+ T3.dist=Math.max(W,H)*1.9+1;paint();
+}
+function renderParts(){
+ const i=cur();if(!(i.w>0&&i.h>0))return;
+ const ps=buildParts(i,true),cost=ps.reduce((a,p)=>a+p.qty*p.unit,0),sell=cost*(1+MK/100);
+ $("dparts").innerHTML=ps.map(p=>`<tr><td>${esc(p.name)}</td><td>${p.u}</td><td class="n"><input type="number" step="0.01" min="0" data-q="${p.id}" value="${p.qty}" aria-label="Quantity of ${esc(p.name)}"></td><td class="n"><input type="number" step="0.01" min="0" data-p="${p.id}" value="${p.unit}" aria-label="Unit price of ${esc(p.name)}"></td><td class="n">${money(p.qty*p.unit)}</td><td class="n"><button class="x" data-off="${p.id}" aria-label="Remove ${esc(p.name)}">Remove</button></td></tr>`).join("");
+ $("restore").style.display=Object.keys(mods.off).length?"inline-block":"none";
+ $("pcost").textContent=money(cost);$("psell").textContent=money(sell);
+ $("est").innerHTML=`${money(sell)} each <small>${A(i).toFixed(2)} m², parts cost ${money(cost)}</small>`}
+function plistHtml(){if(!items.length)return"";const agg={};items.forEach(i=>(i.parts||[]).forEach(p=>{const k=p.name+"|"+p.u,a=agg[k]=agg[k]||{name:p.name,u:p.u,qty:0,cost:0};a.qty+=p.qty*i.qty;a.cost+=p.qty*p.unit*i.qty}));
+ const r=Object.values(agg);return`<details open style="margin-top:14px"><summary>Parts list for ordering (${r.length} lines, cost ${money(r.reduce((a,p)=>a+p.cost,0))})</summary><div class="tw"><table><thead><tr><th>Part</th><th class="n">Total qty</th><th>Unit</th><th class="n">Cost</th></tr></thead><tbody>${r.map(p=>`<tr><td>${esc(p.name)}</td><td class="n">${+p.qty.toFixed(2)}</td><td>${p.u}</td><td class="n">${money(p.cost)}</td></tr>`).join("")}</tbody></table></div></details>`}
+function render(){
+  $("rows").innerHTML=items.map((i,k)=>{const c=calc(i);return`<tr><td>${k+1}</td><td><b>${esc(i.type)}</b><br>${esc(i.loc||"No location")}</td><td>${esc(i.style)}, ${esc(i.mat)}, ${esc(i.glz)}<br>${esc(i.col)}${i.note?"<br><i>"+esc(i.note)+"</i>":""}<details><summary>${(i.parts||[]).length} parts</summary>${(i.parts||[]).map(p=>`${esc(p.name)}: ${p.qty} ${p.u} × ${money(p.unit)}`).join("<br>")}</details></td><td class="n">${i.w} × ${i.h}</td><td class="n">${c.area.toFixed(2)}</td><td class="n">${i.qty}</td><td class="n">${money(c.line)}</td><td class="noprint"><button class="x" data-del="${k}" aria-label="Remove item ${k+1}">Remove</button></td></tr>`}).join("");
+  $("none").style.display=items.length?"none":"block";$("plist").innerHTML=plistHtml();
+  const sub=items.reduce((a,i)=>a+calc(i).line,0),d=Math.min(100,Math.max(0,+$("disc").value||0)),net=sub*(1-d/100),vat=net*.2;
+  $("sub").textContent=money(sub);$("vat").textContent=money(vat);$("tot").textContent=money(net+vat);
+  const l=store.saved;$("nosaved").style.display=l.length?"none":"block";
+  $("saved").innerHTML=l.map((o,k)=>`<li><span>${esc(o.cust||"Unnamed")} · ${o.items.length} items · ${esc(o.date)}</span><span><button class="alt" data-load="${k}">Open</button> <button class="x" data-rm="${k}">Delete</button></span></li>`).join("");
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+$("add").onclick=()=>{const i=cur(),e=validate(i);$("err").textContent=e;if(e)return;i.parts=buildParts(i,true);mods=fresh();items.push(i);render();renderParts();$("loc").value="";$("note").value=""};
+$("clear").onclick=()=>{mods=fresh();["loc","note"].forEach(k=>$(k).value="");$("w").value=1200;$("h").value=1350;$("qty").value=1;$("err").textContent="";draw()};
+$("rows").onclick=e=>{const k=e.target.dataset.del;if(k!==undefined){items.splice(+k,1);render()}};
+$("disc").oninput=render;$("type").onchange=styles;
+["w","h","style","mat","glz","qty","col"].forEach(k=>$(k).addEventListener("input",draw));
+$("print").onclick=()=>window.print();
+$("new").onclick=()=>{items=[];["cust","addr","ref"].forEach(k=>$(k).value="");$("disc").value=0;render()};
+$("save").onclick=()=>{if(!items.length){$("msg").textContent="Add at least one opening first.";return}store.saved.unshift({cust:$("cust").value,addr:$("addr").value,ref:$("ref").value,disc:$("disc").value,items:JSON.parse(JSON.stringify(items)),date:new Date().toLocaleDateString("en-GB")});persist();render();$("msg").textContent="Order saved in this browser."};
+$("saved").onclick=e=>{const o=e.target.dataset;if(o.load!==undefined){const s=store.saved[+o.load];items=s.items;$("cust").value=s.cust;$("addr").value=s.addr;$("ref").value=s.ref;$("disc").value=s.disc;render()}if(o.rm!==undefined){store.saved.splice(+o.rm,1);persist();render()}};
+$("copy").onclick=async()=>{const t=items.map((i,k)=>`${k+1}. ${i.type} (${i.loc||"-"}) ${i.w} x ${i.h} mm, qty ${i.qty}, ${i.style}, ${i.mat}, ${i.glz}, ${i.col}${i.note?", "+i.note:""}\n`+(i.parts||[]).map(p=>`   - ${p.name}: ${p.qty} ${p.u}`).join("\n")).join("\n");try{await navigator.clipboard.writeText(t);$("msg").textContent="Cut list and parts copied."}catch(e){$("msg").textContent="Copy blocked here; use Print instead."}};
+$("dparts").addEventListener("change",e=>{const d=e.target.dataset,v=Math.max(0,+e.target.value||0);
+ if(d.q!==undefined){if(d.q[0]==="x")mods.extra[+d.q.slice(1)].qty=v;else mods.qty[d.q]=v}
+ if(d.p!==undefined){if(d.p[0]==="x")mods.extra[+d.p.slice(1)].unit=v;else mods.price[d.p]=v}
+ renderParts()});
+$("dparts").addEventListener("click",e=>{const k=e.target.dataset.off;if(!k)return;if(k[0]==="x")mods.extra.splice(+k.slice(1),1);else mods.off[k]=1;renderParts()});
+$("restore").onclick=()=>{mods.off={};renderParts()};
+$("xa").onclick=()=>{const n=$("xn").value.trim();if(!n)return;mods.extra.push({name:n,u:"each",qty:Math.max(0,+$("xq").value||1),unit:Math.max(0,+$("xp").value||0)});$("xn").value="";$("xp").value="";renderParts()};
+$("mk").oninput=()=>{MK=Math.max(0,+$("mk").value||0);persist();render();renderParts()};
+$("rv").onclick=()=>{if(T3){T3.ry=-.5;T3.rx=.15;build3d()}};
+init3d();$("mk").value=MK;styles();render();
+</script>
+</body>
+</html>
