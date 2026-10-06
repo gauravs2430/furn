@@ -425,7 +425,42 @@ h1 {
 }
 
 .people-table {
-  min-width: 880px;
+  min-width: 1040px;
+}
+
+.people-create {
+  display: grid;
+  gap: 14px;
+  max-width: 720px;
+}
+
+.people-create h2 {
+  font-size: 22px;
+}
+
+.password-once {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.password-once div {
+  display: grid;
+  gap: 2px;
+}
+
+.password-once dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.password-once dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .admin-orders th,
