@@ -45,6 +45,36 @@ export function ConfirmDialog({
   )
 }
 
+interface BlockingDialogProps {
+  open: boolean
+  title: string
+  description: string
+  actionLabel: string
+  onAction: () => void
+}
+
+export function BlockingDialog({ open, title, description, actionLabel, onAction }: BlockingDialogProps) {
+  return (
+    <Dialog.Root open={open} onOpenChange={() => {}}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-overlay" />
+        <Dialog.Content
+          className="dialog"
+          onEscapeKeyDown={(event) => event.preventDefault()}
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onInteractOutside={(event) => event.preventDefault()}
+        >
+          <Dialog.Title className="dialog-title">{title}</Dialog.Title>
+          <Dialog.Description className="dialog-copy">{description}</Dialog.Description>
+          <div className="dialog-actions">
+            <Button onClick={onAction}>{actionLabel}</Button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  )
+}
+
 interface ModalProps {
   open: boolean
   title: string

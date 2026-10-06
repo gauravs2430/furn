@@ -538,6 +538,10 @@ h1 {
   min-width: 8rem;
 }
 
+.people-table input[type='date'] {
+  min-width: 11rem;
+}
+
 .people-id {
   overflow-wrap: anywhere;
   font-size: 13px;

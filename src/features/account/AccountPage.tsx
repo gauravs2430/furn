@@ -58,12 +58,21 @@ export function AccountPage() {
     setError(null)
     setBusy(true)
     const { error: updateError } = await supabase.auth.updateUser({ password })
-    setBusy(false)
     if (updateError) {
+      setBusy(false)
       setError(updateError.message)
       return
     }
+    const { error: stampError } = await supabase.rpc('mark_password_set')
+    setBusy(false)
+    if (stampError) {
+      setError(stampError.message)
+      return
+    }
     setPassword('')
+    useAuthStore.setState((state) => ({
+      profile: state.profile ? { ...state.profile, passwordSetAt: new Date().toISOString() } : state.profile,
+    }))
     pushToast('Password updated')
   }
 

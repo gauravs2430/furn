@@ -53,7 +53,16 @@ Deno.serve(async (req) => {
       if (error) return json({ error: error.message }, 400)
 
       if (data.user) {
-        await admin.from('profiles').update({ full_name: fullName, role, email }).eq('id', data.user.id)
+        const { error: profileError } = await admin
+          .from('profiles')
+          .update({
+            full_name: fullName,
+            role,
+            email,
+            password_set_at: new Date().toISOString(),
+          })
+          .eq('id', data.user.id)
+        if (profileError) return json({ error: profileError.message }, 400)
       }
 
       return json({
@@ -73,6 +82,11 @@ Deno.serve(async (req) => {
       if (!target) return json({ error: 'User not found' }, 404)
       const { error } = await admin.auth.admin.updateUserById(userId, { password })
       if (error) return json({ error: error.message }, 400)
+      const { error: stampError } = await admin
+        .from('profiles')
+        .update({ password_set_at: new Date().toISOString() })
+        .eq('id', userId)
+      if (stampError) return json({ error: stampError.message }, 400)
       return json({ email: target.email, temporaryPassword: password })
     }
 

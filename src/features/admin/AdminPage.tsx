@@ -14,6 +14,7 @@ interface Person {
   full_name: string
   role: 'admin' | 'user'
   active: boolean
+  access_expires_on: string | null
   created_at: string
 }
 
@@ -27,6 +28,7 @@ function personFrom(value: unknown): Person | null {
     full_name: typeof row.full_name === 'string' ? row.full_name : '',
     role: row.role === 'admin' ? 'admin' : 'user',
     active: row.active === true,
+    access_expires_on: typeof row.access_expires_on === 'string' ? row.access_expires_on.slice(0, 10) : null,
     created_at: typeof row.created_at === 'string' ? row.created_at : '',
   }
 }
@@ -92,7 +94,7 @@ export function AdminPage() {
     let cancelled = false
     void supabase
       .from('profiles')
-      .select('id, email, full_name, role, active, created_at')
+      .select('id, email, full_name, role, active, access_expires_on, created_at')
       .order('created_at', { ascending: true })
       .then(({ data, error: loadError }) => {
         if (cancelled) return
@@ -111,7 +113,7 @@ export function AdminPage() {
     if (!supabase) return
     const { data, error: loadError } = await supabase
       .from('profiles')
-      .select('id, email, full_name, role, active, created_at')
+      .select('id, email, full_name, role, active, access_expires_on, created_at')
       .order('created_at', { ascending: true })
     if (loadError) {
       setError(loadError.message)
@@ -132,11 +134,11 @@ export function AdminPage() {
     if (!supabase || role === person.role || savingId) return
     setError(null)
     setSavingId(person.id)
-    patchRow(person.id, { role })
+    patchRow(person.id, role === 'admin' ? { role, access_expires_on: null } : { role })
     const { data, error: updateError } = await supabase.from('profiles').update({ role }).eq('id', person.id).select('id')
     setSavingId(null)
     if (updateError || !Array.isArray(data) || data.length === 0) {
-      patchRow(person.id, { role: person.role })
+      patchRow(person.id, { role: person.role, access_expires_on: person.access_expires_on })
       setError(updateError?.message || 'Could not save that role.')
       return
     }
@@ -222,6 +224,25 @@ export function AdminPage() {
     setShown(null)
   }
 
+  async function saveExpiry(person: Person, value: string) {
+    if (!supabase || person.role !== 'user' || savingId) return
+    const accessExpiresOn = value.trim() || null
+    if (accessExpiresOn === person.access_expires_on) return
+    setError(null)
+    setSavingId(person.id)
+    patchRow(person.id, { access_expires_on: accessExpiresOn })
+    const { data, error: updateError } = await supabase
+      .from('profiles')
+      .update({ access_expires_on: accessExpiresOn })
+      .eq('id', person.id)
+      .select('id')
+    setSavingId(null)
+    if (updateError || !Array.isArray(data) || data.length === 0) {
+      patchRow(person.id, { access_expires_on: person.access_expires_on })
+      setError(updateError?.message || 'Could not save that expiry.')
+    }
+  }
+
   async function saveActive(person: Person, active: boolean) {
     if (!supabase || person.id === staff.id || active === person.active || savingId) return
     setError(null)
@@ -279,6 +300,7 @@ export function AdminPage() {
                 <th>User id</th>
                 <th>Role</th>
                 <th>Active</th>
+                <th>Expiry</th>
                 <th>Created</th>
                 <th>
                   <span className="sr-only">Actions</span>
@@ -322,6 +344,22 @@ export function AdminPage() {
                         />
                         {person.active ? 'Active' : 'Off'}
                       </label>
+                    </td>
+                    <td>
+                      {person.role === 'user' ? (
+                        <input
+                          className="input"
+                          type="date"
+                          aria-label={`Expiry for ${person.email}`}
+                          value={person.access_expires_on ?? ''}
+                          disabled={busy}
+                          onChange={(event) => {
+                            void saveExpiry(person, event.target.value)
+                          }}
+                        />
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td>{formatDate(person.created_at)}</td>
                     <td>
