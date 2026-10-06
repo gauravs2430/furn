@@ -1,5 +1,5 @@
 import type { PanelKind, ProductTypeId, TechnicalOptions } from '../domain/models.ts'
-import { findGlazing, findMaterial } from './productCatalog.ts'
+import { findGlazing, findMaterial } from '../domain/catalogue.ts'
 
 export interface LayoutPreset {
   id: string

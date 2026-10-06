@@ -1,6 +1,19 @@
 export const PRODUCT_TYPES = ['window', 'door', 'patio', 'bifold'] as const
 export type ProductTypeId = (typeof PRODUCT_TYPES)[number]
 
+export const PRODUCT_FAMILIES = ['window', 'door', 'patio', 'bifold', 'accessory'] as const
+export type ProductFamily = (typeof PRODUCT_FAMILIES)[number]
+
+export function isDrawingFamily(value: string): value is ProductTypeId {
+  return (PRODUCT_TYPES as readonly string[]).includes(value)
+}
+
+/** Older quotes stored only the family, and those families used the same id. */
+export function itemProductId(item: { productId?: string; productType: string }): string {
+  const id = item.productId?.trim()
+  return id ? id : item.productType
+}
+
 export const PANEL_KINDS = [
   'fixed',
   'casement-left',
@@ -45,7 +58,8 @@ export interface TechnicalOptions {
 export interface QuoteItem {
   id: string
   location: string
-  productType: ProductTypeId
+  productId: string
+  productType: ProductFamily
   widthMm: number
   heightMm: number
   quantity: number

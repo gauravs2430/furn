@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { ItemPricing, QuoteItem } from '../../domain/models.ts'
 import type { ValidationIssue } from '../../domain/validation.ts'
-import { findColour, findGlazing, findMaterial, findProduct } from '../../data/productCatalog.ts'
+import { findColour, findGlazing, findMaterial, findProduct } from '../../domain/catalogue.ts'
+import { isDrawingFamily, itemProductId } from '../../domain/models.ts'
+import { useAppStore } from '../../store/useAppStore.ts'
 import { describeConfiguration } from '../../domain/factories.ts'
 import { formatMoney } from '../../utils/money.ts'
 import { Button } from '../../components/ui/Button.tsx'
@@ -19,17 +21,19 @@ interface PreviewCardProps {
 }
 
 export function PreviewCard({ item, pricing, issues, editing, onAdd, onUpdate, onCancel }: PreviewCardProps) {
+  const catalogue = useAppStore((state) => state.catalogue)
   const [large, setLarge] = useState(false)
   const [partsOpen, setPartsOpen] = useState(false)
-  const colour = findColour(item.externalColourId)
-  const product = findProduct(item.productType)
+  const colour = findColour(item.externalColourId, catalogue)
+  const product = findProduct(itemProductId(item), catalogue)
+  const drawing = isDrawingFamily(item.productType) ? item.productType : null
   const blocked = issues.length > 0
 
   return (
     <aside className="card preview-card">
       <div className="preview-kicker">
         <span>{product.name}</span>
-        <span>{describeConfiguration(item.panels)}</span>
+        <span>{drawing ? describeConfiguration(item.panels) : 'Accessory'}</span>
       </div>
       <p className="preview-size">
         {item.widthMm} × {item.heightMm} <span>mm</span>
@@ -43,18 +47,20 @@ export function PreviewCard({ item, pricing, issues, editing, onAdd, onUpdate, o
           {issues[0].message}
         </p>
       ) : null}
-      <div className="preview-sheet">
-        <OpeningDrawing
-          widthMm={item.widthMm}
-          heightMm={item.heightMm}
-          panels={item.panels}
-          frameColor={colour.hex}
-          finish={colour.finish}
-          showCill={item.technical.cill !== 'None'}
-          productType={item.productType}
-          title={`${product.name}, ${item.widthMm} by ${item.heightMm} millimetres`}
-        />
-      </div>
+      {drawing ? (
+        <div className="preview-sheet">
+          <OpeningDrawing
+            widthMm={item.widthMm}
+            heightMm={item.heightMm}
+            panels={item.panels}
+            frameColor={colour.hex}
+            finish={colour.finish}
+            showCill={item.technical.cill !== 'None'}
+            productType={drawing}
+            title={`${product.name}, ${item.widthMm} by ${item.heightMm} millimetres`}
+          />
+        </div>
+      ) : null}
       <div className="preview-actions">
         {editing ? (
           <>
@@ -70,13 +76,15 @@ export function PreviewCard({ item, pricing, issues, editing, onAdd, onUpdate, o
             Add to order
           </Button>
         )}
-        <Button variant="secondary" onClick={() => setLarge(true)}>
-          Enlarge drawing
-        </Button>
+        {drawing ? (
+          <Button variant="secondary" onClick={() => setLarge(true)}>
+            Enlarge drawing
+          </Button>
+        ) : null}
       </div>
       <ul className="spec-chips">
-        <li>{findMaterial(item.materialId).name}</li>
-        <li>{findGlazing(item.glazingId).name}</li>
+        <li>{findMaterial(item.materialId, catalogue).name}</li>
+        <li>{findGlazing(item.glazingId, catalogue).name}</li>
         <li>{colour.name}</li>
         <li>Qty {item.quantity}</li>
       </ul>
@@ -103,19 +111,21 @@ export function PreviewCard({ item, pricing, issues, editing, onAdd, onUpdate, o
           </tbody>
         </table>
       ) : null}
-      <Modal open={large} title="Technical drawing" onOpenChange={setLarge}>
-        <div className="enlarge-sheet">
-          <OpeningDrawing
-            widthMm={item.widthMm}
-            heightMm={item.heightMm}
-            panels={item.panels}
-            frameColor={colour.hex}
-            finish={colour.finish}
-            showCill={item.technical.cill !== 'None'}
-            productType={item.productType}
-          />
-        </div>
-      </Modal>
+      {drawing ? (
+        <Modal open={large} title="Technical drawing" onOpenChange={setLarge}>
+          <div className="enlarge-sheet">
+            <OpeningDrawing
+              widthMm={item.widthMm}
+              heightMm={item.heightMm}
+              panels={item.panels}
+              frameColor={colour.hex}
+              finish={colour.finish}
+              showCill={item.technical.cill !== 'None'}
+              productType={drawing}
+            />
+          </div>
+        </Modal>
+      ) : null}
     </aside>
   )
 }

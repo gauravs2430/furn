@@ -1,6 +1,9 @@
-import type { Panel, PanelKind, ProductTypeId, Quote, QuoteItem } from './models.ts'
+import type { Catalogue } from './catalogue.ts'
+import { currentCatalogue, findProduct } from './catalogue.ts'
+import type { Panel, PanelKind, Quote, QuoteItem } from './models.ts'
+import { isDrawingFamily } from './models.ts'
 import { findPreset, matchPreset, technicalDefaults } from '../data/technicalPresets.ts'
-import { findProduct, panelKindLabels } from '../data/productCatalog.ts'
+import { panelKindLabels } from '../data/productCatalog.ts'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
 import { createId } from '../utils/ids.ts'
 import { nowIso } from '../utils/dates.ts'
@@ -30,21 +33,22 @@ export function panelsForPreset(presetId: string, totalWidth: number, explicit?:
   }))
 }
 
-export function createQuoteItem(productType: ProductTypeId = 'window'): QuoteItem {
-  const product = findProduct(productType)
-  const preset = findPreset(product.defaultPreset)
+export function createQuoteItem(productId = 'window', catalogue: Catalogue = currentCatalogue()): QuoteItem {
+  const product = findProduct(productId, catalogue)
+  const family = product.family
+  const drawing = isDrawingFamily(family) ? family : null
+  const preset = drawing && product.defaultPreset ? findPreset(product.defaultPreset) : undefined
   const useSample =
     preset?.sampleWidths &&
     product.defaultWidth === preset.sampleWidths.reduce((sum, width) => sum + width, 0)
-  const panels = panelsForPreset(
-    product.defaultPreset,
-    product.defaultWidth,
-    useSample ? preset.sampleWidths : undefined,
-  )
+  const panels = drawing
+    ? panelsForPreset(product.defaultPreset, product.defaultWidth, useSample ? preset.sampleWidths : undefined)
+    : []
   return {
     id: createId(),
     location: '',
-    productType,
+    productId: product.id,
+    productType: family,
     widthMm: product.defaultWidth,
     heightMm: product.defaultHeight,
     quantity: 1,
@@ -53,18 +57,14 @@ export function createQuoteItem(productType: ProductTypeId = 'window'): QuoteIte
     internalColourId: 'white',
     glazingId: 'double',
     panels,
-    technical: technicalDefaults(
-      productType,
-      'upvc',
-      'double',
-      panels.map((panel) => panel.kind),
-    ),
+    technical: technicalDefaults(drawing ?? 'window', 'upvc', 'double', panels.map((panel) => panel.kind)),
     notes: '',
   }
 }
 
-export function applyProductType(item: QuoteItem, productType: ProductTypeId): QuoteItem {
-  const next = createQuoteItem(productType)
+export function applyProductType(item: QuoteItem, productId: string): QuoteItem {
+  const next = createQuoteItem(productId)
+  const family = isDrawingFamily(next.productType) ? next.productType : 'window'
   return {
     ...next,
     id: item.id,
@@ -75,7 +75,7 @@ export function applyProductType(item: QuoteItem, productType: ProductTypeId): Q
     internalColourId: item.internalColourId,
     materialId: item.materialId,
     technical: technicalDefaults(
-      productType,
+      family,
       item.materialId,
       next.glazingId,
       next.panels.map((panel) => panel.kind),

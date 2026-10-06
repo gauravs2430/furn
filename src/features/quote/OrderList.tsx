@@ -1,6 +1,8 @@
 import { Copy, Pencil, Trash2 } from 'lucide-react'
 import type { PricingConfig, QuoteItem } from '../../domain/models.ts'
-import { findColour, findGlazing, findMaterial, findProduct } from '../../data/productCatalog.ts'
+import { isDrawingFamily, itemProductId } from '../../domain/models.ts'
+import { findColour, findGlazing, findMaterial, findProduct } from '../../domain/catalogue.ts'
+import { useAppStore } from '../../store/useAppStore.ts'
 import { describeConfiguration } from '../../domain/factories.ts'
 import { calculateItemPrice } from '../../domain/pricing.ts'
 import { formatMoney } from '../../utils/money.ts'
@@ -17,6 +19,7 @@ interface OrderListProps {
 }
 
 export function OrderList({ items, pricingConfig, editingId, onEdit, onDuplicate, onDelete }: OrderListProps) {
+  const catalogue = useAppStore((state) => state.catalogue)
   if (items.length === 0) {
     return (
       <div className="empty">
@@ -28,31 +31,34 @@ export function OrderList({ items, pricingConfig, editingId, onEdit, onDuplicate
   return (
     <ul className="order-list">
       {items.map((item, index) => {
-        const price = calculateItemPrice(item, pricingConfig)
-        const colour = findColour(item.externalColourId)
+        const price = calculateItemPrice(item, pricingConfig, catalogue)
+        const colour = findColour(item.externalColourId, catalogue)
+        const drawing = isDrawingFamily(item.productType) ? item.productType : null
         return (
           <li key={item.id} className={editingId === item.id ? 'order-item is-editing' : 'order-item'}>
             <div className="order-thumb">
-              <OpeningDrawing
-                widthMm={item.widthMm}
-                heightMm={item.heightMm}
-                panels={item.panels}
-                frameColor={colour.hex}
-                finish={colour.finish}
-                showDimensions={false}
-                showCill={item.technical.cill !== 'None'}
-                productType={item.productType}
-              />
+              {drawing ? (
+                <OpeningDrawing
+                  widthMm={item.widthMm}
+                  heightMm={item.heightMm}
+                  panels={item.panels}
+                  frameColor={colour.hex}
+                  finish={colour.finish}
+                  showDimensions={false}
+                  showCill={item.technical.cill !== 'None'}
+                  productType={drawing}
+                />
+              ) : null}
             </div>
             <div className="order-copy">
               <p className="order-location">{item.location.trim() || 'No location'}</p>
               <p className="order-title">
-                {index + 1}. {findProduct(item.productType).name}
-                <span> · {describeConfiguration(item.panels)}</span>
+                {index + 1}. {findProduct(itemProductId(item), catalogue).name}
+                <span> · {drawing ? describeConfiguration(item.panels) : 'Accessory'}</span>
               </p>
               <p className="order-spec">
-                {item.widthMm} × {item.heightMm} mm · Qty {item.quantity} · {findMaterial(item.materialId).name} ·{' '}
-                {findGlazing(item.glazingId).name} · {colour.name}
+                {item.widthMm} × {item.heightMm} mm · Qty {item.quantity} · {findMaterial(item.materialId, catalogue).name} ·{' '}
+                {findGlazing(item.glazingId, catalogue).name} · {colour.name}
               </p>
               {item.notes ? <p className="order-notes">{item.notes}</p> : null}
             </div>

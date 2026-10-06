@@ -1,6 +1,8 @@
 import type { QuoteItem } from '../../domain/models.ts'
-import { colours, findGlazing, glazingOptions, materials } from '../../data/productCatalog.ts'
+import { isDrawingFamily } from '../../domain/models.ts'
+import { findGlazing } from '../../domain/catalogue.ts'
 import { technicalDefaults } from '../../data/technicalPresets.ts'
+import { useAppStore } from '../../store/useAppStore.ts'
 import { cx } from '../../utils/cx.ts'
 
 interface AppearanceFormProps {
@@ -9,9 +11,17 @@ interface AppearanceFormProps {
 }
 
 export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
+  const catalogue = useAppStore((state) => state.catalogue)
+  const family = isDrawingFamily(item.productType) ? item.productType : 'window'
+  const materials = catalogue.materials.filter((material) => material.active || material.id === item.materialId)
+  const glazingOptions = catalogue.glazing.filter((option) => option.active || option.id === item.glazingId)
+  const colours = catalogue.colours.filter(
+    (colour) => colour.active || colour.id === item.externalColourId || colour.id === item.internalColourId,
+  )
+
   function setMaterial(materialId: string) {
     const defaults = technicalDefaults(
-      item.productType,
+      family,
       materialId,
       item.glazingId,
       item.panels.map((panel) => panel.kind),
@@ -29,9 +39,9 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
   }
 
   function setGlazing(glazingId: string) {
-    const option = findGlazing(glazingId)
+    const option = findGlazing(glazingId, catalogue)
     const defaults = technicalDefaults(
-      item.productType,
+      family,
       item.materialId,
       glazingId,
       item.panels.map((panel) => panel.kind),

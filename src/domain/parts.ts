@@ -1,5 +1,7 @@
-import type { PanelKind, PartLine, PricingConfig, QuoteItem } from './models.ts'
-import { partCatalog } from '../data/pricingDefaults.ts'
+import type { CatalogPart, Catalogue, QuantityRule } from './catalogue.ts'
+import { currentCatalogue } from './catalogue.ts'
+import type { PanelKind, PartLine, QuoteItem } from './models.ts'
+import { itemProductId } from './models.ts'
 import { calculateArea, calculatePerimeter } from './measures.ts'
 
 function roundQty(value: number): number {
@@ -72,28 +74,80 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
   }
 }
 
-export function calculateParts(item: QuoteItem, config: PricingConfig): PartLine[] {
-  const quantities = partQuantities(item)
-  const materialFactor = config.materialFactors[item.materialId] ?? 1
-  const productFactor = config.productFactors[item.productType] ?? 1
-  const glazingAddon = config.glazingAddons[item.glazingId] ?? 0
+function openingCount(item: QuoteItem): number {
+  return item.panels.filter((panel) => panel.kind !== 'fixed').length
+}
 
-  return partCatalog
-    .map((definition) => {
-      const quantity = quantities[definition.id] ?? 0
+function sashCount(item: QuoteItem): number {
+  return item.panels.filter((panel) =>
+    ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right'].includes(panel.kind),
+  ).length
+}
+
+function quantityFor(rule: QuantityRule, item: QuoteItem, partId: string, fixedQty: number | null): number {
+  if (item.productType === 'accessory') return fixedQty ?? 1
+  switch (rule) {
+    case 'builtin':
+      return partQuantities(item)[partId] ?? 0
+    case 'perimeter':
+      return roundQty(calculatePerimeter(item.widthMm, item.heightMm))
+    case 'area':
+      return roundQty(calculateArea(item.widthMm, item.heightMm))
+    case 'width':
+      return roundQty(item.widthMm / 1000)
+    case 'per-opening':
+      return openingCount(item)
+    case 'per-sash':
+      return sashCount(item)
+    case 'per-panel':
+      return item.panels.length
+    case 'one':
+      return 1
+    case 'fixed':
+      return fixedQty ?? 1
+    default:
+      return 0
+  }
+}
+
+export function calculateParts(item: QuoteItem, catalogue: Catalogue = currentCatalogue()): PartLine[] {
+  const productId = itemProductId(item)
+  const product = catalogue.products.find((entry) => entry.id === productId)
+  const materialFactor = catalogue.materials.find((entry) => entry.id === item.materialId)?.factor ?? 1
+  const productFactor = product?.factor ?? 1
+  const glazingAddon = catalogue.glazing.find((entry) => entry.id === item.glazingId)?.addonPerM2 ?? 0
+  const partsById = new Map(catalogue.parts.map((part) => [part.id, part]))
+
+  return catalogue.links
+    .filter((link) => link.productId === productId && link.included)
+    .map((link) => {
+      const definition = partsById.get(link.partId)
+      if (!definition?.active) return null
+      const quantity = quantityFor(definition.quantityRule, item, definition.id, link.fixedQty)
       if (quantity <= 0) return null
-      const base = config.partPrices[definition.id] ?? definition.price
-      let unitPrice = base
-      if (definition.appliesMaterialFactor) unitPrice *= materialFactor
-      if (definition.appliesProductFactor) unitPrice *= productFactor
-      if (definition.appliesGlazingAddon) unitPrice += glazingAddon
-      return {
-        id: definition.id,
-        name: definition.name,
-        unit: definition.unit,
-        quantity,
-        unitPrice: Math.round(unitPrice * 100) / 100,
-      }
+      return lineFor(definition, quantity, link.priceOverride, materialFactor, productFactor, glazingAddon)
     })
     .filter((part): part is PartLine => part !== null)
+    .sort((left, right) => (partsById.get(left.id)?.sortOrder ?? 0) - (partsById.get(right.id)?.sortOrder ?? 0))
+}
+
+function lineFor(
+  definition: CatalogPart,
+  quantity: number,
+  priceOverride: number | null,
+  materialFactor: number,
+  productFactor: number,
+  glazingAddon: number,
+): PartLine {
+  let unitPrice = priceOverride ?? definition.price
+  if (definition.appliesMaterialFactor) unitPrice *= materialFactor
+  if (definition.appliesProductFactor) unitPrice *= productFactor
+  if (definition.appliesGlazingAddon) unitPrice += glazingAddon
+  return {
+    id: definition.id,
+    name: definition.name,
+    unit: definition.unit,
+    quantity,
+    unitPrice: Math.round(unitPrice * 100) / 100,
+  }
 }

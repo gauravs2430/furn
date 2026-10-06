@@ -1,5 +1,9 @@
+import { useState } from 'react'
 import type { Panel, PanelKind, QuoteItem } from '../../domain/models.ts'
-import { findProduct, panelKindLabels, panelKindsFor, products } from '../../data/productCatalog.ts'
+import { isDrawingFamily, itemProductId } from '../../domain/models.ts'
+import { findProduct } from '../../domain/catalogue.ts'
+import { panelKindLabels, panelKindsFor } from '../../data/productCatalog.ts'
+import { useAppStore } from '../../store/useAppStore.ts'
 import { findPreset, matchPreset, presetsFor, technicalDefaults } from '../../data/technicalPresets.ts'
 import { applyProductType, describeConfiguration, equalPanelWidths, panelWidthTotal, panelsForPreset } from '../../domain/factories.ts'
 import { LIMITS } from '../../data/pricingDefaults.ts'
@@ -15,8 +19,9 @@ interface OpeningFormProps {
 }
 
 function withPanels(item: QuoteItem, panels: Panel[]): QuoteItem {
+  const family = isDrawingFamily(item.productType) ? item.productType : 'window'
   const defaults = technicalDefaults(
-    item.productType,
+    family,
     item.materialId,
     item.glazingId,
     panels.map((panel) => panel.kind),
@@ -39,12 +44,21 @@ function withPanels(item: QuoteItem, panels: Panel[]): QuoteItem {
 }
 
 export function OpeningForm({ item, onChange }: OpeningFormProps) {
-  const presets = presetsFor(item.productType)
+  const catalogue = useAppStore((state) => state.catalogue)
+  const [query, setQuery] = useState('')
+  const drawing = isDrawingFamily(item.productType) ? item.productType : null
+  const presets = drawing ? presetsFor(drawing) : []
   const active = matchPreset(item.panels.map((panel) => panel.kind))
   const total = panelWidthTotal(item.panels)
   const delta = item.widthMm - total
   const matched = item.panels.length > 0 && delta === 0
-  const product = findProduct(item.productType)
+  const product = findProduct(itemProductId(item), catalogue)
+  const selectedId = itemProductId(item)
+  const needle = query.trim().toLowerCase()
+  const results = catalogue.products
+    .filter((entry) => entry.active)
+    .filter((entry) => (needle ? entry.name.toLowerCase().includes(needle) : true))
+    .sort((left, right) => left.sortOrder - right.sortOrder || left.name.localeCompare(right.name))
 
   function selectPreset(presetId: string) {
     const preset = findPreset(presetId)
@@ -67,29 +81,47 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
       <div className="card-head">
         <h2 id="opening-heading">Opening</h2>
         <p>
-          {product.name} · {describeConfiguration(item.panels)}
+          {product.name}
+          {drawing ? ` · ${describeConfiguration(item.panels)}` : ' · Accessory'}
         </p>
       </div>
 
-      <div className="product-grid" role="radiogroup" aria-label="Product">
-        {products.map((entry) => (
-          <button
-            key={entry.id}
-            type="button"
-            role="radio"
-            aria-checked={item.productType === entry.id}
-            className={cx('product-choice', item.productType === entry.id && 'is-active')}
-            onClick={() => {
-              if (item.productType !== entry.id) onChange(applyProductType(item, entry.id))
-            }}
-          >
-            <span className="product-name">{entry.name}</span>
-            <span className="product-summary">{entry.summary}</span>
-          </button>
-        ))}
+      <div className="product-picker">
+        <label className="search">
+          <span className="sr-only">Search products</span>
+          <input
+            value={query}
+            placeholder="Search products"
+            autoComplete="off"
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+        {results.length === 0 ? (
+          <p className="product-summary">Nothing matches that search.</p>
+        ) : (
+          <ul className="product-results" role="listbox" aria-label="Products">
+            {results.map((entry) => (
+              <li key={entry.id}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selectedId === entry.id}
+                  className={cx('product-choice', selectedId === entry.id && 'is-active')}
+                  onClick={() => {
+                    if (selectedId !== entry.id) onChange(applyProductType(item, entry.id))
+                  }}
+                >
+                  <span className="product-name">{entry.name}</span>
+                  <span className="product-summary">{entry.summary}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
-      <h3 className="subhead">Layout</h3>
+      {drawing ? <h3 className="subhead">Layout</h3> : null}
+      {drawing ? (
       <div className="preset-grid">
         {presets.map((preset) => (
           <LayoutThumb
@@ -104,28 +136,33 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
           <span className="preset-label">Custom</span>
         </div>
       </div>
+      ) : null}
 
       <div className="form-grid measure-grid">
-        <NumberField
-          label="Overall width"
-          suffix="mm"
-          value={item.widthMm}
-          min={LIMITS.widthMin}
-          max={LIMITS.widthMax}
-          step={10}
-          stepper
-          onChange={(widthMm) => onChange({ ...item, widthMm })}
-        />
-        <NumberField
-          label="Overall height"
-          suffix="mm"
-          value={item.heightMm}
-          min={LIMITS.heightMin}
-          max={LIMITS.heightMax}
-          step={10}
-          stepper
-          onChange={(heightMm) => onChange({ ...item, heightMm })}
-        />
+        {drawing ? (
+          <NumberField
+            label="Overall width"
+            suffix="mm"
+            value={item.widthMm}
+            min={LIMITS.widthMin}
+            max={LIMITS.widthMax}
+            step={10}
+            stepper
+            onChange={(widthMm) => onChange({ ...item, widthMm })}
+          />
+        ) : null}
+        {drawing ? (
+          <NumberField
+            label="Overall height"
+            suffix="mm"
+            value={item.heightMm}
+            min={LIMITS.heightMin}
+            max={LIMITS.heightMax}
+            step={10}
+            stepper
+            onChange={(heightMm) => onChange({ ...item, heightMm })}
+          />
+        ) : null}
         <NumberField
           label="Quantity"
           value={item.quantity}
@@ -143,7 +180,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
         />
       </div>
 
-      <div className="panel-editor">
+      {drawing ? <div className="panel-editor">
         <div className="panel-editor-head">
           <h3 className="subhead">Panel widths</h3>
           <Button
@@ -182,12 +219,12 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
                   value={panel.kind}
                   onChange={(event) => updatePanel(panel.id, { kind: event.target.value as PanelKind })}
                 >
-                  {panelKindsFor(item.productType).map((kind) => (
+                  {panelKindsFor(drawing).map((kind) => (
                     <option key={kind} value={kind}>
                       {panelKindLabels[kind]}
                     </option>
                   ))}
-                  {panelKindsFor(item.productType).includes(panel.kind) ? null : (
+                  {panelKindsFor(drawing).includes(panel.kind) ? null : (
                     <option value={panel.kind}>{panelKindLabels[panel.kind]}</option>
                   )}
                 </select>
@@ -220,7 +257,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
               const next: Panel = {
                 id: createId(),
                 widthMm: last?.widthMm ?? 600,
-                kind: item.productType === 'bifold' ? 'bifold' : item.productType === 'patio' ? 'sliding' : 'fixed',
+                kind: drawing === 'bifold' ? 'bifold' : drawing === 'patio' ? 'sliding' : 'fixed',
               }
               onChange(withPanels(item, [...item.panels, next]))
             }}
@@ -228,7 +265,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
             Add panel
           </Button>
         </div>
-      </div>
+      </div> : null}
 
       <TextField label="Notes" value={item.notes} placeholder="Obscure glass, restrictor, pet door" onChange={(notes) => onChange({ ...item, notes })} />
     </section>

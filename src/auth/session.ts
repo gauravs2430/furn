@@ -1,7 +1,14 @@
 import type { Session } from '@supabase/supabase-js'
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase.ts'
-import { clearLoadedPricing, clearLoadedQuotes, loadPricingForSession, loadQuotesForSession } from '../store/useAppStore.ts'
+import {
+  clearLoadedCatalogue,
+  clearLoadedPricing,
+  clearLoadedQuotes,
+  loadCatalogueForSession,
+  loadPricingForSession,
+  loadQuotesForSession,
+} from '../store/useAppStore.ts'
 
 export interface StaffProfile {
   id: string
@@ -35,6 +42,7 @@ let reloadTicket = 0
 function leaveSession() {
   clearLoadedQuotes()
   clearLoadedPricing()
+  clearLoadedCatalogue()
 }
 
 async function syncSession(session: Session | null) {
@@ -54,6 +62,7 @@ async function syncSession(session: Session | null) {
     useAuthStore.setState({ session, loading: false })
     loadQuotesForSession(session.user.id)
     loadPricingForSession(session.user.id)
+    loadCatalogueForSession(session.user.id)
     return
   }
 
@@ -109,6 +118,7 @@ async function syncSession(session: Session | null) {
   if (current !== ticket) return
   loadQuotesForSession(session.user.id)
   loadPricingForSession(session.user.id)
+  loadCatalogueForSession(session.user.id)
 }
 
 export function listenToAuth(): () => void {

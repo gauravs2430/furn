@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
+import { fallbackCatalogue } from './catalogue.ts'
+import type { CatalogProduct } from './catalogue.ts'
 import { createQuoteItem } from './factories.ts'
 import { calculateDiscount, calculateItemPrice, calculateQuoteTotals, calculateTax } from './pricing.ts'
 import { buildWorkOrder } from './workOrder.ts'
@@ -8,8 +10,15 @@ import type { Quote } from './models.ts'
 describe('pricing', () => {
   it('prices a window from parts plus markup, then applies discount and tax', () => {
     const item = createQuoteItem('window')
+    expect(item.productId).toBe('window')
+    expect(item.productType).toBe('window')
+    expect(item.widthMm).toBe(1815)
+    expect(item.heightMm).toBe(1130)
     item.quantity = 2
     const price = calculateItemPrice(item, pricingDefaults)
+    expect(price.partsCost).toBe(515.01)
+    expect(price.unitPrice).toBe(669.51)
+    expect(price.lineTotal).toBe(1339.02)
     expect(price.areaM2).toBeCloseTo((1815 * 1130) / 1_000_000, 4)
     expect(price.parts.some((part) => part.id === 'glass')).toBe(true)
     expect(price.parts.some((part) => part.id === 'cill')).toBe(true)
@@ -48,6 +57,107 @@ describe('pricing', () => {
     const price = calculateItemPrice(item, pricingDefaults)
     expect(price.parts.some((part) => part.id === 'glass')).toBe(false)
     expect(price.parts.some((part) => part.id === 'leaf')).toBe(true)
+  })
+
+  it('replaces the part price for that product when price_override is set', () => {
+    const catalogue = fallbackCatalogue()
+    const windowHandle = catalogue.links.find((link) => link.productId === 'window' && link.partId === 'handle')
+    const windowFrame = catalogue.links.find((link) => link.productId === 'window' && link.partId === 'frame')
+    const windowGlass = catalogue.links.find((link) => link.productId === 'window' && link.partId === 'glass')
+    if (!windowHandle || !windowFrame || !windowGlass) throw new Error('missing link')
+    windowHandle.priceOverride = 40
+    windowFrame.priceOverride = 10
+    windowGlass.priceOverride = 20
+
+    const window = createQuoteItem('window')
+    window.materialId = 'aluminium'
+    window.glazingId = 'acoustic'
+    const price = calculateItemPrice(window, pricingDefaults, catalogue)
+    expect(price.parts.find((part) => part.id === 'handle')?.unitPrice).toBe(40)
+    expect(price.parts.find((part) => part.id === 'frame')?.unitPrice).toBe(18)
+    expect(price.parts.find((part) => part.id === 'glass')?.unitPrice).toBe(80)
+
+    const door = calculateItemPrice(createQuoteItem('door'), pricingDefaults, catalogue)
+    expect(door.parts.find((part) => part.id === 'handle')?.unitPrice).toBe(18)
+  })
+
+  it('uses a new company part price on the next window', () => {
+    const before = calculateItemPrice(createQuoteItem('window'), pricingDefaults, fallbackCatalogue())
+    const catalogue = fallbackCatalogue()
+    const frame = catalogue.parts.find((part) => part.id === 'frame')
+    if (!frame) throw new Error('missing part')
+    frame.price += 10
+    const after = calculateItemPrice(createQuoteItem('window'), pricingDefaults, catalogue)
+    const beforeFrame = before.parts.find((part) => part.id === 'frame')?.unitPrice ?? 0
+    expect(after.parts.find((part) => part.id === 'frame')?.unitPrice).toBeCloseTo(beforeFrame + 10, 2)
+    expect(after.partsCost).toBeGreaterThan(before.partsCost)
+  })
+
+  it('drops a part when the product link is not included', () => {
+    const catalogue = fallbackCatalogue()
+    const seal = catalogue.links.find((link) => link.productId === 'window' && link.partId === 'seal')
+    if (!seal) throw new Error('missing link')
+    seal.included = false
+    const price = calculateItemPrice(createQuoteItem('window'), pricingDefaults, catalogue)
+    const full = calculateItemPrice(createQuoteItem('window'), pricingDefaults, fallbackCatalogue())
+    expect(price.parts.some((part) => part.id === 'seal')).toBe(false)
+    expect(full.parts.some((part) => part.id === 'seal')).toBe(true)
+    expect(price.partsCost).toBeLessThan(full.partsCost)
+    const door = calculateItemPrice(createQuoteItem('door'), pricingDefaults, catalogue)
+    expect(door.parts.some((part) => part.id === 'seal')).toBe(true)
+  })
+
+  it('uses a quantity rule for a new part and a fixed quantity on an accessory', () => {
+    const catalogue = fallbackCatalogue()
+    const fixings = catalogue.parts.find((part) => part.id === 'fixings')
+    if (!fixings) throw new Error('missing part')
+    fixings.quantityRule = 'per-panel'
+    const ruled = calculateItemPrice(createQuoteItem('window'), pricingDefaults, catalogue)
+    expect(ruled.parts.find((part) => part.id === 'fixings')?.quantity).toBe(3)
+
+    const accessory: CatalogProduct = {
+      id: 'handle-pack',
+      name: 'Handle pack',
+      family: 'accessory',
+      summary: 'Extra handles',
+      factor: 1,
+      defaultWidth: 1000,
+      defaultHeight: 1000,
+      defaultPreset: '',
+      active: true,
+      sortOrder: 5,
+    }
+    catalogue.products.push(accessory)
+    catalogue.parts.push({
+      id: 'extra-handle',
+      name: 'Extra handle',
+      unit: 'each',
+      price: 18,
+      quantityRule: 'area',
+      appliesMaterialFactor: false,
+      appliesProductFactor: false,
+      appliesGlazingAddon: false,
+      active: true,
+      sortOrder: 18,
+    })
+    catalogue.links.push({
+      productId: 'handle-pack',
+      partId: 'extra-handle',
+      priceOverride: null,
+      fixedQty: 4,
+      included: true,
+    })
+    const item = createQuoteItem('handle-pack', catalogue)
+    expect(item.productType).toBe('accessory')
+    expect(item.productId).toBe('handle-pack')
+    expect(item.panels).toEqual([])
+    const price = calculateItemPrice(item, pricingDefaults, catalogue)
+    expect(price.parts.map((part) => [part.id, part.quantity, part.unitPrice])).toEqual([['extra-handle', 4, 18]])
+    const link = catalogue.links.find((entry) => entry.partId === 'extra-handle')
+    if (!link) throw new Error('missing link')
+    link.fixedQty = null
+    item.widthMm = 2500
+    expect(calculateItemPrice(item, pricingDefaults, catalogue).parts[0]?.quantity).toBe(1)
   })
 })
 

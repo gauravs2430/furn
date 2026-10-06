@@ -17,5 +17,11 @@
 
 7. Add Search Functionality across the diffrent pages. 
 
-8. 
+8. My activity panel for the Admin so he can see what orders are made and also who are logged in currently?
 
+9.The data coming should be in the database (of the furniture and the prices).
+
+
+
+
+okay you have the context of the website, Now we will be modyfying the frontend completely for this website, it should look like a very professional one, 

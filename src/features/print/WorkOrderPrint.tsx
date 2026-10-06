@@ -1,17 +1,21 @@
 import type { Quote } from '../../domain/models.ts'
-import { findColour, findProduct } from '../../data/productCatalog.ts'
+import { isDrawingFamily, itemProductId } from '../../domain/models.ts'
+import { findColour, findProduct } from '../../domain/catalogue.ts'
+import { useAppStore } from '../../store/useAppStore.ts'
 import { buildWorkOrder } from '../../domain/workOrder.ts'
 import { formatMm } from '../../utils/money.ts'
 import { formatPrintDate } from '../../utils/dates.ts'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
 
 export function WorkOrderDocument({ quote, printedAt }: { quote: Quote; printedAt: string }) {
+  const catalogue = useAppStore((state) => state.catalogue)
   const printed = formatPrintDate(printedAt)
   return (
     <div className="print-stack">
       {quote.items.map((item, index) => {
         const data = buildWorkOrder(item)
-        const colour = findColour(item.externalColourId)
+        const colour = findColour(item.externalColourId, catalogue)
+        const drawing = isDrawingFamily(item.productType) ? item.productType : null
         return (
           <article key={item.id} className="print-sheet">
             <h1 className="wo-banner">WORK ORDER</h1>
@@ -54,18 +58,20 @@ export function WorkOrderDocument({ quote, printedAt }: { quote: Quote; printedA
               </table>
               <div className="wo-drawing">
                 <p className="wo-drawing-caption">
-                  {findProduct(item.productType).name}
+                  {findProduct(itemProductId(item), catalogue).name}
                   {item.location ? ` · ${item.location}` : ''} · {item.widthMm} × {item.heightMm} mm
                 </p>
-                <OpeningDrawing
-                  widthMm={item.widthMm}
-                  heightMm={item.heightMm}
-                  panels={item.panels}
-                  frameColor={colour.hex}
-                  finish={colour.finish}
-                  showCill={item.technical.cill !== 'None'}
-                  productType={item.productType}
-                />
+                {drawing ? (
+                  <OpeningDrawing
+                    widthMm={item.widthMm}
+                    heightMm={item.heightMm}
+                    panels={item.panels}
+                    frameColor={colour.hex}
+                    finish={colour.finish}
+                    showCill={item.technical.cill !== 'None'}
+                    productType={drawing}
+                  />
+                ) : null}
               </div>
             </div>
 

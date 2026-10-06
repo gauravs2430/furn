@@ -1,5 +1,5 @@
 import type { PanelKind, QuoteItem, WorkOrderData } from './models.ts'
-import { findColour } from '../data/productCatalog.ts'
+import { findColour } from './catalogue.ts'
 import { formatMm } from '../utils/money.ts'
 
 function isSash(kind: PanelKind): boolean {
@@ -210,7 +210,7 @@ export function buildWorkOrder(item: QuoteItem): WorkOrderData {
       { item: 'Roller set', qty: formatMm(item.panels.length * item.quantity), unit: 'Unit' },
       { item: item.technical.locking || 'Lock', qty: formatMm(item.quantity), unit: 'Unit' },
     )
-  } else if (item.productType !== 'window') {
+  } else if (item.productType !== 'window' && item.productType !== 'accessory') {
     accessories.push(
       { item: item.technical.handle || 'Handle', qty: formatMm(item.quantity), unit: 'Unit' },
       { item: 'Hinge set', qty: formatMm(item.quantity), unit: 'Unit' },

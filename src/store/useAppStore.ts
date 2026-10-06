@@ -1,8 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Catalogue } from '../domain/catalogue.ts'
+import { fallbackCatalogue, replaceCatalogue } from '../domain/catalogue.ts'
 import type { PricingConfig, Quote, QuoteItem, QuoteStatus, ThemeMode } from '../domain/models.ts'
 import { createQuote } from '../domain/factories.ts'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
+import { fetchCatalogue, fetchCatalogueStrict } from '../repositories/CatalogueRepository.ts'
 import { fetchPricingConfig } from '../repositories/PricingConfigRepository.ts'
 import { fetchNextJobNo, SupabaseQuoteRepository } from '../repositories/SupabaseQuoteRepository.ts'
 import { createId } from '../utils/ids.ts'
@@ -20,6 +23,7 @@ interface AppState {
   pricingConfig: PricingConfig
   pricingStatus: 'loading' | 'ready' | 'error'
   pricingNotice: string | null
+  catalogue: Catalogue
   hydrated: boolean
   toasts: ToastMessage[]
   createQuote: () => Promise<Quote | null>
@@ -97,6 +101,11 @@ let loadedUserId: string | null = null
 let loadTicket = 0
 let loadedPricingUserId: string | null = null
 let pricingTicket = 0
+let loadedCatalogueUserId: string | null = null
+let catalogueTicket = 0
+
+const initialCatalogue = fallbackCatalogue()
+replaceCatalogue(initialCatalogue)
 
 function rememberQuote(quote: Quote) {
   useAppStore.setState((state) => {
@@ -243,6 +252,43 @@ export function clearLoadedPricing() {
   })
 }
 
+async function fetchCatalogueIntoStore() {
+  const ticket = ++catalogueTicket
+  try {
+    const catalogue = await fetchCatalogue()
+    if (ticket !== catalogueTicket) return
+    replaceCatalogue(catalogue)
+    useAppStore.setState({ catalogue })
+  } catch {
+    if (ticket !== catalogueTicket) return
+    const catalogue = fallbackCatalogue()
+    replaceCatalogue(catalogue)
+    useAppStore.setState({ catalogue })
+  }
+}
+
+export async function refreshCatalogue(): Promise<void> {
+  const ticket = ++catalogueTicket
+  const catalogue = await fetchCatalogueStrict()
+  if (ticket !== catalogueTicket) return
+  replaceCatalogue(catalogue)
+  useAppStore.setState({ catalogue })
+}
+
+export function loadCatalogueForSession(userId: string) {
+  if (loadedCatalogueUserId === userId) return
+  loadedCatalogueUserId = userId
+  void fetchCatalogueIntoStore()
+}
+
+export function clearLoadedCatalogue() {
+  loadedCatalogueUserId = null
+  catalogueTicket += 1
+  const catalogue = fallbackCatalogue()
+  replaceCatalogue(catalogue)
+  useAppStore.setState({ catalogue })
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -251,6 +297,7 @@ export const useAppStore = create<AppState>()(
       pricingConfig: pricingDefaults,
       pricingStatus: 'loading',
       pricingNotice: null,
+      catalogue: initialCatalogue,
       hydrated: false,
       toasts: [],
 

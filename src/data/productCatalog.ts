@@ -146,18 +146,3 @@ export function panelKindsFor(product: ProductTypeId): PanelKind[] {
   }
 }
 
-export function findProduct(id: string): ProductDefinition {
-  return products.find((product) => product.id === id) ?? products[0]
-}
-
-export function findMaterial(id: string): MaterialOption {
-  return materials.find((material) => material.id === id) ?? materials[0]
-}
-
-export function findGlazing(id: string): GlazingOption {
-  return glazingOptions.find((option) => option.id === id) ?? glazingOptions[0]
-}
-
-export function findColour(id: string): ColourOption {
-  return colours.find((colour) => colour.id === id) ?? colours[0]
-}

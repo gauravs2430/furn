@@ -19,6 +19,7 @@ function messageFrom(error: unknown): string {
 export function AdminOrdersPage() {
   const profile = useAuthStore((state) => state.profile)
   const pricingConfig = useAppStore((state) => state.pricingConfig)
+  const catalogue = useAppStore((state) => state.catalogue)
   const [rows, setRows] = useState<QuoteAccessRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -73,7 +74,7 @@ export function AdminOrdersPage() {
             </thead>
             <tbody>
               {rows.map((row) => {
-                const total = calculateQuoteTotals(row.quote, pricingConfig).grandTotal
+                const total = calculateQuoteTotals(row.quote, pricingConfig, catalogue).grandTotal
                 return (
                   <tr key={row.quote.id}>
                     <td>{row.quote.jobNo}</td>

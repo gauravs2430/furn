@@ -50,14 +50,15 @@ interface ModalProps {
   title: string
   onOpenChange: (open: boolean) => void
   children: ReactNode
+  className?: string
 }
 
-export function Modal({ open, title, onOpenChange, children }: ModalProps) {
+export function Modal({ open, title, onOpenChange, children, className }: ModalProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay" />
-        <Dialog.Content className="dialog dialog-wide">
+        <Dialog.Content className={className ? `dialog dialog-wide ${className}` : 'dialog dialog-wide'}>
           <div className="dialog-head">
             <Dialog.Title className="dialog-title">{title}</Dialog.Title>
             <Dialog.Close className="icon-x" aria-label="Close">

@@ -14,6 +14,7 @@ export function DashboardPage() {
   const hydrated = useAppStore((state) => state.hydrated)
   const quotes = useAppStore((state) => state.quotes)
   const pricingConfig = useAppStore((state) => state.pricingConfig)
+  const catalogue = useAppStore((state) => state.catalogue)
   const createQuote = useAppStore((state) => state.createQuote)
   const duplicateQuote = useAppStore((state) => state.duplicateQuote)
   const deleteQuote = useAppStore((state) => state.deleteQuote)
@@ -51,7 +52,7 @@ export function DashboardPage() {
 
   const bookedValue = quotes
     .filter((quote) => quote.status === 'booked')
-    .reduce((sum, quote) => sum + calculateQuoteTotals(quote, pricingConfig).grandTotal, 0)
+    .reduce((sum, quote) => sum + calculateQuoteTotals(quote, pricingConfig, catalogue).grandTotal, 0)
 
   if (!hydrated) return <p className="boot">Loading your orders…</p>
 
@@ -108,7 +109,7 @@ export function DashboardPage() {
       ) : (
         <ul className="job-grid">
           {visible.map((quote) => {
-            const totals = calculateQuoteTotals(quote, pricingConfig)
+            const totals = calculateQuoteTotals(quote, pricingConfig, catalogue)
             return (
               <li key={quote.id} className="job-card">
                 <div className="job-top">

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Printer } from 'lucide-react'
 import type { Quote, QuoteItem } from '../../domain/models.ts'
+import { itemProductId } from '../../domain/models.ts'
 import { useAuthStore } from '../../auth/session.ts'
 import { createQuoteItem } from '../../domain/factories.ts'
 import { calculateItemPrice, calculateQuoteTotals } from '../../domain/pricing.ts'
@@ -27,6 +28,7 @@ export function ConfiguratorPage() {
   const hydrated = useAppStore((state) => state.hydrated)
   const quote = useAppStore((state) => state.quotes.find((entry) => entry.id === id))
   const pricingConfig = useAppStore((state) => state.pricingConfig)
+  const catalogue = useAppStore((state) => state.catalogue)
   const updateQuote = useAppStore((state) => state.updateQuote)
   const addItem = useAppStore((state) => state.addItem)
   const updateItem = useAppStore((state) => state.updateItem)
@@ -146,8 +148,8 @@ export function ConfiguratorPage() {
   const activeQuote = quote
   const draft = item
   const issues = validateItem(draft)
-  const pricing = calculateItemPrice(draft, pricingConfig)
-  const totals = calculateQuoteTotals(activeQuote, pricingConfig)
+  const pricing = calculateItemPrice(draft, pricingConfig, catalogue)
+  const totals = calculateQuoteTotals(activeQuote, pricingConfig, catalogue)
 
   function freshCopy(source: QuoteItem): QuoteItem {
     return {
@@ -277,7 +279,7 @@ export function ConfiguratorPage() {
               onUpdate={saveOpening}
               onCancel={() => {
                 setEditingId(null)
-                setItem(createQuoteItem(draft.productType))
+                setItem(createQuoteItem(itemProductId(draft)))
                 pushToast('Edit cancelled', 'info')
               }}
             />

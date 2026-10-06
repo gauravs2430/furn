@@ -1,4 +1,4 @@
-import type { Quote, QuoteStatus } from '../domain/models.ts'
+import type { Quote, QuoteItem, QuoteStatus } from '../domain/models.ts'
 import { supabase } from '../lib/supabase.ts'
 import type { QuoteRepository } from './QuoteRepository.ts'
 
@@ -39,6 +39,11 @@ export function quoteToRow(quote: Quote, userId: string): QuoteRow {
   }
 }
 
+function withProductId(item: QuoteItem): QuoteItem {
+  const productId = typeof item.productId === 'string' && item.productId.trim() ? item.productId : item.productType
+  return { ...item, productId }
+}
+
 export function quoteFromDocument(value: unknown): Quote | null {
   if (!value || typeof value !== 'object') return null
   const source = value as Quote & { owner?: unknown }
@@ -47,6 +52,8 @@ export function quoteFromDocument(value: unknown): Quote | null {
   if (!source.customer || typeof source.customer !== 'object' || !Array.isArray(source.items)) return null
   const quote = { ...source }
   delete quote.owner
+  quote.items = source.items.map((item) => withProductId(item))
+  quote.configDraft = source.configDraft ? withProductId(source.configDraft) : null
   return quote
 }
 

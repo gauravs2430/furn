@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
-import { partCatalog, pricingDefaults } from '../../data/pricingDefaults.ts'
-import { glazingOptions, materials } from '../../data/productCatalog.ts'
+import { Link, Navigate } from 'react-router-dom'
+import { pricingDefaults } from '../../data/pricingDefaults.ts'
 import type { PricingConfig } from '../../domain/models.ts'
 import { missingPriceListMessage, savePricingConfig } from '../../repositories/PricingConfigRepository.ts'
 import { useAuthStore } from '../../auth/session.ts'
@@ -75,8 +74,15 @@ export function PricesPage() {
 
   return (
     <div className="page">
-      <h1>Prices</h1>
-      <p className="lede">Company rates. New quotes pick up the default VAT. Markup applies to every price.</p>
+      <div className="page-head">
+        <div>
+          <h1>Prices</h1>
+          <nav className="page-links" aria-label="Admin">
+            <Link to="/admin/catalog">Catalogue</Link>
+          </nav>
+        </div>
+      </div>
+      <p className="lede">Company markup, and the VAT rate a new quote starts with. Product and part prices live in the catalogue.</p>
       <div className="form-grid">
         <NumberField label="Markup" suffix="%" value={config.markupPercent} min={0} onChange={(markupPercent) => patch({ markupPercent })} />
         <NumberField
@@ -86,38 +92,6 @@ export function PricesPage() {
           min={0}
           onChange={(taxPercent) => patch({ taxPercent })}
         />
-        {materials.map((material) => (
-          <NumberField
-            key={material.id}
-            label={`${material.name} factor`}
-            value={config.materialFactors[material.id] ?? material.factor}
-            min={0}
-            step={0.1}
-            onChange={(value) => patch({ materialFactors: { ...config.materialFactors, [material.id]: value } })}
-          />
-        ))}
-        {glazingOptions.map((option) => (
-          <NumberField
-            key={option.id}
-            label={`${option.name} glass add £/m²`}
-            value={config.glazingAddons[option.id] ?? option.addonPerM2}
-            min={0}
-            onChange={(value) => patch({ glazingAddons: { ...config.glazingAddons, [option.id]: value } })}
-          />
-        ))}
-      </div>
-      <h2 className="subhead">Part prices</h2>
-      <div className="form-grid">
-        {partCatalog.map((part) => (
-          <NumberField
-            key={part.id}
-            label={`${part.name} £/${part.unit}`}
-            value={config.partPrices[part.id] ?? part.price}
-            min={0}
-            step={0.1}
-            onChange={(value) => patch({ partPrices: { ...config.partPrices, [part.id]: value } })}
-          />
-        ))}
       </div>
       {error ? <p className="form-error">{error}</p> : null}
       <div className="dialog-actions">

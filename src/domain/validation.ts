@@ -28,6 +28,13 @@ const itemSchema = z.object({
 })
 
 export function validateItem(item: QuoteItem): ValidationIssue[] {
+  if (item.productType === 'accessory') {
+    if (!Number.isInteger(item.quantity) || item.quantity < LIMITS.quantityMin || item.quantity > LIMITS.quantityMax) {
+      return [{ path: 'quantity', message: 'Quantity must be at least 1.' }]
+    }
+    return []
+  }
+
   const issues: ValidationIssue[] = []
   const parsed = itemSchema.safeParse(item)
   if (!parsed.success) {

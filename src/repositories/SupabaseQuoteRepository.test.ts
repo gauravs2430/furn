@@ -28,6 +28,18 @@ describe('quote rows', () => {
     expect(quoteFromDocument({ id: 'x', jobNo: 'SP-0002', status: 'sent' })).toBeNull()
   })
 
+  it('keeps an older opening that stored only the family', () => {
+    const quote = createQuote('SP-0004', 20)
+    const draft = quote.configDraft
+    if (!draft) throw new Error('missing draft')
+    const legacy = { ...draft }
+    delete (legacy as { productId?: string }).productId
+    const parsed = quoteFromDocument({ ...quote, items: [legacy], configDraft: legacy })
+    expect(parsed?.items[0]?.productType).toBe('window')
+    expect(parsed?.items[0]?.productId).toBe('window')
+    expect(parsed?.configDraft?.productId).toBe('window')
+  })
+
   it('reads an admin list row with the owner email from profiles', () => {
     const quote = createQuote('SP-0003', 20)
     quote.customer.name = 'Ada'

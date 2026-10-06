@@ -543,6 +543,117 @@ h1 {
   font-size: 13px;
 }
 
+.catalog-table {
+  min-width: 720px;
+}
+
+.catalog-row {
+  cursor: pointer;
+}
+
+.catalog-row:hover td {
+  background: rgba(55, 65, 81, 0.06);
+}
+
+.row-open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row-open:hover {
+  text-decoration: underline;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.catalog-block {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.catalog-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.catalog-add,
+.catalog-add-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.catalog-add {
+  margin-top: 14px;
+}
+
+.check-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.catalog-parts {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+
+.catalog-parts th,
+.catalog-parts td {
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.catalog-parts th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.catalog-parts .input {
+  width: 100%;
+  min-width: 5.5rem;
+}
+
+.catalog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.catalog-attach {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.catalog-attach li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
 .row-check {
   display: inline-flex;
   align-items: center;
@@ -791,6 +902,27 @@ h1 {
 .order-location,
 .order-title {
   font-weight: 650;
+}
+
+.product-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-results {
+  max-height: 280px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-results .product-choice {
+  width: 100%;
 }
 
 .product-summary,
@@ -1297,6 +1429,10 @@ h1 {
 
 .dialog-wide {
   width: min(760px, calc(100vw - 24px));
+}
+
+.dialog-catalog {
+  width: min(980px, calc(100vw - 24px));
 }
 
 .dialog-title {
