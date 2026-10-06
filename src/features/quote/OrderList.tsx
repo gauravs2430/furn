@@ -20,8 +20,7 @@ export function OrderList({ items, pricingConfig, editingId, onEdit, onDuplicate
   if (items.length === 0) {
     return (
       <div className="empty">
-        <p className="empty-title">No openings on this order yet</p>
-        <p>Set the size and layout, check the drawing, then add the opening.</p>
+        <p>No openings on this order yet.</p>
       </div>
     )
   }

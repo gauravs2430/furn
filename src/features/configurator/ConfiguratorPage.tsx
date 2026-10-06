@@ -44,6 +44,7 @@ export function ConfiguratorPage() {
   const [deleteTarget, setDeleteTarget] = useState<QuoteItem | null>(null)
   const [bookOpen, setBookOpen] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
+  const [savingDraft, setSavingDraft] = useState(false)
   const booted = useRef(false)
   const saveMark = useRef(0)
 
@@ -109,13 +110,13 @@ export function ConfiguratorPage() {
     void updateQuote(id, { configDraft: item, editingItemId: editingId }, { touch: false })
   }, [item, editingId, id, updateQuote])
 
-  if (!hydrated) return <p className="boot">Opening the workspace…</p>
-  if (!quote && lookupId !== id) return <p className="boot">Opening the workspace…</p>
+  if (!hydrated) return <p className="boot">Loading your orders…</p>
+  if (!quote && lookupId !== id) return <p className="boot">Loading this quote…</p>
   if (!quote && lockedQuote) {
     return (
       <div className="page">
         <div className="empty">
-          <p className="empty-title">Only the owner can change this order</p>
+          <p>Only the owner can change this order.</p>
           <p>
             Job {lockedQuote.jobNo}
             {lockedQuote.customer.name.trim() ? ` · ${lockedQuote.customer.name.trim()}` : ''}
@@ -135,12 +136,12 @@ export function ConfiguratorPage() {
   if (!quote) {
     return (
       <div className="empty">
-        <p className="empty-title">This quote is not on this device</p>
+        <p>This quote is not on this device.</p>
         <Button onClick={() => navigate('/orders')}>Orders</Button>
       </div>
     )
   }
-  if (!item) return <p className="boot">Preparing the opening…</p>
+  if (!item) return <p className="boot">Loading this quote…</p>
 
   const activeQuote = quote
   const draft = item
@@ -214,14 +215,19 @@ export function ConfiguratorPage() {
           <Button
             variant="secondary"
             size="sm"
+            disabled={savingDraft}
+            aria-busy={savingDraft}
             onClick={() => {
+              if (savingDraft) return
               const mark = saveMark.current
+              setSavingDraft(true)
               void flushQuote(activeQuote.id).then((ok) => {
                 if (ok && mark === saveMark.current) setDraftSaved(true)
+                setSavingDraft(false)
               })
             }}
           >
-            {draftSaved ? 'Saved' : 'Save draft'}
+            {savingDraft ? 'Saving…' : draftSaved ? 'Saved' : 'Save draft'}
           </Button>
           <Button
             variant="secondary"

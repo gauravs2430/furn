@@ -12,5 +12,10 @@
 
 5. automatic sign out of the user and Admin after 30-40 minutes of work and login time or maybe inactivity.
 
-6. 
+6. For new login, Send a confirmation email to the particular email where it will be having the login page link of the website, and their user's email and the password admin defines for them. 
+(maybe a 2 factor verification if we can do here).
+
+7. Add Search Functionality across the diffrent pages. 
+
+8. 
 

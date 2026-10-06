@@ -45,7 +45,7 @@ export function AppShell() {
     <div className="app-shell">
       <header className="topbar">
         <div className="topbar-bar">
-          <Link to="/" className="brand">
+          <Link to="/" className="brand" onClick={() => setMenuOpen(false)}>
             <span className="brand-name">SunnyPlast</span>
           </Link>
           <button

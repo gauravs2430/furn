@@ -121,8 +121,8 @@ export function PricesPage() {
       </div>
       {error ? <p className="form-error">{error}</p> : null}
       <div className="dialog-actions">
-        <Button variant="secondary" disabled={busy} onClick={() => void persist(pricingDefaults, 'Rates reset')}>
-          Reset rates
+        <Button variant="secondary" disabled={busy} aria-busy={busy} onClick={() => void persist(pricingDefaults, 'Rates reset')}>
+          {busy ? 'Saving…' : 'Reset rates'}
         </Button>
         <Button disabled={busy} onClick={() => void persist(config, 'Prices saved')}>
           {busy ? 'Saving…' : 'Save'}

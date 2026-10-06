@@ -129,6 +129,7 @@ p {
 .nav-email {
   color: var(--muted);
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 button.nav-link {
@@ -162,6 +163,7 @@ button.nav-link {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 2px;
@@ -177,6 +179,49 @@ button.nav-link {
 
 .home-box p {
   color: var(--muted);
+}
+
+.home-box:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.home-latest {
+  margin-top: 28px;
+}
+
+.home-latest h2 {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+
+.home-latest > p {
+  color: var(--muted);
+}
+
+.home-latest ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+.home-latest a {
+  display: block;
+  padding: 12px 14px;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.home-latest li:last-child a {
+  border-bottom: 0;
+}
+
+.home-latest a:hover {
+  background: var(--bg);
 }
 
 .login-screen {
@@ -286,6 +331,7 @@ h1 {
   font-size: 42px;
   font-weight: 700;
   line-height: 0.95;
+  overflow-wrap: anywhere;
 }
 
 .lede,
@@ -1177,11 +1223,8 @@ h1 {
   color: var(--muted);
 }
 
-.empty-title {
-  margin-bottom: 6px;
-  color: var(--ink);
-  font-family: var(--display);
-  font-size: 28px;
+.empty .btn {
+  margin-top: 12px;
 }
 
 .page-links {
@@ -1366,8 +1409,29 @@ h1 {
   }
 
   .bottom-bar {
+    flex-wrap: wrap;
     margin-left: -14px;
     margin-right: -14px;
+  }
+
+  .quote-identity {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .quote-identity > div {
+    min-width: 0;
+    flex: 1 1 140px;
+  }
+
+  .toast-wrap {
+    left: 16px;
+    right: 16px;
+  }
+
+  .toast {
+    min-width: 0;
+    max-width: none;
   }
 }
 

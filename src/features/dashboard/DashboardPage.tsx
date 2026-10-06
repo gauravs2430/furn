@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Copy, Plus, Printer, Trash2 } from 'lucide-react'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
@@ -21,13 +21,20 @@ export function DashboardPage() {
   const [query, setQuery] = useState('')
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+  const startingRef = useRef(false)
 
   function startQuote() {
-    if (starting) return
+    if (startingRef.current) return
+    startingRef.current = true
     setStarting(true)
     void createQuote().then((quote) => {
-      if (quote) navigate(`/quote/${quote.id}`)
-      else setStarting(false)
+      if (quote) {
+        navigate(`/quote/${quote.id}`)
+        return
+      }
+      startingRef.current = false
+      setStarting(false)
     })
   }
 
@@ -46,7 +53,7 @@ export function DashboardPage() {
     .filter((quote) => quote.status === 'booked')
     .reduce((sum, quote) => sum + calculateQuoteTotals(quote, pricingConfig).grandTotal, 0)
 
-  if (!hydrated) return <p className="boot">Opening the workspace…</p>
+  if (!hydrated) return <p className="boot">Loading your orders…</p>
 
   return (
     <div className="page">
@@ -56,8 +63,8 @@ export function DashboardPage() {
           <h1>Quotes & orders</h1>
           <p className="lede">Configure an opening with the customer, price it, and print the work order or the quote.</p>
         </div>
-        <Button icon={<Plus size={18} />} disabled={starting} onClick={startQuote}>
-          New quote
+        <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={startQuote}>
+          {starting ? 'Starting…' : 'New quote'}
         </Button>
       </div>
 
@@ -89,16 +96,14 @@ export function DashboardPage() {
 
       {quotes.length === 0 ? (
         <div className="empty">
-          <p className="empty-title">No saved jobs yet</p>
-          <p>Start a quote, add a window or door, and it will show in your orders.</p>
-          <Button disabled={starting} onClick={startQuote}>
-            New quote
+          <p>No saved jobs yet.</p>
+          <Button disabled={starting} aria-busy={starting} onClick={startQuote}>
+            {starting ? 'Starting…' : 'New quote'}
           </Button>
         </div>
       ) : visible.length === 0 ? (
         <div className="empty">
-          <p className="empty-title">Nothing matches that search</p>
-          <p>Try the customer name, the reference, or the job number.</p>
+          <p>Nothing matches that search.</p>
         </div>
       ) : (
         <ul className="job-grid">
@@ -134,15 +139,20 @@ export function DashboardPage() {
                     size="sm"
                     variant="secondary"
                     icon={<Copy size={15} />}
+                    disabled={duplicatingId === quote.id}
+                    aria-busy={duplicatingId === quote.id}
                     onClick={() => {
+                      if (duplicatingId) return
+                      setDuplicatingId(quote.id)
                       void duplicateQuote(quote.id).then((copy) => {
+                        setDuplicatingId(null)
                         if (!copy) return
                         pushToast('Quote duplicated')
                         navigate(`/quote/${copy.id}`)
                       })
                     }}
                   >
-                    Duplicate
+                    {duplicatingId === quote.id ? 'Duplicating…' : 'Duplicate'}
                   </Button>
                   <Button
                     size="sm"

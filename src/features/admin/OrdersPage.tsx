@@ -53,10 +53,7 @@ export function AdminOrdersPage() {
       {error ? <p className="form-error">{error}</p> : null}
       {!error && rows === null ? <p className="boot">Loading orders…</p> : null}
       {rows && rows.length === 0 ? (
-        <div className="empty">
-          <p className="empty-title">No orders yet</p>
-          <p>Staff quotes will show here.</p>
-        </div>
+        <p>No orders yet.</p>
       ) : null}
       {rows && rows.length > 0 ? (
         <div className="table-scroll">

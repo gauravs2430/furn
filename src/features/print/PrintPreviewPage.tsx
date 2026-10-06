@@ -44,11 +44,11 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
     documentTitle: quote ? `${kind === 'work-order' ? 'Work Order' : 'Quotation'} ${quote.jobNo}` : 'Document',
   })
 
-  if (!hydrated || (!stored && fetched?.id !== id)) return <p className="boot">Preparing the document…</p>
+  if (!hydrated || (!stored && fetched?.id !== id)) return <p className="boot">Loading this quote…</p>
   if (!quote) {
     return (
       <div className="empty">
-        <p className="empty-title">This quote is not on this device</p>
+        <p>This quote is not on this device.</p>
         <Button onClick={() => navigate('/orders')}>Orders</Button>
       </div>
     )
