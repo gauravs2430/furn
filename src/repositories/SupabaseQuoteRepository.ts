@@ -154,6 +154,21 @@ export class SupabaseQuoteRepository implements QuoteRepository {
     return rows
   }
 
+  async listForUser(userId: string): Promise<QuoteAccessRow[]> {
+    const { data, error } = await requireClient()
+      .from('quotes')
+      .select('id, user_id, document, updated_at, profiles(email)')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+    if (error) throw error
+    const rows: QuoteAccessRow[] = []
+    for (const row of data ?? []) {
+      const parsed = quoteAccessFromRow(row)
+      if (parsed && parsed.userId === userId) rows.push(parsed)
+    }
+    return rows
+  }
+
   async read(id: string): Promise<QuoteAccessRow | null> {
     const { data, error } = await requireClient()
       .from('quotes')

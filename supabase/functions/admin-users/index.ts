@@ -90,11 +90,74 @@ Deno.serve(async (req) => {
       return json({ email: target.email, temporaryPassword: password })
     }
 
+    if (action === 'set-active') {
+      const userId = String(body.userId ?? '')
+      if (typeof body.active !== 'boolean') return json({ error: 'Choose active or inactive.' }, 400)
+      if (!userId) return json({ error: 'User not found' }, 404)
+      if (userId === userData.user.id && body.active === false) {
+        return json({ error: 'You cannot turn off your own account.' }, 400)
+      }
+      const target = await readUser(admin, userId)
+      if (target.error || !target.user) return json({ error: target.error || 'User not found' }, target.status)
+      const { data, error } = await userClient
+        .from('profiles')
+        .update({ active: body.active })
+        .eq('id', userId)
+        .eq('role', 'user')
+        .select('id')
+      if (error) return json({ error: error.message }, 400)
+      if (!Array.isArray(data) || data.length === 0) return json({ error: 'Could not save that change.' }, 400)
+      return json({ ok: true, active: body.active })
+    }
+
+    if (action === 'unlock') {
+      const userId = String(body.userId ?? '')
+      if (!userId) return json({ error: 'User not found' }, 404)
+      const target = await readUser(admin, userId)
+      if (target.error || !target.user) return json({ error: target.error || 'User not found' }, target.status)
+      const stored = typeof target.user.access_expires_on === 'string' ? target.user.access_expires_on.slice(0, 10) : ''
+      const today = new Date().toISOString().slice(0, 10)
+      const supplied = typeof body.accessExpiresOn === 'string' ? body.accessExpiresOn.trim() : ''
+      const needsDate = stored !== '' && stored <= today
+      const patch: { locked: boolean; access_expires_on?: string } = { locked: false }
+      if (supplied) {
+        if (!isAfterToday(supplied, today)) return json({ error: 'Enter a date after today.' }, 400)
+        patch.access_expires_on = supplied
+      } else if (needsDate) {
+        return json({ error: 'Enter a date after today.' }, 400)
+      }
+      const { data, error } = await userClient
+        .from('profiles')
+        .update(patch)
+        .eq('id', userId)
+        .eq('role', 'user')
+        .select('id')
+      if (error) return json({ error: error.message }, 400)
+      if (!Array.isArray(data) || data.length === 0) return json({ error: 'Could not unlock that user.' }, 400)
+      return json({ ok: true })
+    }
+
     return json({ error: 'Unknown action' }, 400)
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : 'Failed' }, 500)
   }
 })
+
+async function readUser(admin: ReturnType<typeof createClient>, userId: string) {
+  const { data, error } = await admin.from('profiles').select('id, role, access_expires_on').eq('id', userId).maybeSingle()
+  if (error) return { error: error.message, status: 400 as const, user: null }
+  if (!data) return { error: 'User not found', status: 404 as const, user: null }
+  if (data.role !== 'user') return { error: 'Only a user can be changed.', status: 400 as const, user: null }
+  return { error: '', status: 200 as const, user: data }
+}
+
+function isAfterToday(value: string, today: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  const real = date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+  return real && value > today
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {

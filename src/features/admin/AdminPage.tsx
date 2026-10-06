@@ -1,12 +1,14 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { dayAfter, expiryOnOrBeforeToday, isDateAfter, localToday, userAccessLocked } from '../../auth/access.ts'
 import { useAuthStore } from '../../auth/session.ts'
 import { Button } from '../../components/ui/Button.tsx'
-import { Modal } from '../../components/ui/Dialog.tsx'
+import { ConfirmDialog, Modal } from '../../components/ui/Dialog.tsx'
 import { SelectField, TextField } from '../../components/ui/Field.tsx'
 import { supabase } from '../../lib/supabase.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { formatDate } from '../../utils/dates.ts'
+import { matchesQuery } from './filters.ts'
 
 interface Person {
   id: string
@@ -14,9 +16,12 @@ interface Person {
   full_name: string
   role: 'admin' | 'user'
   active: boolean
+  locked: boolean
   access_expires_on: string | null
   created_at: string
 }
+
+const profileColumns = 'id, email, full_name, role, active, locked, access_expires_on, created_at'
 
 function personFrom(value: unknown): Person | null {
   if (!value || typeof value !== 'object') return null
@@ -28,6 +33,7 @@ function personFrom(value: unknown): Person | null {
     full_name: typeof row.full_name === 'string' ? row.full_name : '',
     role: row.role === 'admin' ? 'admin' : 'user',
     active: row.active === true,
+    locked: row.locked === true,
     access_expires_on: typeof row.access_expires_on === 'string' ? row.access_expires_on.slice(0, 10) : null,
     created_at: typeof row.created_at === 'string' ? row.created_at : '',
   }
@@ -41,12 +47,16 @@ function peopleFrom(value: unknown): Person[] {
   })
 }
 
+function displayName(person: Person): string {
+  return person.full_name.trim() || person.email
+}
+
 interface ShownPassword {
   email: string
   password: string
 }
 
-async function messageFromInvoke(error: unknown): Promise<string> {
+async function messageFromInvoke(error: unknown, fallback = 'Could not save that login.'): Promise<string> {
   const context = error && typeof error === 'object' && 'context' in error ? error.context : null
   if (context instanceof Response) {
     const text = await context.text()
@@ -61,7 +71,7 @@ async function messageFromInvoke(error: unknown): Promise<string> {
     }
   }
   if (error instanceof Error && error.message.trim()) return error.message
-  return 'Could not save that login.'
+  return fallback
 }
 
 function shownPassword(value: unknown): ShownPassword | null {
@@ -72,12 +82,27 @@ function shownPassword(value: unknown): ShownPassword | null {
   return { email: body.email, password: body.temporaryPassword }
 }
 
+function invokeFailure(value: unknown, fallback: string): string | null {
+  if (!value || typeof value !== 'object') return fallback
+  const body = value as Record<string, unknown>
+  if (body.ok === true) return null
+  if (typeof body.error === 'string' && body.error.trim()) return body.error.trim()
+  return fallback
+}
+
+function emptyPeople(count: number, searching: boolean, label: string): string {
+  if (searching && count > 0) return `No ${label} match that search.`
+  return `No ${label} are listed.`
+}
+
 export function AdminPage() {
   const profile = useAuthStore((state) => state.profile)
   const pushToast = useAppStore((state) => state.pushToast)
+  const savingRef = useRef(false)
   const [rows, setRows] = useState<Person[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<'admin' | 'user'>('user')
@@ -88,13 +113,17 @@ export function AdminPage() {
   const [resetFor, setResetFor] = useState<Person | null>(null)
   const [resetPassword, setResetPassword] = useState('')
   const [resetting, setResetting] = useState(false)
+  const [activeFor, setActiveFor] = useState<{ person: Person; next: boolean } | null>(null)
+  const [unlockFor, setUnlockFor] = useState<Person | null>(null)
+  const [unlockDate, setUnlockDate] = useState('')
+  const [unlockError, setUnlockError] = useState<string | null>(null)
 
   useEffect(() => {
     if (profile?.role !== 'admin' || !supabase) return
     let cancelled = false
     void supabase
       .from('profiles')
-      .select('id, email, full_name, role, active, access_expires_on, created_at')
+      .select(profileColumns)
       .order('created_at', { ascending: true })
       .then(({ data, error: loadError }) => {
         if (cancelled) return
@@ -111,10 +140,7 @@ export function AdminPage() {
 
   async function reloadPeople() {
     if (!supabase) return
-    const { data, error: loadError } = await supabase
-      .from('profiles')
-      .select('id, email, full_name, role, active, access_expires_on, created_at')
-      .order('created_at', { ascending: true })
+    const { data, error: loadError } = await supabase.from('profiles').select(profileColumns).order('created_at', { ascending: true })
     if (loadError) {
       setError(loadError.message)
       return
@@ -125,28 +151,17 @@ export function AdminPage() {
   if (!profile) return <p className="boot">Checking login…</p>
   if (profile.role !== 'admin') return <Navigate to="/" replace />
   const staff = profile
+  const today = localToday()
+  const loaded = rows ?? []
+  const users = loaded.filter((person) => person.role === 'user')
+  const admins = loaded.filter((person) => person.role === 'admin')
+  const visibleUsers = users.filter((person) => matchesQuery(query, person.full_name, person.email))
+  const visibleAdmins = admins.filter((person) => matchesQuery(query, person.full_name, person.email))
+  const searching = query.trim().length > 0
+  const unlockNeedsDate = unlockFor ? expiryOnOrBeforeToday(unlockFor.access_expires_on, today) : false
 
   function patchRow(id: string, patch: Partial<Person>) {
     setRows((current) => current?.map((row) => (row.id === id ? { ...row, ...patch } : row)) ?? current)
-  }
-
-  async function saveRole(person: Person, role: 'admin' | 'user') {
-    if (!supabase || role === person.role || savingId) return
-    setError(null)
-    setSavingId(person.id)
-    patchRow(person.id, role === 'admin' ? { role, access_expires_on: null } : { role })
-    const { data, error: updateError } = await supabase.from('profiles').update({ role }).eq('id', person.id).select('id')
-    setSavingId(null)
-    if (updateError || !Array.isArray(data) || data.length === 0) {
-      patchRow(person.id, { role: person.role, access_expires_on: person.access_expires_on })
-      setError(updateError?.message || 'Could not save that role.')
-      return
-    }
-    if (person.id === staff.id) {
-      useAuthStore.setState((state) => ({
-        profile: state.profile ? { ...state.profile, role } : state.profile,
-      }))
-    }
   }
 
   async function onCreate(event: FormEvent) {
@@ -243,18 +258,70 @@ export function AdminPage() {
     }
   }
 
-  async function saveActive(person: Person, active: boolean) {
-    if (!supabase || person.id === staff.id || active === person.active || savingId) return
-    setError(null)
-    setSavingId(person.id)
-    patchRow(person.id, { active })
-    const { data, error: updateError } = await supabase.from('profiles').update({ active }).eq('id', person.id).select('id')
-    setSavingId(null)
-    if (updateError || !Array.isArray(data) || data.length === 0) {
-      patchRow(person.id, { active: person.active })
-      setError(updateError?.message || 'Could not save that change.')
+  async function confirmActive() {
+    if (!supabase || !activeFor || savingRef.current) return
+    const { person, next } = activeFor
+    if (person.id === staff.id && !next) {
+      pushToast('You cannot turn off your own account.', 'danger')
       return
     }
+    savingRef.current = true
+    setSavingId(person.id)
+    const { data, error: invokeError } = await supabase.functions.invoke('admin-users', {
+      body: { action: 'set-active', userId: person.id, active: next },
+    })
+    savingRef.current = false
+    setSavingId(null)
+    if (invokeError) {
+      pushToast(await messageFromInvoke(invokeError, 'Could not save that change.'), 'danger')
+      return
+    }
+    const failure = invokeFailure(data, 'Could not save that change.')
+    if (failure) {
+      pushToast(failure, 'danger')
+      return
+    }
+    patchRow(person.id, { active: next })
+    setActiveFor(null)
+  }
+
+  async function confirmUnlock() {
+    if (!supabase || !unlockFor || savingRef.current) return
+    const person = unlockFor
+    const todayNow = localToday()
+    const needsDate = expiryOnOrBeforeToday(person.access_expires_on, todayNow)
+    if (needsDate && !isDateAfter(unlockDate, todayNow)) {
+      setUnlockError('Enter a date after today.')
+      return
+    }
+    savingRef.current = true
+    setSavingId(person.id)
+    setUnlockError(null)
+    const { data, error: invokeError } = await supabase.functions.invoke('admin-users', {
+      body: needsDate
+        ? { action: 'unlock', userId: person.id, accessExpiresOn: unlockDate }
+        : { action: 'unlock', userId: person.id },
+    })
+    savingRef.current = false
+    setSavingId(null)
+    if (invokeError) {
+      pushToast(await messageFromInvoke(invokeError, 'Could not unlock that user.'), 'danger')
+      return
+    }
+    const failure = invokeFailure(data, 'Could not unlock that user.')
+    if (failure) {
+      pushToast(failure, 'danger')
+      return
+    }
+    patchRow(person.id, needsDate ? { locked: false, access_expires_on: unlockDate } : { locked: false })
+    setUnlockFor(null)
+    setUnlockDate('')
+    setUnlockError(null)
+  }
+
+  function openReset(person: Person) {
+    setResetPassword('')
+    setResetFor(person)
   }
 
   return (
@@ -289,99 +356,222 @@ export function AdminPage() {
 
       {error ? <p className="form-error">{error}</p> : null}
       {!error && rows === null ? <p className="boot">Loading people…</p> : null}
-      {rows && rows.length === 0 ? <p>No people are listed.</p> : null}
-      {rows && rows.length > 0 ? (
-        <div className="table-scroll">
-          <table className="people-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>User id</th>
-                <th>Role</th>
-                <th>Active</th>
-                <th>Expiry</th>
-                <th>Created</th>
-                <th>
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((person) => {
-                const busy = savingId === person.id
-                const ownRow = person.id === staff.id
-                return (
-                  <tr key={person.id}>
-                    <td>{person.full_name.trim() || '—'}</td>
-                    <td>{person.email}</td>
-                    <td className="people-id">{person.id}</td>
-                    <td>
-                      <select
-                        className="input"
-                        aria-label={`Role for ${person.email}`}
-                        value={person.role}
-                        disabled={busy}
-                        onChange={(event) => {
-                          const role = event.target.value === 'admin' ? 'admin' : 'user'
-                          void saveRole(person, role)
-                        }}
-                      >
-                        <option value="user">user</option>
-                        <option value="admin">admin</option>
-                      </select>
-                    </td>
-                    <td>
-                      <label className="row-check" title={ownRow ? 'You cannot turn off your own account.' : undefined}>
-                        <input
-                          type="checkbox"
-                          checked={person.active}
-                          disabled={ownRow || busy}
-                          aria-label={ownRow ? 'Active. You cannot turn off your own account.' : `Active for ${person.email}`}
-                          onChange={(event) => {
-                            void saveActive(person, event.target.checked)
-                          }}
-                        />
-                        {person.active ? 'Active' : 'Off'}
-                      </label>
-                    </td>
-                    <td>
-                      {person.role === 'user' ? (
-                        <input
-                          className="input"
-                          type="date"
-                          aria-label={`Expiry for ${person.email}`}
-                          value={person.access_expires_on ?? ''}
-                          disabled={busy}
-                          onChange={(event) => {
-                            void saveExpiry(person, event.target.value)
-                          }}
-                        />
-                      ) : (
-                        '—'
-                      )}
-                    </td>
-                    <td>{formatDate(person.created_at)}</td>
-                    <td>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={busy || resetting}
-                        onClick={() => {
-                          setResetPassword('')
-                          setResetFor(person)
-                        }}
-                      >
-                        Set a new password
-                      </Button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+      {rows ? (
+        <div className="toolbar">
+          <label className="search">
+            <span className="sr-only">Search people</span>
+            <input
+              value={query}
+              placeholder="Search name or email"
+              autoComplete="off"
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </label>
         </div>
       ) : null}
+
+      {rows ? (
+        <section className="people-section" aria-labelledby="people-users">
+          <h2 id="people-users">Users</h2>
+          {visibleUsers.length === 0 ? <p>{emptyPeople(users.length, searching, 'users')}</p> : null}
+          {visibleUsers.length > 0 ? (
+            <div className="table-scroll">
+              <table className="people-table people-users">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>User id</th>
+                    <th>Role</th>
+                    <th>Active</th>
+                    <th>Expiry</th>
+                    <th>Lock</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleUsers.map((person) => {
+                    const busy = savingId === person.id
+                    const ownRow = person.id === staff.id
+                    const showsLocked = userAccessLocked('user', person.locked, person.access_expires_on, today)
+                    return (
+                      <tr key={person.id}>
+                        <td>{person.full_name.trim() || '—'}</td>
+                        <td>{person.email}</td>
+                        <td className="people-id">{person.id}</td>
+                        <td>user</td>
+                        <td>
+                          <button
+                            type="button"
+                            className={person.active ? 'switch is-on' : 'switch'}
+                            role="switch"
+                            aria-checked={person.active}
+                            aria-label={`${person.active ? 'Active' : 'Inactive'} for ${person.email}`}
+                            disabled={ownRow || savingId !== null}
+                            title={ownRow ? 'You cannot turn off your own account.' : undefined}
+                            onClick={() => {
+                              if (ownRow || savingId) return
+                              setActiveFor({ person, next: !person.active })
+                            }}
+                          >
+                            <span className="switch-track" aria-hidden="true" />
+                            {person.active ? 'Active' : 'Inactive'}
+                          </button>
+                        </td>
+                        <td>
+                          <input
+                            className="input"
+                            type="date"
+                            aria-label={`Expiry for ${person.email}`}
+                            value={person.access_expires_on ?? ''}
+                            disabled={busy}
+                            onChange={(event) => {
+                              void saveExpiry(person, event.target.value)
+                            }}
+                          />
+                        </td>
+                        <td>
+                          {showsLocked ? (
+                            <div className="people-actions">
+                              <span>Locked</span>
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                disabled={busy || resetting}
+                                onClick={() => {
+                                  setUnlockDate('')
+                                  setUnlockError(null)
+                                  setUnlockFor(person)
+                                }}
+                              >
+                                Unlock
+                              </Button>
+                            </div>
+                          ) : (
+                            'Unlocked'
+                          )}
+                        </td>
+                        <td>{formatDate(person.created_at)}</td>
+                        <td>
+                          <div className="people-actions">
+                            <Link className="btn btn-sm btn-secondary" to={`/admin/users/${person.id}/orders`}>
+                              Orders
+                            </Link>
+                            <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
+                              Set a new password
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {rows ? (
+        <section className="people-section" aria-labelledby="people-admins">
+          <h2 id="people-admins">Admins</h2>
+          {visibleAdmins.length === 0 ? <p>{emptyPeople(admins.length, searching, 'admins')}</p> : null}
+          {visibleAdmins.length > 0 ? (
+            <div className="table-scroll">
+              <table className="people-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>User id</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleAdmins.map((person) => {
+                    const busy = savingId === person.id
+                    return (
+                      <tr key={person.id}>
+                        <td>{person.full_name.trim() || '—'}</td>
+                        <td>{person.email}</td>
+                        <td className="people-id">{person.id}</td>
+                        <td>admin</td>
+                        <td>{formatDate(person.created_at)}</td>
+                        <td>
+                          <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
+                            Set a new password
+                          </Button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      <ConfirmDialog
+        open={activeFor !== null}
+        title={activeFor?.next ? 'Set active?' : 'Set inactive?'}
+        description={
+          activeFor
+            ? activeFor.next
+              ? `${displayName(activeFor.person)} will be marked active and can sign in again. An email will be sent.`
+              : `${displayName(activeFor.person)} will be marked inactive and signed out of the app. An email will be sent.`
+            : ''
+        }
+        confirmLabel={savingId && activeFor ? 'Saving…' : activeFor?.next ? 'Set active' : 'Set inactive'}
+        tone={activeFor?.next ? 'primary' : 'danger'}
+        onConfirm={() => void confirmActive()}
+        onOpenChange={(open) => {
+          if (!open && !savingRef.current) setActiveFor(null)
+        }}
+      />
+
+      <ConfirmDialog
+        open={unlockFor !== null}
+        title="Unlock this account?"
+        description={
+          unlockFor
+            ? unlockNeedsDate
+              ? `${displayName(unlockFor)} will be unlocked. The current expiry is today or earlier, so choose a new date after today. An email will be sent.`
+              : `${displayName(unlockFor)} will be unlocked. An email will be sent.`
+            : ''
+        }
+        confirmLabel={savingId && unlockFor ? 'Saving…' : 'Unlock'}
+        onConfirm={() => void confirmUnlock()}
+        onOpenChange={(open) => {
+          if (!open && !savingRef.current) {
+            setUnlockFor(null)
+            setUnlockDate('')
+            setUnlockError(null)
+          }
+        }}
+      >
+        {unlockNeedsDate ? (
+          <label className="field">
+            <span className="field-label">New expiry</span>
+            <input
+              className="input"
+              type="date"
+              min={dayAfter(today)}
+              value={unlockDate}
+              aria-label="New expiry"
+              onChange={(event) => {
+                setUnlockDate(event.target.value)
+                setUnlockError(null)
+              }}
+            />
+            <span className="field-hint">Must be after today.</span>
+            {unlockError ? <p className="form-error">{unlockError}</p> : null}
+          </label>
+        ) : null}
+      </ConfirmDialog>
 
       <Modal
         open={resetFor !== null}

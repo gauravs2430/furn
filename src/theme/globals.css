@@ -471,7 +471,28 @@ h1 {
 }
 
 .people-table {
-  min-width: 1040px;
+  min-width: 880px;
+}
+
+.people-users {
+  min-width: 1240px;
+}
+
+.people-section {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.people-section h2 {
+  font-size: 26px;
+}
+
+.people-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .people-create {
@@ -669,6 +690,54 @@ h1 {
 .row-check input {
   width: 18px;
   height: 18px;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.switch-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--bg);
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--ink-soft);
+}
+
+.switch.is-on .switch-track {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.switch.is-on .switch-track::after {
+  left: 20px;
+  background: #ffffff;
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .page-head .page-links {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { userAccessLocked, userPasswordExpired } from './access.ts'
+import { dayAfter, expiryOnOrBeforeToday, isDateAfter, userAccessLocked, userPasswordExpired } from './access.ts'
 
 const now = new Date('2026-10-07T12:00:00.000Z')
 const today = '2026-10-07'
@@ -23,6 +23,27 @@ describe('user access lock', () => {
 
   it('does not lock an admin with the same expiry or flag', () => {
     expect(userAccessLocked('admin', true, '2026-10-06', today)).toBe(false)
+  })
+})
+
+describe('unlock date', () => {
+  it('asks for a new date when the expiry is today or earlier', () => {
+    expect(expiryOnOrBeforeToday('2026-10-07', today)).toBe(true)
+    expect(expiryOnOrBeforeToday('2026-10-06', today)).toBe(true)
+    expect(expiryOnOrBeforeToday('2026-10-08', today)).toBe(false)
+    expect(expiryOnOrBeforeToday(null, today)).toBe(false)
+  })
+
+  it('accepts only a real date after today', () => {
+    expect(isDateAfter('2026-10-08', today)).toBe(true)
+    expect(isDateAfter('2026-10-07', today)).toBe(false)
+    expect(isDateAfter('2026-02-31', today)).toBe(false)
+    expect(isDateAfter('', today)).toBe(false)
+  })
+
+  it('steps to the next calendar day', () => {
+    expect(dayAfter('2026-10-07')).toBe('2026-10-08')
+    expect(dayAfter('2026-12-31')).toBe('2027-01-01')
   })
 })
 
