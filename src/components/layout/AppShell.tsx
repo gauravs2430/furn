@@ -26,7 +26,7 @@ const navigation: NavGroup[] = [
     label: 'Orders and quotes',
     items: [
       { type: 'link', to: '/orders?status=draft', label: 'Drafts' },
-      { type: 'link', to: '/orders', label: 'Orders' },
+      { type: 'link', to: '/orders?status=quoted', label: 'Quotes' },
       { type: 'link', to: '/orders?status=booked', label: 'Booked' },
     ],
   },

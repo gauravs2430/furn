@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { Copy, Plus, Printer, Trash2 } from 'lucide-react'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
@@ -21,7 +21,7 @@ export function DashboardPage() {
   const pushToast = useAppStore((state) => state.pushToast)
   const [params] = useSearchParams()
   const statusParam = params.get('status')
-  const statusFilter = statusParam === 'draft' || statusParam === 'booked' ? statusParam : null
+  const statusFilter = statusParam === 'draft' || statusParam === 'quoted' || statusParam === 'booked' ? statusParam : null
   const [query, setQuery] = useState('')
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
@@ -70,14 +70,17 @@ export function DashboardPage() {
     .filter((quote) => quote.status === 'booked')
     .reduce((sum, quote) => sum + calculateQuoteTotals(quote, pricingConfig, catalogue).grandTotal, 0)
 
+  if (!statusFilter) return <Navigate to="/orders?status=quoted" replace />
   if (!hydrated) return <p className="boot">Loading your orders…</p>
+
+  const title = statusFilter === 'draft' ? 'Drafts' : statusFilter === 'booked' ? 'Booked' : 'Quotes'
 
   return (
     <div className="page">
       <div className="page-head">
         <div>
           <p className="eyebrow">Sales workspace</p>
-          <h1>{statusFilter === 'draft' ? 'Drafts' : statusFilter === 'booked' ? 'Booked' : 'Quotes & orders'}</h1>
+          <h1>{title}</h1>
           <p className="lede">Configure an opening with the customer, price it, and print the work order or the quote.</p>
         </div>
         <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={startQuote}>
@@ -91,7 +94,7 @@ export function DashboardPage() {
           <strong>{quotes.filter((quote) => quote.status === 'draft').length}</strong>
         </article>
         <article>
-          <span>Quoted</span>
+          <span>Quotes</span>
           <strong>{quotes.filter((quote) => quote.status === 'quoted').length}</strong>
         </article>
         <article>
@@ -125,7 +128,9 @@ export function DashboardPage() {
               ? 'Nothing matches that search.'
               : statusFilter === 'draft'
                 ? 'No drafts yet.'
-                : 'No booked orders yet.'}
+                : statusFilter === 'booked'
+                  ? 'No booked orders yet.'
+                  : 'No quotes yet.'}
           </p>
         </div>
       ) : (
