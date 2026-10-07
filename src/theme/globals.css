@@ -426,8 +426,17 @@ p {
   text-decoration: none;
 }
 
+.home-stat {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
 .home-stat:hover {
   border-color: var(--line-strong);
+  box-shadow: 0 8px 22px rgba(20, 38, 46, 0.08);
+  transform: translateY(-2px);
 }
 
 .home-stat span {
@@ -462,6 +471,7 @@ p {
 
 .login-split {
   display: grid;
+  animation: rise-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   grid-template-columns: minmax(220px, 280px) minmax(320px, 400px);
   width: min(720px, 100%);
   margin: auto;
@@ -594,6 +604,7 @@ p {
 .page {
   max-width: 1180px;
   margin: 0 auto;
+  animation: rise-in 0.42s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .page-head,
@@ -713,6 +724,10 @@ h1 {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .search input,
@@ -768,6 +783,16 @@ select.input {
   flex-direction: column;
   gap: 8px;
   padding: 16px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.job-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 22px rgba(20, 38, 46, 0.08);
+  transform: translateY(-2px);
 }
 
 .job-card h2 {
@@ -1074,6 +1099,9 @@ select.input {
   border: 1px solid var(--line-strong);
   border-radius: 11px;
   background: var(--bg);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .switch-track::after {
@@ -1208,6 +1236,16 @@ select.input {
   color: #ffffff;
   font-weight: 600;
   text-decoration: none;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .btn:hover:not(:disabled) {
@@ -1922,6 +1960,7 @@ select.input {
   color: #ffffff;
   text-align: left;
   box-shadow: var(--shadow-sticky);
+  animation: toast-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .toast-danger {
@@ -1940,6 +1979,11 @@ select.input {
   z-index: 40;
   inset: 0;
   background: rgba(15, 26, 31, 0.46);
+  animation: overlay-in 0.22s ease;
+}
+
+.dialog-overlay[data-state='closed'] {
+  animation: overlay-out 0.16s ease;
 }
 
 .dialog {
@@ -1948,15 +1992,20 @@ select.input {
   top: 50%;
   left: 50%;
   width: min(480px, calc(100vw - 24px));
-  border-radius: 8px;
   max-height: min(86vh, 860px);
   overflow: auto;
   transform: translate(-50%, -50%);
   padding: 22px;
+  border-radius: 8px;
   background: var(--surface);
   color: var(--ink);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-sticky);
+  animation: dialog-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog[data-state='closed'] {
+  animation: dialog-out 0.16s ease;
 }
 
 .dialog-wide {
@@ -2449,25 +2498,75 @@ select.input {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-spinner {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+}
 
-  .login-screen .input,
-  .login-screen .btn,
-  .login-reveal,
-  .side-panel,
-  .side-chevron svg,
-  .side-group-toggle svg,
-  .shell-side,
-  .shell-scrim,
-  .side-link,
-  .side-group-link,
-  .side-group-toggle,
-  .side-chevron,
-  .shell-account,
-  .shell-logout {
-    transition: none;
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
   }
 }
 
