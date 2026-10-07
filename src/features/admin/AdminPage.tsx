@@ -127,11 +127,6 @@ export function AdminPage() {
   const [unlockError, setUnlockError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (location.hash !== '#new-user') return
-    document.getElementById('new-user')?.scrollIntoView({ block: 'start' })
-  }, [location.hash])
-
-  useEffect(() => {
     if (profile?.role !== 'admin' || !supabase) return
     let cancelled = false
     void supabase
@@ -164,6 +159,7 @@ export function AdminPage() {
   if (!profile) return <p className="boot">Checking login…</p>
   if (profile.role !== 'admin') return <Navigate to="/" replace />
   const staff = profile
+  const adding = location.hash === '#new-user'
   const today = localToday()
   const loaded = rows ?? []
   const users = loaded.filter((person) => person.role === 'user')
@@ -358,26 +354,28 @@ export function AdminPage() {
         </div>
       </div>
 
-      <form id="new-user" className="people-create card" onSubmit={(event) => void onCreate(event)}>
-        <h2>New login</h2>
-        <div className="form-grid">
-          <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />
-          <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
-          <SelectField label="Role" value={role} onChange={(value) => setRole(value === 'admin' ? 'admin' : 'user')}>
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </SelectField>
-          <TextField label="Password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
-        </div>
-        {formError ? <p className="form-error">{formError}</p> : null}
-        <Button type="submit" disabled={creating}>
-          {creating ? 'Creating…' : 'Create login'}
-        </Button>
-      </form>
+      {adding ? (
+        <form id="new-user" className="people-create card" onSubmit={(event) => void onCreate(event)}>
+          <h2>New login</h2>
+          <div className="form-grid">
+            <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />
+            <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
+            <SelectField label="Role" value={role} onChange={(value) => setRole(value === 'admin' ? 'admin' : 'user')}>
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </SelectField>
+            <TextField label="Password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
+          </div>
+          {formError ? <p className="form-error">{formError}</p> : null}
+          <Button type="submit" disabled={creating}>
+            {creating ? 'Creating…' : 'Create login'}
+          </Button>
+        </form>
+      ) : null}
 
-      {error ? <p className="form-error">{error}</p> : null}
-      {!error && rows === null ? <p className="boot">Loading people…</p> : null}
-      {rows ? (
+      {!adding && error ? <p className="form-error">{error}</p> : null}
+      {!adding && !error && rows === null ? <p className="boot">Loading people…</p> : null}
+      {!adding && rows ? (
         <div className="toolbar">
           <label className="search">
             <span className="sr-only">Search people</span>
@@ -391,7 +389,7 @@ export function AdminPage() {
         </div>
       ) : null}
 
-      {rows ? (
+      {!adding && rows ? (
         <section className="people-section" aria-labelledby="people-users">
           <h2 id="people-users">Users</h2>
           {visibleUsers.length === 0 ? <p>{emptyPeople(users.length, searching, 'users')}</p> : null}
@@ -494,7 +492,7 @@ export function AdminPage() {
         </section>
       ) : null}
 
-      {rows ? (
+      {!adding && rows ? (
         <section className="people-section" aria-labelledby="people-admins">
           <h2 id="people-admins">Admins</h2>
           {visibleAdmins.length === 0 ? <p>{emptyPeople(admins.length, searching, 'admins')}</p> : null}
