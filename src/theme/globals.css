@@ -1074,9 +1074,14 @@ h1 {
   align-items: start;
 }
 
+.preview-column {
+  align-self: stretch;
+}
+
 .preview-sticky {
   position: sticky;
-  top: 78px;
+  top: calc(64px + 16px);
+  z-index: 4;
 }
 
 .card {
