@@ -407,12 +407,49 @@ p {
   color: #14262e;
 }
 
-.home-panel {
-  min-height: 320px;
-  border: 1px solid #d5dce4;
-  border-radius: 2px;
-  background: #ffffff;
-  box-shadow: 0 1px 1px rgba(20, 38, 46, 0.04);
+.home-desk {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.home-stat {
+  display: grid;
+  gap: 6px;
+  min-height: 148px;
+  padding: 18px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-stat:hover {
+  border-color: var(--line-strong);
+}
+
+.home-stat span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-stat strong {
+  font-family: var(--display);
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: #14262e;
+}
+
+.home-stat em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 14px;
 }
 
 .login-screen {
@@ -450,15 +487,49 @@ p {
   overflow-wrap: anywhere;
 }
 
-.account-name,
-.account-password {
+.account-layout,
+.split-desk {
   display: grid;
-  gap: 12px;
-  max-width: 420px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+  gap: 14px;
+  align-items: start;
+  margin-top: 18px;
 }
 
-.account-name {
-  margin-top: 18px;
+.account-forms {
+  display: grid;
+  gap: 14px;
+}
+
+.account-name,
+.account-password,
+.desk-note,
+.account-side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.account-side h2,
+.desk-note h2,
+.account-name h2,
+.account-password h2 {
+  font-size: 22px;
+}
+
+.desk-note ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink-soft);
+}
+
+.desk-note p,
+.account-side p {
+  color: var(--muted);
+}
+
+.prices-card {
+  max-width: 720px;
 }
 
 .account-password h2 {
@@ -610,6 +681,13 @@ h1 {
   border-color: var(--line-strong);
 }
 
+.input:focus,
+.search input:focus {
+  outline: 2px solid var(--glass);
+  outline-offset: 1px;
+  border-color: var(--ink-soft);
+}
+
 .textarea {
   min-height: 84px;
   resize: vertical;
@@ -639,6 +717,7 @@ h1 {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .admin-orders,
@@ -676,7 +755,6 @@ h1 {
 .people-create {
   display: grid;
   gap: 14px;
-  max-width: 720px;
   scroll-margin-top: 80px;
 }
 
@@ -785,7 +863,32 @@ h1 {
 .catalog-block {
   display: grid;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 22px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.catalog-block-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.catalog-block-head .subhead {
+  margin: 0 0 4px;
+}
+
+.catalog-block-head .btn {
+  flex: none;
+}
+
+.catalog-block .table-scroll {
+  border: 0;
+  box-shadow: none;
 }
 
 .catalog-editor {
@@ -1766,7 +1869,10 @@ h1 {
 @media (max-width: 1020px) {
   .config-layout,
   .order-layout,
-  .stat-row {
+  .stat-row,
+  .home-desk,
+  .account-layout,
+  .split-desk {
     grid-template-columns: 1fr;
   }
 

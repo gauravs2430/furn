@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { pricingDefaults } from '../../data/pricingDefaults.ts'
 import type { PricingConfig } from '../../domain/models.ts'
 import { missingPriceListMessage, savePricingConfig } from '../../repositories/PricingConfigRepository.ts'
@@ -77,30 +77,29 @@ export function PricesPage() {
       <div className="page-head">
         <div>
           <h1>Prices</h1>
-          <nav className="page-links" aria-label="Admin">
-            <Link to="/admin/catalog">Catalogue</Link>
-          </nav>
         </div>
       </div>
       <p className="lede">Company markup, and the VAT rate a new quote starts with. Product and part prices live in the catalogue.</p>
-      <div className="form-grid">
-        <NumberField label="Markup" suffix="%" value={config.markupPercent} min={0} onChange={(markupPercent) => patch({ markupPercent })} />
-        <NumberField
-          label="Default VAT"
-          suffix="%"
-          value={config.taxPercent}
-          min={0}
-          onChange={(taxPercent) => patch({ taxPercent })}
-        />
-      </div>
-      {error ? <p className="form-error">{error}</p> : null}
-      <div className="dialog-actions">
+      <div className="card prices-card">
+        <div className="form-grid">
+          <NumberField label="Markup" suffix="%" value={config.markupPercent} min={0} onChange={(markupPercent) => patch({ markupPercent })} />
+          <NumberField
+            label="Default VAT"
+            suffix="%"
+            value={config.taxPercent}
+            min={0}
+            onChange={(taxPercent) => patch({ taxPercent })}
+          />
+        </div>
+        {error ? <p className="form-error">{error}</p> : null}
+        <div className="dialog-actions">
         <Button variant="secondary" disabled={busy} aria-busy={busy} onClick={() => void persist(pricingDefaults, 'Rates reset')}>
           {busy ? 'Saving…' : 'Reset rates'}
         </Button>
         <Button disabled={busy} onClick={() => void persist(config, 'Prices saved')}>
           {busy ? 'Saving…' : 'Save'}
         </Button>
+        </div>
       </div>
     </div>
   )

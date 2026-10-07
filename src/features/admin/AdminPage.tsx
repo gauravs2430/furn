@@ -350,22 +350,33 @@ export function AdminPage() {
       </div>
 
       {adding ? (
-        <form id="new-user" className="people-create card" onSubmit={(event) => void onCreate(event)}>
-          <h2>New login</h2>
-          <div className="form-grid">
-            <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />
-            <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
-            <SelectField label="Role" value={role} onChange={(value) => setRole(value === 'admin' ? 'admin' : 'user')}>
-              <option value="user">user</option>
-              <option value="admin">admin</option>
-            </SelectField>
-            <TextField label="Password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
-          </div>
-          {formError ? <p className="form-error">{formError}</p> : null}
-          <Button type="submit" disabled={creating}>
-            {creating ? 'Creating…' : 'Create login'}
-          </Button>
-        </form>
+        <div className="split-desk">
+          <form id="new-user" className="people-create card" onSubmit={(event) => void onCreate(event)}>
+            <h2>New login</h2>
+            <div className="form-grid">
+              <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />
+              <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
+              <SelectField label="Role" value={role} onChange={(value) => setRole(value === 'admin' ? 'admin' : 'user')}>
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </SelectField>
+              <TextField label="Password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
+            </div>
+            {formError ? <p className="form-error">{formError}</p> : null}
+            <Button type="submit" disabled={creating}>
+              {creating ? 'Creating…' : 'Create login'}
+            </Button>
+          </form>
+          <aside className="card desk-note">
+            <h2>What this creates</h2>
+            <p>A staff login for this email. They sign in with the password you set here.</p>
+            <ul>
+              <li>User can work their own drafts, quotes, and booked jobs.</li>
+              <li>Admin can also open the admin panel.</li>
+              <li>The password is shown once after you create the login.</li>
+            </ul>
+          </aside>
+        </div>
       ) : null}
 
       {!adding && error ? <p className="form-error">{error}</p> : null}

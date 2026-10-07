@@ -16,8 +16,8 @@
   --danger-soft: rgba(166, 61, 47, 0.1);
   --ok: #1d6b45;
   --ok-soft: rgba(29, 107, 69, 0.12);
-  --shadow: none;
-  --shadow-sticky: none;
+  --shadow: 0 1px 2px rgba(20, 38, 46, 0.06);
+  --shadow-sticky: 0 8px 24px rgba(20, 38, 46, 0.12);
   --radius: 2px;
   --radius-sm: 2px;
   --font: 'Roboto', 'Segoe UI', sans-serif;

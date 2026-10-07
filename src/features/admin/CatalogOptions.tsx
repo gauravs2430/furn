@@ -14,6 +14,7 @@ import {
 import { refreshCatalogue } from '../../store/useAppStore.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { Button } from '../../components/ui/Button.tsx'
+import { Modal } from '../../components/ui/Dialog.tsx'
 import { NumberField, SelectField, TextField } from '../../components/ui/Field.tsx'
 import { ActiveCheck, Pager, messageFrom, useCatalogList, usePagedQuery } from './catalogUi.tsx'
 
@@ -57,6 +58,7 @@ function MaterialsSection() {
   const [active, setActive] = useState(true)
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [adding, setAdding] = useState(false)
 
   async function onAdd(event: FormEvent) {
     event.preventDefault()
@@ -68,6 +70,7 @@ function MaterialsSection() {
       setName('')
       setFactor(1)
       setActive(true)
+      setAdding(false)
       setReload((current) => current + 1)
     } catch (addError) {
       setFormError(messageFrom(addError, 'Could not add that material.'))
@@ -78,8 +81,13 @@ function MaterialsSection() {
 
   return (
     <section className="catalog-block" aria-labelledby="materials-heading">
-      <h2 id="materials-heading" className="subhead">Materials</h2>
-      <p className="field-hint">The factor applies to parts that use the material factor. Turning one off hides it on a new quote.</p>
+      <div className="catalog-block-head">
+        <div>
+          <h2 id="materials-heading" className="subhead">Materials</h2>
+          <p className="field-hint">The factor applies to parts that use the material factor. Turning one off hides it on a new quote.</p>
+        </div>
+        <Button onClick={() => setAdding(true)}>Add material</Button>
+      </div>
       {result?.searchable ? <SearchBox label="Search materials" value={query} onChange={setQuery} /> : null}
       {error ? <p className="form-error">{error}</p> : null}
       {loading && !result ? <p className="boot">Loading materials…</p> : null}
@@ -108,16 +116,26 @@ function MaterialsSection() {
         </div>
       ) : null}
       {result?.searchable ? <Pager page={page} total={result.total} onPage={setPage} /> : null}
-      <form className="catalog-add-panel" onSubmit={(event) => void onAdd(event)}>
-        <h3 className="subhead">Add material</h3>
-        <div className="form-grid">
-          <TextField label="Name" value={name} onChange={setName} />
-          <NumberField label="Factor" value={factor} min={0} step={0.1} onChange={setFactor} />
-          <ActiveCheck checked={active} onChange={setActive} />
-        </div>
-        {formError ? <p className="form-error">{formError}</p> : null}
-        <Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add material'}</Button>
-      </form>
+      <Modal
+        open={adding}
+        title="Add material"
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setFormError(null)
+        }}
+      >
+        <form className="catalog-editor" onSubmit={(event) => void onAdd(event)}>
+          <div className="form-grid">
+            <TextField label="Name" value={name} onChange={setName} />
+            <NumberField label="Factor" value={factor} min={0} step={0.1} onChange={setFactor} />
+            <ActiveCheck checked={active} onChange={setActive} />
+          </div>
+          {formError ? <p className="form-error">{formError}</p> : null}
+          <div className="dialog-actions">
+            <Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add material'}</Button>
+          </div>
+        </form>
+      </Modal>
     </section>
   )
 }
@@ -179,6 +197,7 @@ function ColoursSection() {
   const [active, setActive] = useState(true)
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [adding, setAdding] = useState(false)
 
   async function onAdd(event: FormEvent) {
     event.preventDefault()
@@ -191,6 +210,7 @@ function ColoursSection() {
       setHex('#888888')
       setFinish('solid')
       setActive(true)
+      setAdding(false)
       setReload((current) => current + 1)
     } catch (addError) {
       setFormError(messageFrom(addError, 'Could not add that colour.'))
@@ -201,8 +221,13 @@ function ColoursSection() {
 
   return (
     <section className="catalog-block" aria-labelledby="colours-heading">
-      <h2 id="colours-heading" className="subhead">Colours</h2>
-      <p className="field-hint">Turning a colour off hides it on a new quote.</p>
+      <div className="catalog-block-head">
+        <div>
+          <h2 id="colours-heading" className="subhead">Colours</h2>
+          <p className="field-hint">Turning a colour off hides it on a new quote.</p>
+        </div>
+        <Button onClick={() => setAdding(true)}>Add colour</Button>
+      </div>
       {result?.searchable ? <SearchBox label="Search colours" value={query} onChange={setQuery} /> : null}
       {error ? <p className="form-error">{error}</p> : null}
       {loading && !result ? <p className="boot">Loading colours…</p> : null}
@@ -232,20 +257,30 @@ function ColoursSection() {
         </div>
       ) : null}
       {result?.searchable ? <Pager page={page} total={result.total} onPage={setPage} /> : null}
-      <form className="catalog-add-panel" onSubmit={(event) => void onAdd(event)}>
-        <h3 className="subhead">Add colour</h3>
-        <div className="form-grid">
-          <TextField label="Name" value={name} onChange={setName} />
-          <TextField label="Hex" value={hex} onChange={setHex} placeholder="#1C1C1C" />
-          <SelectField label="Finish" value={finish} onChange={(value) => setFinish(value === 'oak' ? 'oak' : 'solid')}>
-            <option value="solid">solid</option>
-            <option value="oak">oak</option>
-          </SelectField>
-          <ActiveCheck checked={active} onChange={setActive} />
-        </div>
-        {formError ? <p className="form-error">{formError}</p> : null}
-        <Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add colour'}</Button>
-      </form>
+      <Modal
+        open={adding}
+        title="Add colour"
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setFormError(null)
+        }}
+      >
+        <form className="catalog-editor" onSubmit={(event) => void onAdd(event)}>
+          <div className="form-grid">
+            <TextField label="Name" value={name} onChange={setName} />
+            <TextField label="Hex" value={hex} onChange={setHex} placeholder="#1C1C1C" />
+            <SelectField label="Finish" value={finish} onChange={(value) => setFinish(value === 'oak' ? 'oak' : 'solid')}>
+              <option value="solid">solid</option>
+              <option value="oak">oak</option>
+            </SelectField>
+            <ActiveCheck checked={active} onChange={setActive} />
+          </div>
+          {formError ? <p className="form-error">{formError}</p> : null}
+          <div className="dialog-actions">
+            <Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add colour'}</Button>
+          </div>
+        </form>
+      </Modal>
     </section>
   )
 }
@@ -311,6 +346,7 @@ function GlazingSection() {
   const [active, setActive] = useState(true)
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [adding, setAdding] = useState(false)
 
   async function onAdd(event: FormEvent) {
     event.preventDefault()
@@ -329,6 +365,7 @@ function GlazingSection() {
       setGlassType('')
       setGasFill('')
       setActive(true)
+      setAdding(false)
       setReload((current) => current + 1)
     } catch (addError) {
       setFormError(messageFrom(addError, 'Could not add that glazing.'))
@@ -339,8 +376,13 @@ function GlazingSection() {
 
   return (
     <section className="catalog-block" aria-labelledby="glazing-heading">
-      <h2 id="glazing-heading" className="subhead">Glazing</h2>
-      <p className="field-hint">The price is the glass add-on per square metre. Turning one off hides it on a new quote.</p>
+      <div className="catalog-block-head">
+        <div>
+          <h2 id="glazing-heading" className="subhead">Glazing</h2>
+          <p className="field-hint">The price is the glass add-on per square metre. Turning one off hides it on a new quote.</p>
+        </div>
+        <Button onClick={() => setAdding(true)}>Add glazing</Button>
+      </div>
       {result?.searchable ? <SearchBox label="Search glazing" value={query} onChange={setQuery} /> : null}
       {error ? <p className="form-error">{error}</p> : null}
       {loading && !result ? <p className="boot">Loading glazing…</p> : null}
@@ -371,19 +413,29 @@ function GlazingSection() {
         </div>
       ) : null}
       {result?.searchable ? <Pager page={page} total={result.total} onPage={setPage} /> : null}
-      <form className="catalog-add-panel" onSubmit={(event) => void onAdd(event)}>
-        <h3 className="subhead">Add glazing</h3>
-        <div className="form-grid">
-          <TextField label="Name" value={name} onChange={setName} />
-          <NumberField label="Price" suffix="£/m²" value={price} min={0} step={1} onChange={setPrice} />
-          <TextField label="Description" value={description} onChange={setDescription} />
-          <TextField label="Glass type" value={glassType} onChange={setGlassType} />
-          <TextField label="Gas fill" value={gasFill} onChange={setGasFill} />
-          <ActiveCheck checked={active} onChange={setActive} />
-        </div>
-        {formError ? <p className="form-error">{formError}</p> : null}
-        <Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add glazing'}</Button>
-      </form>
+      <Modal
+        open={adding}
+        title="Add glazing"
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setFormError(null)
+        }}
+      >
+        <form className="catalog-editor" onSubmit={(event) => void onAdd(event)}>
+          <div className="form-grid">
+            <TextField label="Name" value={name} onChange={setName} />
+            <NumberField label="Price" suffix="£/m²" value={price} min={0} step={1} onChange={setPrice} />
+            <TextField label="Description" value={description} onChange={setDescription} />
+            <TextField label="Glass type" value={glassType} onChange={setGlassType} />
+            <TextField label="Gas fill" value={gasFill} onChange={setGasFill} />
+            <ActiveCheck checked={active} onChange={setActive} />
+          </div>
+          {formError ? <p className="form-error">{formError}</p> : null}
+          <div className="dialog-actions">
+            <Button type="submit" disabled={busy}>{busy ? 'Adding…' : 'Add glazing'}</Button>
+          </div>
+        </form>
+      </Modal>
     </section>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../auth/session.ts'
 import { currentCatalogue, fallbackCatalogue } from '../../domain/catalogue.ts'
 import { presetsFor } from '../../data/technicalPresets.ts'
@@ -134,10 +134,6 @@ export function CatalogPage() {
       <div className="page-head">
         <div>
           <h1>Catalogue</h1>
-          <nav className="page-links" aria-label="Admin">
-            <Link to="/admin/users">People</Link>
-            <Link to="/admin/prices">Prices</Link>
-          </nav>
         </div>
         <Button onClick={openNew}>New product</Button>
       </div>

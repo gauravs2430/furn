@@ -81,31 +81,41 @@ export function AccountPage() {
   return (
     <div className="page">
       <h1>Account</h1>
-      <form className="account-name" onSubmit={onSaveName}>
-        <TextField label="Name" value={name} autoComplete="name" onChange={setName} />
-        {nameError ? <p className="form-error">{nameError}</p> : null}
-        <Button type="submit" disabled={nameBusy}>
-          {nameBusy ? 'Saving…' : 'Save name'}
-        </Button>
-      </form>
-      <dl className="account-facts">
-        <div>
-          <dt>Email</dt>
-          <dd>{profile.email}</dd>
+      <div className="account-layout">
+        <div className="account-forms">
+          <form className="card account-name" onSubmit={onSaveName}>
+            <h2>Name</h2>
+            <TextField label="Name" value={name} autoComplete="name" onChange={setName} />
+            {nameError ? <p className="form-error">{nameError}</p> : null}
+            <Button type="submit" disabled={nameBusy}>
+              {nameBusy ? 'Saving…' : 'Save name'}
+            </Button>
+          </form>
+          <form className="card account-password" onSubmit={onSubmit}>
+            <h2>New password</h2>
+            <p className="field-hint">At least 8 characters. This replaces the password you sign in with.</p>
+            <TextField label="New password" type="password" value={password} autoComplete="new-password" onChange={setPassword} />
+            {error ? <p className="form-error">{error}</p> : null}
+            <Button type="submit" disabled={busy}>
+              {busy ? 'Saving…' : 'Set password'}
+            </Button>
+          </form>
         </div>
-        <div>
-          <dt>User id</dt>
-          <dd className="account-id">{profile.id}</dd>
-        </div>
-      </dl>
-      <form className="account-password" onSubmit={onSubmit}>
-        <h2>New password</h2>
-        <TextField label="New password" type="password" value={password} autoComplete="new-password" onChange={setPassword} />
-        {error ? <p className="form-error">{error}</p> : null}
-        <Button type="submit" disabled={busy}>
-          {busy ? 'Saving…' : 'Set password'}
-        </Button>
-      </form>
+        <aside className="card account-side">
+          <p className="home-kicker">{profile.role === 'admin' ? 'Admin' : 'Staff'}</p>
+          <h2>{profile.full_name.trim() || 'Account'}</h2>
+          <dl className="account-facts">
+            <div>
+              <dt>Email</dt>
+              <dd>{profile.email}</dd>
+            </div>
+            <div>
+              <dt>User id</dt>
+              <dd className="account-id">{profile.id}</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
     </div>
   )
 }
