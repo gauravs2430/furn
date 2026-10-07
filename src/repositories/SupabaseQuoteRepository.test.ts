@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createQuote } from '../domain/factories.ts'
+import { createQuote, createQuoteItem } from '../domain/factories.ts'
 import { assertJobNo, ownerCanWrite, quoteAccessFromRow, quoteFromDocument, quoteToRow } from './SupabaseQuoteRepository.ts'
 
 describe('quote rows', () => {
@@ -26,6 +26,21 @@ describe('quote rows', () => {
     expect(parsed?.id).toBe(quote.id)
     expect(parsed).not.toHaveProperty('owner')
     expect(quoteFromDocument({ id: 'x', jobNo: 'SP-0002', status: 'sent' })).toBeNull()
+  })
+
+  it('keeps removed and added parts inside the quote document', () => {
+    const quote = createQuote('SP-0008', 20)
+    const item = createQuoteItem('window')
+    item.removedPartIds = ['handle']
+    item.addedParts = [{ partId: 'lining', fixedQty: 2 }]
+    quote.items = [item]
+    const parsed = quoteFromDocument(quoteToRow(quote, 'user-1').document)
+    expect(parsed?.items[0]?.removedPartIds).toEqual(['handle'])
+    expect(parsed?.items[0]?.addedParts).toEqual([{ partId: 'lining', fixedQty: 2 }])
+    const legacy = createQuoteItem('window')
+    const old = quoteFromDocument({ ...quote, items: [legacy] })
+    expect(old?.items[0]?.removedPartIds).toBeUndefined()
+    expect(old?.items[0]?.addedParts).toBeUndefined()
   })
 
   it('keeps an older opening that stored only the family', () => {

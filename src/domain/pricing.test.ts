@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
 import { fallbackCatalogue } from './catalogue.ts'
-import type { CatalogProduct } from './catalogue.ts'
+import type { CatalogPart, CatalogProduct } from './catalogue.ts'
 import { createQuoteItem } from './factories.ts'
+import { addPartToItem, removePartFromItem } from './parts.ts'
 import { calculateDiscount, calculateItemPrice, calculateQuoteTotals, calculateTax } from './pricing.ts'
 import { buildWorkOrder } from './workOrder.ts'
 import type { Quote } from './models.ts'
@@ -158,6 +159,82 @@ describe('pricing', () => {
     link.fixedQty = null
     item.widthMm = 2500
     expect(calculateItemPrice(item, pricingDefaults, catalogue).parts[0]?.quantity).toBe(1)
+  })
+
+  it('leaves a removed part out of the total and includes an added part', () => {
+    const catalogue = fallbackCatalogue()
+    const lining: CatalogPart = {
+      id: 'lining',
+      name: 'Lining',
+      unit: 'm',
+      price: 10,
+      quantityRule: 'perimeter',
+      appliesMaterialFactor: false,
+      appliesProductFactor: false,
+      appliesGlazingAddon: false,
+      active: true,
+      sortOrder: 30,
+    }
+    catalogue.parts.push(lining)
+    catalogue.links.push({
+      productId: 'window',
+      partId: 'lining',
+      priceOverride: 25,
+      fixedQty: null,
+      included: false,
+    })
+    const bracket: CatalogPart = {
+      id: 'bracket',
+      name: 'Bracket',
+      unit: 'each',
+      price: 4,
+      quantityRule: 'fixed',
+      appliesMaterialFactor: false,
+      appliesProductFactor: false,
+      appliesGlazingAddon: false,
+      active: true,
+      sortOrder: 31,
+    }
+    catalogue.parts.push(bracket)
+
+    const full = calculateItemPrice(createQuoteItem('window'), pricingDefaults, catalogue)
+    const handle = full.parts.find((part) => part.id === 'handle')
+    if (!handle) throw new Error('missing handle')
+    const handleLine = handle.quantity * handle.unitPrice
+
+    const withoutHandle = removePartFromItem(createQuoteItem('window'), 'handle')
+    const removed = calculateItemPrice(withoutHandle, pricingDefaults, catalogue)
+    expect(removed.parts.some((part) => part.id === 'handle')).toBe(false)
+    expect(removed.partsCost).toBeCloseTo(full.partsCost - handleLine, 2)
+
+    const adjusted = addPartToItem(addPartToItem(withoutHandle, lining, 1, catalogue), bracket, 3, catalogue)
+    const price = calculateItemPrice(adjusted, pricingDefaults, catalogue)
+    const liningLine = price.parts.find((part) => part.id === 'lining')
+    const bracketLine = price.parts.find((part) => part.id === 'bracket')
+    expect(price.parts.some((part) => part.id === 'handle')).toBe(false)
+    expect(liningLine?.unitPrice).toBe(25)
+    expect(bracketLine?.quantity).toBe(3)
+    expect(price.partsCost).toBeCloseTo(removed.partsCost + (liningLine?.quantity ?? 0) * 25 + 3 * 4, 2)
+
+    const wider = calculateItemPrice({ ...adjusted, widthMm: adjusted.widthMm + 1000 }, pricingDefaults, catalogue)
+    expect(wider.parts.some((part) => part.id === 'handle')).toBe(false)
+    expect(wider.parts.find((part) => part.id === 'lining')?.quantity).toBeGreaterThan(liningLine?.quantity ?? 0)
+    expect(wider.parts.find((part) => part.id === 'bracket')?.quantity).toBe(3)
+
+    const other = calculateItemPrice(createQuoteItem('window'), pricingDefaults, catalogue)
+    expect(other.parts.some((part) => part.id === 'handle')).toBe(true)
+    expect(other.parts.some((part) => part.id === 'lining')).toBe(false)
+    expect(catalogue.links.find((link) => link.productId === 'window' && link.partId === 'handle')?.included).toBe(true)
+
+    const cleared = removePartFromItem(adjusted, 'lining')
+    expect(calculateItemPrice(cleared, pricingDefaults, catalogue).parts.some((part) => part.id === 'lining')).toBe(false)
+
+    let empty = createQuoteItem('window')
+    for (const part of full.parts) empty = removePartFromItem(empty, part.id)
+    const bare = calculateItemPrice(empty, pricingDefaults, catalogue)
+    expect(bare.parts).toEqual([])
+    expect(bare.partsCost).toBe(0)
+    expect(bare.lineTotal).toBe(0)
   })
 })
 

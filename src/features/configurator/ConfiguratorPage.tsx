@@ -156,6 +156,8 @@ export function ConfiguratorPage() {
       ...source,
       id: createId(),
       location: '',
+      removedPartIds: [],
+      addedParts: [],
       panels: source.panels.map((panel) => ({ ...panel, id: createId() })),
     }
   }
@@ -275,6 +277,7 @@ export function ConfiguratorPage() {
               pricing={pricing}
               issues={issues}
               editing={editingId !== null}
+              onChange={setItem}
               onAdd={addOpening}
               onUpdate={saveOpening}
               onCancel={() => {

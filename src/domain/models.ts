@@ -55,6 +55,12 @@ export interface TechnicalOptions {
   horizontalSplit: string
 }
 
+/** An inventory part added to this opening only. `fixedQty` is the typed amount when the part's rule is fixed. */
+export interface AddedPart {
+  partId: string
+  fixedQty: number | null
+}
+
 export interface QuoteItem {
   id: string
   location: string
@@ -70,6 +76,10 @@ export interface QuoteItem {
   panels: Panel[]
   technical: TechnicalOptions
   notes: string
+  /** Catalogue part ids left off this opening. Absent on older quotes. */
+  removedPartIds?: string[]
+  /** Inventory parts added to this opening. Absent on older quotes. */
+  addedParts?: AddedPart[]
 }
 
 export interface Customer {

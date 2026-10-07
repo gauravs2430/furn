@@ -1,6 +1,6 @@
 import type { CatalogPart, Catalogue, QuantityRule } from './catalogue.ts'
 import { currentCatalogue } from './catalogue.ts'
-import type { PanelKind, PartLine, QuoteItem } from './models.ts'
+import type { AddedPart, PanelKind, PartLine, QuoteItem } from './models.ts'
 import { itemProductId } from './models.ts'
 import { calculateArea, calculatePerimeter } from './measures.ts'
 
@@ -84,8 +84,7 @@ function sashCount(item: QuoteItem): number {
   ).length
 }
 
-function quantityFor(rule: QuantityRule, item: QuoteItem, partId: string, fixedQty: number | null): number {
-  if (item.productType === 'accessory') return fixedQty ?? 1
+function quantityForRule(rule: QuantityRule, item: QuoteItem, partId: string, fixedQty: number | null): number {
   switch (rule) {
     case 'builtin':
       return partQuantities(item)[partId] ?? 0
@@ -110,6 +109,45 @@ function quantityFor(rule: QuantityRule, item: QuoteItem, partId: string, fixedQ
   }
 }
 
+function quantityFor(rule: QuantityRule, item: QuoteItem, partId: string, fixedQty: number | null): number {
+  if (item.productType === 'accessory') return fixedQty ?? 1
+  return quantityForRule(rule, item, partId, fixedQty)
+}
+
+function addedQuantity(definition: CatalogPart, item: QuoteItem, typedQty: number | null, linkFixedQty: number | null): number {
+  if (definition.quantityRule === 'fixed') {
+    const qty = typedQty ?? 1
+    return qty > 0 ? roundQty(qty) : 0
+  }
+  return quantityForRule(definition.quantityRule, item, definition.id, linkFixedQty)
+}
+
+export function removePartFromItem(item: QuoteItem, partId: string): QuoteItem {
+  const removedPartIds = [...new Set([...(item.removedPartIds ?? []), partId])]
+  const addedParts = (item.addedParts ?? []).filter((part) => part.partId !== partId)
+  return { ...item, removedPartIds, addedParts }
+}
+
+export function addPartToItem(item: QuoteItem, definition: CatalogPart, typedQty: number, catalogue: Catalogue = currentCatalogue()): QuoteItem {
+  const productId = itemProductId(item)
+  const onBill = catalogue.links.some((link) => link.productId === productId && link.partId === definition.id && link.included)
+  const removedPartIds = (item.removedPartIds ?? []).filter((id) => id !== definition.id)
+  const addedParts = (item.addedParts ?? []).filter((part) => part.partId !== definition.id)
+  if (definition.quantityRule === 'fixed') {
+    const qty = Number.isFinite(typedQty) && typedQty > 0 ? roundQty(typedQty) : 1
+    const nextAdded: AddedPart[] = [...addedParts, { partId: definition.id, fixedQty: qty }]
+    return {
+      ...item,
+      removedPartIds: onBill ? [...new Set([...removedPartIds, definition.id])] : removedPartIds,
+      addedParts: nextAdded,
+    }
+  }
+  if (!onBill) {
+    return { ...item, removedPartIds, addedParts: [...addedParts, { partId: definition.id, fixedQty: null }] }
+  }
+  return { ...item, removedPartIds, addedParts }
+}
+
 export function calculateParts(item: QuoteItem, catalogue: Catalogue = currentCatalogue()): PartLine[] {
   const productId = itemProductId(item)
   const product = catalogue.products.find((entry) => entry.id === productId)
@@ -118,17 +156,42 @@ export function calculateParts(item: QuoteItem, catalogue: Catalogue = currentCa
   const glazingAddon = catalogue.glazing.find((entry) => entry.id === item.glazingId)?.addonPerM2 ?? 0
   const partsById = new Map(catalogue.parts.map((part) => [part.id, part]))
 
-  return catalogue.links
+  const removed = new Set(item.removedPartIds ?? [])
+  const catalogueLines = catalogue.links
     .filter((link) => link.productId === productId && link.included)
     .map((link) => {
       const definition = partsById.get(link.partId)
-      if (!definition?.active) return null
+      if (!definition?.active || removed.has(definition.id)) return null
       const quantity = quantityFor(definition.quantityRule, item, definition.id, link.fixedQty)
       if (quantity <= 0) return null
       return lineFor(definition, quantity, link.priceOverride, materialFactor, productFactor, glazingAddon)
     })
     .filter((part): part is PartLine => part !== null)
-    .sort((left, right) => (partsById.get(left.id)?.sortOrder ?? 0) - (partsById.get(right.id)?.sortOrder ?? 0))
+
+  const present = new Set(catalogueLines.map((part) => part.id))
+  const addedLines = (item.addedParts ?? []).flatMap((added) => {
+    if (present.has(added.partId)) return []
+    const definition = partsById.get(added.partId)
+    if (!definition?.active) return []
+    const link = catalogue.links.find((entry) => entry.productId === productId && entry.partId === added.partId)
+    const quantity = addedQuantity(definition, item, added.fixedQty, link?.fixedQty ?? null)
+    if (quantity <= 0) return []
+    return [lineFor(definition, quantity, link?.priceOverride ?? null, materialFactor, productFactor, glazingAddon)]
+  })
+
+  return [...catalogueLines, ...addedLines].sort(
+    (left, right) => (partsById.get(left.id)?.sortOrder ?? 0) - (partsById.get(right.id)?.sortOrder ?? 0),
+  )
+}
+
+export function partUnitPrice(
+  definition: CatalogPart,
+  priceOverride: number | null,
+  materialFactor: number,
+  productFactor: number,
+  glazingAddon: number,
+): number {
+  return lineFor(definition, 1, priceOverride, materialFactor, productFactor, glazingAddon).unitPrice
 }
 
 function lineFor(

@@ -1308,16 +1308,57 @@ h1 {
   text-underline-offset: 3px;
 }
 
+.parts-build {
+  margin-top: 8px;
+}
+
+.parts-scroll {
+  overflow-x: auto;
+}
+
 .parts-table {
   width: 100%;
-  margin-top: 8px;
   border-collapse: collapse;
   font-size: 13px;
 }
 
+.parts-table th {
+  padding: 4px 8px 4px 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+}
+
 .parts-table td {
-  padding: 5px 0;
+  padding: 5px 8px 5px 0;
   border-bottom: 1px solid var(--line);
+  vertical-align: baseline;
+}
+
+.parts-table .part-action {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.parts-summary td {
+  font-weight: 650;
+}
+
+.parts-add {
+  margin-top: 10px;
+}
+
+.fixed-qty {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.fixed-qty .field {
+  width: 96px;
 }
 
 .parts-table td:last-child,

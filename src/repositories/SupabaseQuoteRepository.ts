@@ -1,4 +1,4 @@
-import type { Quote, QuoteItem, QuoteStatus } from '../domain/models.ts'
+import type { AddedPart, Quote, QuoteItem, QuoteStatus } from '../domain/models.ts'
 import { supabase } from '../lib/supabase.ts'
 import type { QuoteRepository } from './QuoteRepository.ts'
 
@@ -39,9 +39,37 @@ export function quoteToRow(quote: Quote, userId: string): QuoteRow {
   }
 }
 
+function readRemoved(item: QuoteItem): string[] | undefined {
+  if (!Object.prototype.hasOwnProperty.call(item, 'removedPartIds')) return undefined
+  const value = item.removedPartIds
+  if (!Array.isArray(value)) return []
+  return value.filter((id): id is string => typeof id === 'string' && id.trim().length > 0)
+}
+
+function readAdded(item: QuoteItem): AddedPart[] | undefined {
+  if (!Object.prototype.hasOwnProperty.call(item, 'addedParts')) return undefined
+  if (!Array.isArray(item.addedParts)) return []
+  const parts: AddedPart[] = []
+  for (const entry of item.addedParts) {
+    if (!entry || typeof entry !== 'object') continue
+    const row = entry as AddedPart
+    if (typeof row.partId !== 'string' || !row.partId.trim()) continue
+    const fixedQty = typeof row.fixedQty === 'number' && Number.isFinite(row.fixedQty) && row.fixedQty >= 0 ? row.fixedQty : null
+    parts.push({ partId: row.partId, fixedQty })
+  }
+  return parts
+}
+
 function withProductId(item: QuoteItem): QuoteItem {
   const productId = typeof item.productId === 'string' && item.productId.trim() ? item.productId : item.productType
-  return { ...item, productId }
+  const removedPartIds = readRemoved(item)
+  const addedParts = readAdded(item)
+  return {
+    ...item,
+    productId,
+    ...(removedPartIds !== undefined ? { removedPartIds } : {}),
+    ...(addedParts !== undefined ? { addedParts } : {}),
+  }
 }
 
 export function quoteFromDocument(value: unknown): Quote | null {
