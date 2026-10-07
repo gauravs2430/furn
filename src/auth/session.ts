@@ -45,6 +45,23 @@ const profileColumns = 'id, email, full_name, role, active, locked, access_expir
 
 let ticket = 0
 let reloadTicket = 0
+let screenRole: 'admin' | 'user' | null = null
+
+/** Remember which login screen submitted. A refresh does not set this, so an existing session is left alone. */
+export function expectLoginRole(role: 'admin' | 'user' | null) {
+  screenRole = role
+}
+
+function takeLoginRole(): 'admin' | 'user' | null {
+  const role = screenRole
+  screenRole = null
+  return role
+}
+
+function wrongScreenNotice(screen: 'admin' | 'user'): string {
+  if (screen === 'user') return 'Admin accounts sign in on the admin login screen.'
+  return 'User accounts sign in on the user login screen.'
+}
 
 function leaveSession() {
   clearLoadedQuotes()
@@ -171,6 +188,7 @@ async function syncSession(session: Session | null) {
 
   if (current !== ticket) return
 
+  const screen = takeLoginRole()
   if (error) {
     await rejectSession(error.message)
     return
@@ -179,6 +197,11 @@ async function syncSession(session: Session | null) {
   const profile = profileFrom(data)
   if (!profile) {
     await rejectSession('No staff profile was found for this login.')
+    return
+  }
+
+  if (screen && profile.role !== screen) {
+    await rejectSession(wrongScreenNotice(screen))
     return
   }
 

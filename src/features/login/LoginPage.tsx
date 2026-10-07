@@ -1,10 +1,10 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button.tsx'
 import { TextField } from '../../components/ui/Field.tsx'
 import { supabase } from '../../lib/supabase.ts'
-import { useAuthStore } from '../../auth/session.ts'
+import { expectLoginRole, useAuthStore } from '../../auth/session.ts'
 
 const copy = {
   staff: {
@@ -67,11 +67,13 @@ export function LoginPage({ variant = 'staff' }: { variant?: 'staff' | 'admin' }
     setError(null)
     clearNotice()
     setBusy(true)
+    expectLoginRole(variant === 'admin' ? 'admin' : 'user')
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
     if (signInError) {
+      expectLoginRole(null)
       setBusy(false)
       setError(signInError.message)
     }
@@ -120,6 +122,23 @@ export function LoginPage({ variant = 'staff' }: { variant?: 'staff' | 'admin' }
               text.submit
             )}
           </Button>
+          <p className="login-switch">
+            {variant === 'staff' ? (
+              <>
+                Administrator?{' '}
+                <Link to="/admin/login" onClick={() => clearNotice()}>
+                  Admin login
+                </Link>
+              </>
+            ) : (
+              <>
+                Staff member?{' '}
+                <Link to="/login" onClick={() => clearNotice()}>
+                  User login
+                </Link>
+              </>
+            )}
+          </p>
         </form>
         <p className="login-footnote">{text.footnote}</p>
       </div>
