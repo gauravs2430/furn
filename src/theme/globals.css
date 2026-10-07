@@ -81,7 +81,7 @@ p {
   justify-content: space-between;
   gap: 12px;
   height: 64px;
-  padding: 0 32px;
+  padding: 0 64px;
   background: #ffffff;
   border-bottom: 1px solid #d5dce4;
 }
@@ -721,6 +721,15 @@ h1 {
   padding: 10px 12px;
 }
 
+select.input {
+  padding-right: 40px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%235c6770' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+}
+
 .search {
   display: block;
   max-width: 460px;
@@ -1272,6 +1281,15 @@ h1 {
   position: sticky;
   top: calc(64px + 16px);
   z-index: 1;
+  margin-bottom: 0;
+}
+
+.preview-card {
+  margin-bottom: 0;
+}
+
+.config-forms > :last-child {
+  margin-bottom: 0;
 }
 
 .card {
@@ -1504,6 +1522,12 @@ h1 {
   grid-template-columns: 28px minmax(0, 1fr) minmax(140px, 1fr) auto;
   gap: 12px 14px;
   align-items: end;
+}
+
+.panel-row > .btn {
+  height: 44px;
+  min-height: 44px;
+  align-self: end;
 }
 
 .panel-index {
@@ -1752,7 +1776,11 @@ h1 {
 }
 
 .order-card {
-  margin-top: 4px;
+  margin-top: 18px;
+}
+
+.measure-grid {
+  margin-top: 26px;
 }
 
 .order-layout {
