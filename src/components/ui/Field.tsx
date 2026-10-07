@@ -7,11 +7,27 @@ interface TextFieldProps {
   onChange: (value: string) => void
   placeholder?: string
   autoComplete?: string
+  name?: string
   type?: string
   hint?: string
+  disabled?: boolean
+  autoFocus?: boolean
+  invalid?: boolean
 }
 
-export function TextField({ label, value, onChange, placeholder, autoComplete, type = 'text', hint }: TextFieldProps) {
+export function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  name,
+  type = 'text',
+  hint,
+  disabled,
+  autoFocus,
+  invalid,
+}: TextFieldProps) {
   const id = useId()
   return (
     <label className="field" htmlFor={id}>
@@ -20,9 +36,13 @@ export function TextField({ label, value, onChange, placeholder, autoComplete, t
         id={id}
         className="input"
         type={type}
+        name={name}
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        disabled={disabled}
+        autoFocus={autoFocus}
+        aria-invalid={invalid || undefined}
         onChange={(event) => onChange(event.target.value)}
       />
       {hint ? <span className="field-hint">{hint}</span> : null}
