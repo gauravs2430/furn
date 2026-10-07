@@ -346,11 +346,6 @@ export function AdminPage() {
       <div className="page-head">
         <div>
           <h1>People</h1>
-          <nav className="page-links" aria-label="Admin">
-            <Link to="/admin/prices">Prices</Link>
-            <Link to="/admin/catalog">Catalogue</Link>
-            <Link to="/admin/orders">All orders</Link>
-          </nav>
         </div>
       </div>
 
