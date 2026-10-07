@@ -409,67 +409,10 @@ p {
 
 .home-panel {
   min-height: 320px;
-  padding: 18px 8px 8px;
   border: 1px solid #d5dce4;
   border-radius: 2px;
   background: #ffffff;
   box-shadow: 0 1px 1px rgba(20, 38, 46, 0.04);
-}
-
-.home-panel-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 12px 12px;
-}
-
-.home-panel-head h2 {
-  font-size: 20px;
-}
-
-.home-panel-head p,
-.home-empty {
-  color: var(--muted);
-}
-
-.home-panel-head p {
-  font-size: 14px;
-}
-
-.home-empty {
-  padding: 28px 12px;
-}
-
-.home-orders {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-
-.home-orders a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 12px;
-  border-bottom: 1px solid var(--line);
-  color: inherit;
-  text-decoration: none;
-}
-
-.home-orders li:last-child a {
-  border-bottom: 0;
-}
-
-.home-orders a:hover {
-  background: #f6f8fa;
-}
-
-.home-orders a svg {
-  flex: none;
-  color: #9aa6b2;
 }
 
 .login-screen {
