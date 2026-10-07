@@ -90,6 +90,13 @@ function invokeFailure(value: unknown, fallback: string): string | null {
   return fallback
 }
 
+function emailErrorFrom(value: unknown): string | null {
+  if (!value || typeof value !== 'object') return null
+  const body = value as Record<string, unknown>
+  if (typeof body.emailError === 'string' && body.emailError.trim()) return body.emailError.trim()
+  return null
+}
+
 function emptyPeople(count: number, searching: boolean, label: string): string {
   if (searching && count > 0) return `No ${label} match that search.`
   return `No ${label} are listed.`
@@ -195,6 +202,8 @@ export function AdminPage() {
     setRole('user')
     setPassword('')
     setShown(next)
+    const emailError = emailErrorFrom(data)
+    pushToast(emailError ?? 'Email sent', emailError ? 'danger' : 'success')
     await reloadPeople()
   }
 
@@ -223,6 +232,8 @@ export function AdminPage() {
     setResetFor(null)
     setResetPassword('')
     setShown(next)
+    const emailError = emailErrorFrom(data)
+    pushToast(emailError ?? 'Email sent', emailError ? 'danger' : 'success')
   }
 
   async function copyPassword() {
@@ -283,6 +294,8 @@ export function AdminPage() {
     }
     patchRow(person.id, { active: next })
     setActiveFor(null)
+    const emailError = emailErrorFrom(data)
+    if (emailError) pushToast(emailError, 'danger')
   }
 
   async function confirmUnlock() {
@@ -317,6 +330,8 @@ export function AdminPage() {
     setUnlockFor(null)
     setUnlockDate('')
     setUnlockError(null)
+    const emailError = emailErrorFrom(data)
+    if (emailError) pushToast(emailError, 'danger')
   }
 
   function openReset(person: Person) {

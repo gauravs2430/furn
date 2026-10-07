@@ -297,6 +297,7 @@ export function ConfiguratorPage() {
         </div>
         <div className="order-layout">
           <OrderList
+            key={activeQuote.id}
             items={activeQuote.items}
             pricingConfig={pricingConfig}
             editingId={editingId}

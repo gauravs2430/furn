@@ -65,12 +65,14 @@ Deno.serve(async (req) => {
         if (profileError) return json({ error: profileError.message }, 400)
       }
 
+      const emailError = await credentialEmail(email, 'Your SunnyPlast login', 'Your SunnyPlast login is ready.', password)
       return json({
         id: data.user?.id ?? '',
         email,
         fullName,
         role,
         temporaryPassword: password,
+        ...emailError,
       })
     }
 
@@ -87,7 +89,13 @@ Deno.serve(async (req) => {
         .update({ password_set_at: new Date().toISOString() })
         .eq('id', userId)
       if (stampError) return json({ error: stampError.message }, 400)
-      return json({ email: target.email, temporaryPassword: password })
+      const emailError = await credentialEmail(
+        String(target.email ?? ''),
+        'Your SunnyPlast password',
+        'Your SunnyPlast password has been changed.',
+        password,
+      )
+      return json({ email: target.email, temporaryPassword: password, ...emailError })
     }
 
     if (action === 'set-active') {
@@ -107,7 +115,13 @@ Deno.serve(async (req) => {
         .select('id')
       if (error) return json({ error: error.message }, 400)
       if (!Array.isArray(data) || data.length === 0) return json({ error: 'Could not save that change.' }, 400)
-      return json({ ok: true, active: body.active })
+      const active = body.active === true
+      const emailError = await noticeEmail(
+        target.user.email,
+        active ? 'Your SunnyPlast account is active' : 'Your SunnyPlast account is inactive',
+        active ? 'Your SunnyPlast account is active.' : 'Your SunnyPlast account is inactive.',
+      )
+      return json({ ok: true, active, ...emailError })
     }
 
     if (action === 'unlock') {
@@ -134,7 +148,12 @@ Deno.serve(async (req) => {
         .select('id')
       if (error) return json({ error: error.message }, 400)
       if (!Array.isArray(data) || data.length === 0) return json({ error: 'Could not unlock that user.' }, 400)
-      return json({ ok: true })
+      const emailError = await noticeEmail(
+        target.user.email,
+        'Your SunnyPlast account is unlocked',
+        'Your SunnyPlast account is unlocked.',
+      )
+      return json({ ok: true, ...emailError })
     }
 
     return json({ error: 'Unknown action' }, 400)
@@ -144,11 +163,89 @@ Deno.serve(async (req) => {
 })
 
 async function readUser(admin: ReturnType<typeof createClient>, userId: string) {
-  const { data, error } = await admin.from('profiles').select('id, role, access_expires_on').eq('id', userId).maybeSingle()
+  const { data, error } = await admin
+    .from('profiles')
+    .select('id, role, email, access_expires_on')
+    .eq('id', userId)
+    .maybeSingle()
   if (error) return { error: error.message, status: 400 as const, user: null }
   if (!data) return { error: 'User not found', status: 404 as const, user: null }
   if (data.role !== 'user') return { error: 'Only a user can be changed.', status: 400 as const, user: null }
-  return { error: '', status: 200 as const, user: data }
+  return {
+    error: '',
+    status: 200 as const,
+    user: { ...data, email: typeof data.email === 'string' ? data.email : '' },
+  }
+}
+
+function loginLink(): string | null {
+  const site = (Deno.env.get('SITE_URL') ?? '').trim().replace(/\/+$/, '')
+  if (!site) return null
+  return `${site}/login`
+}
+
+async function credentialEmail(to: string, subject: string, lead: string, password: string) {
+  const link = loginLink()
+  const reason = link
+    ? await sendPlainEmail(to, subject, `${lead}\n\nLogin: ${link}\nEmail: ${to}\nPassword: ${password}\n`)
+    : 'SITE_URL is not configured.'
+  return mailFailure(reason)
+}
+
+async function noticeEmail(to: string, subject: string, lead: string) {
+  const link = loginLink()
+  const reason = link
+    ? await sendPlainEmail(to, subject, `${lead}\n\nLogin: ${link}\n`)
+    : 'SITE_URL is not configured.'
+  return mailFailure(reason)
+}
+
+function mailFailure(reason: string | null): { emailError?: string } {
+  if (!reason) return {}
+  return { emailError: `Saved, but the email was not sent: ${reason}` }
+}
+
+async function sendPlainEmail(to: string, subject: string, text: string): Promise<string | null> {
+  const key = (Deno.env.get('RESEND_API_KEY') ?? '').trim()
+  const from = (Deno.env.get('MAIL_FROM') ?? '').trim()
+  if (!key || !from) return 'Resend is not configured.'
+  if (!to.includes('@')) return 'That person has no email address.'
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ from, to: [to], subject, text }),
+    })
+    if (response.ok) return null
+    return await resendReason(response)
+  } catch (error) {
+    return error instanceof Error && error.message ? error.message : 'Could not reach Resend.'
+  }
+}
+
+async function resendReason(response: Response): Promise<string> {
+  const fallback = `Resend returned ${response.status}.`
+  try {
+    const body: unknown = await response.json()
+    return reasonFromBody(body, fallback)
+  } catch {
+    return fallback
+  }
+}
+
+function reasonFromBody(body: unknown, fallback: string): string {
+  if (!body || typeof body !== 'object') return fallback
+  const record = body as Record<string, unknown>
+  if (typeof record.message === 'string' && record.message.trim()) return record.message.trim()
+  if (typeof record.error === 'string' && record.error.trim()) return record.error.trim()
+  if (record.error && typeof record.error === 'object') {
+    const nested = record.error as Record<string, unknown>
+    if (typeof nested.message === 'string' && nested.message.trim()) return nested.message.trim()
+  }
+  return fallback
 }
 
 function isAfterToday(value: string, today: string) {
