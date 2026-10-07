@@ -439,6 +439,12 @@ export async function addMaterial(input: { name: string; factor: number; active:
   written(inserted.data, 'Could not add that material.')
 }
 
+export async function removeMaterial(id: string): Promise<void> {
+  const removed = await requireClient().from('materials').delete().eq('id', id).select('id')
+  fail(removed.error, 'Could not remove that material.')
+  written(removed.data, 'Could not remove that material.')
+}
+
 export async function saveMaterial(input: CatalogMaterial): Promise<void> {
   const updated = await requireClient()
     .from('materials')
@@ -475,6 +481,12 @@ export async function addColour(input: { name: string; hex: string; finish: 'sol
     .select('id')
   fail(inserted.error, 'Could not add that colour.')
   written(inserted.data, 'Could not add that colour.')
+}
+
+export async function removeColour(id: string): Promise<void> {
+  const removed = await requireClient().from('colours').delete().eq('id', id).select('id')
+  fail(removed.error, 'Could not remove that colour.')
+  written(removed.data, 'Could not remove that colour.')
 }
 
 export async function saveColour(input: CatalogColour): Promise<void> {
@@ -517,6 +529,12 @@ export async function addGlazing(input: {
     .select('id')
   fail(inserted.error, 'Could not add that glazing.')
   written(inserted.data, 'Could not add that glazing.')
+}
+
+export async function removeGlazing(id: string): Promise<void> {
+  const removed = await requireClient().from('glazing_options').delete().eq('id', id).select('id')
+  fail(removed.error, 'Could not remove that glazing.')
+  written(removed.data, 'Could not remove that glazing.')
 }
 
 export async function saveGlazing(input: CatalogGlazing): Promise<void> {

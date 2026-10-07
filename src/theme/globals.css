@@ -14,7 +14,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.45 var(--font);
+  font: 400 15.5px/1.5 var(--font);
 }
 
 button,
@@ -81,7 +81,7 @@ p {
   justify-content: space-between;
   gap: 12px;
   height: 64px;
-  padding: 0 18px 0 16px;
+  padding: 0 32px;
   background: #ffffff;
   border-bottom: 1px solid #d5dce4;
 }
@@ -628,9 +628,10 @@ p {
 
 h1 {
   margin-top: 4px;
-  font-size: 42px;
-  font-weight: 700;
-  line-height: 0.95;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 
@@ -646,8 +647,10 @@ h1 {
 }
 
 .lede {
-  max-width: 46ch;
-  margin-top: 8px;
+  max-width: 52ch;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 .stat-row,
@@ -700,7 +703,7 @@ h1 {
 }
 
 .toolbar {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .search input,
@@ -981,13 +984,13 @@ h1 {
 
 .catalog-parts {
   width: 100%;
-  min-width: 640px;
+  min-width: 760px;
   border-collapse: collapse;
 }
 
 .catalog-parts th,
 .catalog-parts td {
-  padding: 8px;
+  padding: 12px 10px;
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: middle;
@@ -1003,7 +1006,8 @@ h1 {
 
 .catalog-parts .input {
   width: 100%;
-  min-width: 5.5rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .catalog-actions {
@@ -1059,7 +1063,7 @@ h1 {
   width: 40px;
   height: 22px;
   border: 1px solid var(--line-strong);
-  border-radius: 2px;
+  border-radius: 11px;
   background: var(--bg);
 }
 
@@ -1070,8 +1074,9 @@ h1 {
   left: 2px;
   width: 16px;
   height: 16px;
-  border-radius: 2px;
+  border-radius: 50%;
   background: var(--ink-soft);
+  transition: left 0.15s ease;
 }
 
 .switch.is-on .switch-track {
@@ -1139,8 +1144,14 @@ h1 {
 }
 
 .quote-actions {
-  flex: 1 1 280px;
+  flex: 0 1 auto;
   justify-content: flex-end;
+}
+
+.panel-foot {
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-top: 12px;
 }
 
 .job-actions {
@@ -1228,15 +1239,23 @@ h1 {
 .quote-bar {
   align-items: flex-start;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  gap: 16px 24px;
+  margin-bottom: 18px;
 }
 
 .quote-identity {
+  flex: 1 1 260px;
+  min-width: 0;
   align-items: center;
 }
 
+.quote-identity > div {
+  min-width: 0;
+}
+
 .quote-identity h1 {
-  font-size: 32px;
+  font-size: 28px;
+  line-height: 1.15;
 }
 
 .config-layout {
@@ -1246,12 +1265,13 @@ h1 {
 
 .preview-column {
   align-self: stretch;
+  min-width: 0;
 }
 
 .preview-sticky {
   position: sticky;
   top: calc(64px + 16px);
-  z-index: 4;
+  z-index: 1;
 }
 
 .card {
@@ -1360,11 +1380,15 @@ h1 {
 }
 
 .preset-grid {
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
 }
 
 .preset {
-  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
 }
 
 .preset-static {
@@ -1373,7 +1397,8 @@ h1 {
 
 .preset-art {
   display: block;
-  height: 62px;
+  flex: none;
+  height: 84px;
   overflow: hidden;
   border-radius: 2px;
   background: var(--paper);
@@ -1396,8 +1421,9 @@ h1 {
 }
 
 .preset-label {
-  padding: 6px 2px 2px;
-  line-height: 1.2;
+  min-height: 2.5em;
+  padding: 0 2px;
+  line-height: 1.25;
 }
 
 .segment {
@@ -1475,8 +1501,8 @@ h1 {
 
 .panel-row {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(140px, 1fr) auto;
+  gap: 12px 14px;
   align-items: end;
 }
 
@@ -1492,6 +1518,7 @@ h1 {
 }
 
 .width-sum {
+  flex: 1 1 200px;
   margin: 0;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
@@ -1599,11 +1626,14 @@ h1 {
 
 .preview-actions {
   display: flex;
-  margin-top: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .preview-actions .btn {
-  flex: 1 1 0;
+  flex: 1 1 140px;
+  min-width: 0;
 }
 
 .drawing-frame {
@@ -1890,11 +1920,11 @@ h1 {
   top: 50%;
   left: 50%;
   width: min(480px, calc(100vw - 24px));
+  border-radius: 8px;
   max-height: min(86vh, 860px);
   overflow: auto;
   transform: translate(-50%, -50%);
-  padding: 18px;
-  border-radius: 2px;
+  padding: 22px;
   background: var(--surface);
   color: var(--ink);
   border: 1px solid var(--line);
@@ -2054,8 +2084,8 @@ h1 {
   }
 
   .shell-top {
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
   .shell-scrim {

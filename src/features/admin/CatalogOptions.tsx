@@ -4,6 +4,9 @@ import {
   addColour,
   addGlazing,
   addMaterial,
+  removeColour,
+  removeGlazing,
+  removeMaterial,
   saveColour,
   saveGlazing,
   saveMaterial,
@@ -14,7 +17,7 @@ import {
 import { refreshCatalogue } from '../../store/useAppStore.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { Button } from '../../components/ui/Button.tsx'
-import { Modal } from '../../components/ui/Dialog.tsx'
+import { ConfirmDialog, Modal } from '../../components/ui/Dialog.tsx'
 import { NumberField, SelectField, TextField } from '../../components/ui/Field.tsx'
 import { ActiveCheck, Pager, messageFrom, useCatalogList, usePagedQuery } from './catalogUi.tsx'
 
@@ -59,6 +62,7 @@ function MaterialsSection() {
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [adding, setAdding] = useState(false)
+  const [pendingRemove, setPendingRemove] = useState<CatalogMaterial | null>(null)
 
   async function onAdd(event: FormEvent) {
     event.preventDefault()
@@ -109,6 +113,7 @@ function MaterialsSection() {
                   key={`${material.id}:${material.name}:${material.factor}:${material.active}`}
                   material={material}
                   onSaved={() => setReload((current) => current + 1)}
+                  onRemove={() => setPendingRemove(material)}
                 />
               ))}
             </tbody>
@@ -136,11 +141,29 @@ function MaterialsSection() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        title="Remove this material?"
+        description={pendingRemove ? `${pendingRemove.name} will be taken off the catalogue.` : ''}
+        confirmLabel="Remove material"
+        tone="danger"
+        onOpenChange={(open) => {
+          if (!open) setPendingRemove(null)
+        }}
+        onConfirm={() => {
+          const material = pendingRemove
+          setPendingRemove(null)
+          if (!material) return
+          void commit(() => removeMaterial(material.id), pushToast, 'Material removed')
+            .then(() => setReload((current) => current + 1))
+            .catch((removeError: unknown) => pushToast(messageFrom(removeError, 'Could not remove that material.'), 'danger'))
+        }}
+      />
     </section>
   )
 }
 
-function MaterialRow({ material, onSaved }: { material: CatalogMaterial; onSaved: () => void }) {
+function MaterialRow({ material, onSaved, onRemove }: { material: CatalogMaterial; onSaved: () => void; onRemove: () => void }) {
   const pushToast = useAppStore((state) => state.pushToast)
   const [name, setName] = useState(material.name)
   const [factor, setFactor] = useState(String(material.factor))
@@ -179,6 +202,7 @@ function MaterialRow({ material, onSaved }: { material: CatalogMaterial; onSaved
       </td>
       <td className="catalog-actions">
         <Button size="sm" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save'}</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onRemove}>Remove</Button>
         {error ? <span className="form-error">{error}</span> : null}
       </td>
     </tr>
@@ -198,6 +222,7 @@ function ColoursSection() {
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [adding, setAdding] = useState(false)
+  const [pendingRemove, setPendingRemove] = useState<CatalogColour | null>(null)
 
   async function onAdd(event: FormEvent) {
     event.preventDefault()
@@ -250,6 +275,7 @@ function ColoursSection() {
                   key={`${colour.id}:${colour.name}:${colour.hex}:${colour.finish}:${colour.active}`}
                   colour={colour}
                   onSaved={() => setReload((current) => current + 1)}
+                  onRemove={() => setPendingRemove(colour)}
                 />
               ))}
             </tbody>
@@ -281,11 +307,29 @@ function ColoursSection() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        title="Remove this colour?"
+        description={pendingRemove ? `${pendingRemove.name} will be taken off the catalogue.` : ''}
+        confirmLabel="Remove colour"
+        tone="danger"
+        onOpenChange={(open) => {
+          if (!open) setPendingRemove(null)
+        }}
+        onConfirm={() => {
+          const colour = pendingRemove
+          setPendingRemove(null)
+          if (!colour) return
+          void commit(() => removeColour(colour.id), pushToast, 'Colour removed')
+            .then(() => setReload((current) => current + 1))
+            .catch((removeError: unknown) => pushToast(messageFrom(removeError, 'Could not remove that colour.'), 'danger'))
+        }}
+      />
     </section>
   )
 }
 
-function ColourRow({ colour, onSaved }: { colour: CatalogColour; onSaved: () => void }) {
+function ColourRow({ colour, onSaved, onRemove }: { colour: CatalogColour; onSaved: () => void; onRemove: () => void }) {
   const pushToast = useAppStore((state) => state.pushToast)
   const [name, setName] = useState(colour.name)
   const [hex, setHex] = useState(colour.hex)
@@ -326,6 +370,7 @@ function ColourRow({ colour, onSaved }: { colour: CatalogColour; onSaved: () => 
       </td>
       <td className="catalog-actions">
         <Button size="sm" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save'}</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onRemove}>Remove</Button>
         {error ? <span className="form-error">{error}</span> : null}
       </td>
     </tr>
@@ -347,6 +392,7 @@ function GlazingSection() {
   const [formError, setFormError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [adding, setAdding] = useState(false)
+  const [pendingRemove, setPendingRemove] = useState<CatalogGlazing | null>(null)
 
   async function onAdd(event: FormEvent) {
     event.preventDefault()
@@ -406,6 +452,7 @@ function GlazingSection() {
                   key={`${option.id}:${option.name}:${option.addonPerM2}:${option.active}`}
                   option={option}
                   onSaved={() => setReload((current) => current + 1)}
+                  onRemove={() => setPendingRemove(option)}
                 />
               ))}
             </tbody>
@@ -436,11 +483,29 @@ function GlazingSection() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        title="Remove this glazing?"
+        description={pendingRemove ? `${pendingRemove.name} will be taken off the catalogue.` : ''}
+        confirmLabel="Remove glazing"
+        tone="danger"
+        onOpenChange={(open) => {
+          if (!open) setPendingRemove(null)
+        }}
+        onConfirm={() => {
+          const option = pendingRemove
+          setPendingRemove(null)
+          if (!option) return
+          void commit(() => removeGlazing(option.id), pushToast, 'Glazing removed')
+            .then(() => setReload((current) => current + 1))
+            .catch((removeError: unknown) => pushToast(messageFrom(removeError, 'Could not remove that glazing.'), 'danger'))
+        }}
+      />
     </section>
   )
 }
 
-function GlazingRow({ option, onSaved }: { option: CatalogGlazing; onSaved: () => void }) {
+function GlazingRow({ option, onSaved, onRemove }: { option: CatalogGlazing; onSaved: () => void; onRemove: () => void }) {
   const pushToast = useAppStore((state) => state.pushToast)
   const [name, setName] = useState(option.name)
   const [price, setPrice] = useState(String(option.addonPerM2))
@@ -491,6 +556,7 @@ function GlazingRow({ option, onSaved }: { option: CatalogGlazing; onSaved: () =
       </td>
       <td className="catalog-actions">
         <Button size="sm" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save'}</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onRemove}>Remove</Button>
         {error ? <span className="form-error">{error}</span> : null}
       </td>
     </tr>

@@ -76,6 +76,21 @@ export function ActiveCheck({
   onChange: (checked: boolean) => void
   label?: string
 }) {
+  if (label === 'Active') {
+    return (
+      <button
+        type="button"
+        className={checked ? 'switch is-on' : 'switch'}
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+      >
+        <span className="switch-track" aria-hidden="true" />
+        {label}
+      </button>
+    )
+  }
+
   return (
     <label className="row-check">
       <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
