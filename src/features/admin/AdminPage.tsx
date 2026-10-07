@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { dayAfter, expiryOnOrBeforeToday, isDateAfter, localToday, userAccessLocked } from '../../auth/access.ts'
 import { useAuthStore } from '../../auth/session.ts'
 import { Button } from '../../components/ui/Button.tsx'
@@ -103,6 +103,7 @@ function emptyPeople(count: number, searching: boolean, label: string): string {
 }
 
 export function AdminPage() {
+  const location = useLocation()
   const profile = useAuthStore((state) => state.profile)
   const pushToast = useAppStore((state) => state.pushToast)
   const savingRef = useRef(false)
@@ -124,6 +125,11 @@ export function AdminPage() {
   const [unlockFor, setUnlockFor] = useState<Person | null>(null)
   const [unlockDate, setUnlockDate] = useState('')
   const [unlockError, setUnlockError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (location.hash !== '#new-user') return
+    document.getElementById('new-user')?.scrollIntoView({ block: 'start' })
+  }, [location.hash])
 
   useEffect(() => {
     if (profile?.role !== 'admin' || !supabase) return
@@ -352,7 +358,7 @@ export function AdminPage() {
         </div>
       </div>
 
-      <form className="people-create card" onSubmit={(event) => void onCreate(event)}>
+      <form id="new-user" className="people-create card" onSubmit={(event) => void onCreate(event)}>
         <h2>New login</h2>
         <div className="form-grid">
           <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />

@@ -201,6 +201,9 @@
 
   .no-print,
   .topbar,
+  .shell-side,
+  .shell-scrim,
+  .shell-menu,
   .toast-wrap,
   .bottom-bar {
     display: none !important;

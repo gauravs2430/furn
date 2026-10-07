@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Copy, Plus, Printer, Trash2 } from 'lucide-react'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
@@ -19,6 +19,9 @@ export function DashboardPage() {
   const duplicateQuote = useAppStore((state) => state.duplicateQuote)
   const deleteQuote = useAppStore((state) => state.deleteQuote)
   const pushToast = useAppStore((state) => state.pushToast)
+  const [params] = useSearchParams()
+  const statusParam = params.get('status')
+  const statusFilter = statusParam === 'draft' || statusParam === 'booked' ? statusParam : null
   const [query, setQuery] = useState('')
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
@@ -44,11 +47,12 @@ export function DashboardPage() {
     return [...quotes]
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .filter((quote) => {
+        if (statusFilter && quote.status !== statusFilter) return false
         if (!needle) return true
         const haystack = `${quote.customer.name} ${quote.reference} ${quote.jobNo} ${quote.status}`.toLowerCase()
         return haystack.includes(needle)
       })
-  }, [quotes, query])
+  }, [quotes, query, statusFilter])
 
   const bookedValue = quotes
     .filter((quote) => quote.status === 'booked')
@@ -61,7 +65,7 @@ export function DashboardPage() {
       <div className="page-head">
         <div>
           <p className="eyebrow">Sales workspace</p>
-          <h1>Quotes & orders</h1>
+          <h1>{statusFilter === 'draft' ? 'Drafts' : statusFilter === 'booked' ? 'Booked' : 'Quotes & orders'}</h1>
           <p className="lede">Configure an opening with the customer, price it, and print the work order or the quote.</p>
         </div>
         <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={startQuote}>
@@ -104,7 +108,13 @@ export function DashboardPage() {
         </div>
       ) : visible.length === 0 ? (
         <div className="empty">
-          <p>Nothing matches that search.</p>
+          <p>
+            {query.trim()
+              ? 'Nothing matches that search.'
+              : statusFilter === 'draft'
+                ? 'No drafts yet.'
+                : 'No booked orders yet.'}
+          </p>
         </div>
       ) : (
         <ul className="job-grid">
