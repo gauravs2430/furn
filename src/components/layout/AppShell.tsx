@@ -139,6 +139,16 @@ export function AppShell() {
   }, [])
 
   useEffect(() => {
+    function onPageShow(event: PageTransitionEvent) {
+      if (!event.persisted) return
+      startingRef.current = false
+      setStarting(false)
+    }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
+
+  useEffect(() => {
     if (!profile?.id) return
     if (skipProfileReload.current) {
       skipProfileReload.current = false
@@ -169,18 +179,20 @@ export function AppShell() {
     setOpen((current) => ({ ...current, [id]: !current[id] }))
   }
 
-  function startQuote() {
+  async function startQuote() {
     if (startingRef.current) return
     startingRef.current = true
     setStarting(true)
-    void createQuote().then((quote) => {
-      if (quote) {
-        navigate(`/quote/${quote.id}`)
-        return
-      }
+    try {
+      const quote = await createQuote()
+      if (quote) navigate(`/quote/${quote.id}`)
+    } catch (error) {
+      const message = error instanceof Error && error.message.trim() ? error.message : 'Could not start a quote.'
+      useAppStore.getState().pushToast(message, 'danger')
+    } finally {
       startingRef.current = false
       setStarting(false)
-    })
+    }
   }
 
   async function logOut() {

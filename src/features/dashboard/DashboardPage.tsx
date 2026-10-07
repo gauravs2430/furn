@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Copy, Plus, Printer, Trash2 } from 'lucide-react'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
@@ -28,18 +28,30 @@ export function DashboardPage() {
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
   const startingRef = useRef(false)
 
-  function startQuote() {
+  useEffect(() => {
+    function onPageShow(event: PageTransitionEvent) {
+      if (!event.persisted) return
+      startingRef.current = false
+      setStarting(false)
+    }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
+
+  async function startQuote() {
     if (startingRef.current) return
     startingRef.current = true
     setStarting(true)
-    void createQuote().then((quote) => {
-      if (quote) {
-        navigate(`/quote/${quote.id}`)
-        return
-      }
+    try {
+      const quote = await createQuote()
+      if (quote) navigate(`/quote/${quote.id}`)
+    } catch (error) {
+      const message = error instanceof Error && error.message.trim() ? error.message : 'Could not start a quote.'
+      pushToast(message, 'danger')
+    } finally {
       startingRef.current = false
       setStarting(false)
-    })
+    }
   }
 
   const visible = useMemo(() => {
