@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button.tsx'
 import { TextField } from '../../components/ui/Field.tsx'
 import { supabase } from '../../lib/supabase.ts'
 import { expectLoginRole, useAuthStore } from '../../auth/session.ts'
+import { company } from '../../data/company.ts'
 
 const copy = {
   staff: {
@@ -81,7 +82,20 @@ export function LoginPage({ variant = 'staff' }: { variant?: 'staff' | 'admin' }
 
   return (
     <div className="login-screen">
-      <div className="card login-card">
+      <div className="login-split">
+        <aside className="login-aside">
+          <p className="login-aside-kicker">Internal desk</p>
+          <p className="login-aside-name">{company.name}</p>
+          <p className="login-aside-tag">{company.tagline}</p>
+          <p>
+            {company.lines[0]}
+            <br />
+            {company.lines[1]}
+          </p>
+          <p>{company.phone}</p>
+          <p>{company.email}</p>
+        </aside>
+        <div className="card login-card">
         <LoginBrand />
         <form className="login-form" onSubmit={onSubmit} aria-busy={busy}>
           <div className="login-intro">
@@ -141,6 +155,7 @@ export function LoginPage({ variant = 'staff' }: { variant?: 'staff' | 'admin' }
           </p>
         </form>
         <p className="login-footnote">{text.footnote}</p>
+        </div>
       </div>
     </div>
   )
