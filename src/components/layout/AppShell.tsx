@@ -37,13 +37,13 @@ const navigation: NavGroup[] = [
     admin: true,
     items: [
       { type: 'link', to: '/admin/orders', label: 'All orders' },
-      { type: 'link', to: '/admin/users', label: 'Users & admins' },
-      { type: 'link', to: '/admin/users#new-user', label: 'Add new user' },
       {
         type: 'group',
         id: 'manage',
         label: 'Manage',
         items: [
+          { type: 'link', to: '/admin/users', label: 'Users & admins' },
+          { type: 'link', to: '/admin/users#new-user', label: 'Add new user' },
           { type: 'link', to: '/admin/prices', label: 'Prices' },
           { type: 'link', to: '/admin/catalog', label: 'Catalogue' },
         ],
@@ -126,7 +126,9 @@ export function AppShell() {
         ...(location.pathname === '/' ? { home: true } : null),
         ...(location.pathname.startsWith('/orders') || location.pathname.startsWith('/quote') ? { orders: true } : null),
         ...(location.pathname.startsWith('/admin') ? { admin: true } : null),
-        ...(location.pathname.startsWith('/admin/prices') || location.pathname.startsWith('/admin/catalog')
+        ...(location.pathname.startsWith('/admin/users') ||
+        location.pathname.startsWith('/admin/prices') ||
+        location.pathname.startsWith('/admin/catalog')
           ? { manage: true }
           : null),
       }))

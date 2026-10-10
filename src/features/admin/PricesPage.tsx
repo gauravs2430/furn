@@ -79,7 +79,7 @@ export function PricesPage() {
           <h1>Prices</h1>
         </div>
       </div>
-      <p className="lede">Company markup, and the VAT rate a new quote starts with. Product and part prices live in the catalogue.</p>
+      <p className="lede">Markup is added on top of the parts cost. VAT is the tax a new quote starts with.</p>
       <div className="card prices-card">
         <div className="form-grid">
           <NumberField label="Markup" suffix="%" value={config.markupPercent} min={0} onChange={(markupPercent) => patch({ markupPercent })} />
