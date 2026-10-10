@@ -678,6 +678,7 @@ p {
 .dialog-head,
 .job-top,
 .quote-bar,
+.print-back,
 .print-toolbar,
 .preview-kicker {
   display: flex;
@@ -1642,6 +1643,7 @@ select.input {
   height: 44px;
   min-height: 44px;
   align-self: end;
+  justify-self: center;
 }
 
 .panel-index {
@@ -1863,6 +1865,7 @@ select.input {
 .parts-table .part-action {
   width: 1%;
   white-space: nowrap;
+  text-align: center;
 }
 
 .parts-summary td {

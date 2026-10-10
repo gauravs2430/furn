@@ -192,7 +192,11 @@ export function DashboardPage() {
                     size="sm"
                     variant="secondary"
                     icon={<Printer size={15} />}
-                    onClick={() => (quote.items.length ? navigate(`/quote/${quote.id}/print/quote`) : pushToast('This quote has no openings to print.', 'danger'))}
+                    onClick={() =>
+                      quote.items.length
+                        ? navigate(`/quote/${quote.id}/print/quote`, { state: { from: `/orders?status=${statusFilter}` } })
+                        : pushToast('This quote has no openings to print.', 'danger')
+                    }
                   >
                     Print
                   </Button>

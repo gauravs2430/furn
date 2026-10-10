@@ -165,10 +165,10 @@ export function UserOrdersPage() {
                     <td className="num">{formatMoney(total)}</td>
                     <td>
                       <div className="page-links">
-                        <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/quote`}>
+                        <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/quote`} state={{ from: `/admin/users/${userId}/orders` }}>
                           Print quote
                         </Link>
-                        <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/work-order`}>
+                        <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/work-order`} state={{ from: `/admin/users/${userId}/orders` }}>
                           Print work order
                         </Link>
                       </div>

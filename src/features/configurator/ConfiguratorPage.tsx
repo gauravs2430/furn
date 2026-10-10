@@ -124,10 +124,10 @@ export function ConfiguratorPage() {
             {lockedQuote.customer.name.trim() ? ` · ${lockedQuote.customer.name.trim()}` : ''}
           </p>
           <div className="page-links">
-            <Link className="btn btn-sm" to={`/quote/${lockedQuote.id}/print/quote`}>
+            <Link className="btn btn-sm" to={`/quote/${lockedQuote.id}/print/quote`} state={{ from: '/admin/orders' }}>
               Print quote
             </Link>
-            <Link className="btn btn-sm btn-secondary" to={`/quote/${lockedQuote.id}/print/work-order`}>
+            <Link className="btn btn-sm btn-secondary" to={`/quote/${lockedQuote.id}/print/work-order`} state={{ from: '/admin/orders' }}>
               Print work order
             </Link>
           </div>
@@ -259,10 +259,28 @@ export function ConfiguratorPage() {
           >
             Book order
           </Button>
-          <Button variant="secondary" size="sm" icon={<Printer size={15} />} onClick={() => (activeQuote.items.length ? navigate(`/quote/${activeQuote.id}/print/quote`) : pushToast('Add an opening before printing.', 'danger'))}>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Printer size={15} />}
+            onClick={() =>
+              activeQuote.items.length
+                ? navigate(`/quote/${activeQuote.id}/print/quote`, { state: { from: `/quote/${activeQuote.id}` } })
+                : pushToast('Add an opening before printing.', 'danger')
+            }
+          >
             Print quote
           </Button>
-          <Button variant="secondary" size="sm" icon={<Printer size={15} />} onClick={() => (activeQuote.items.length ? navigate(`/quote/${activeQuote.id}/print/work-order`) : pushToast('Add an opening before printing.', 'danger'))}>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Printer size={15} />}
+            onClick={() =>
+              activeQuote.items.length
+                ? navigate(`/quote/${activeQuote.id}/print/work-order`, { state: { from: `/quote/${activeQuote.id}` } })
+                : pushToast('Add an opening before printing.', 'danger')
+            }
+          >
             Print work order
           </Button>
         </div>

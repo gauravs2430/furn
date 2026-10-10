@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useReactToPrint } from 'react-to-print'
 import type { Quote } from '../../domain/models.ts'
 import { quoteRepository, useAppStore } from '../../store/useAppStore.ts'
@@ -14,6 +14,7 @@ interface PrintPreviewPageProps {
 export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const hydrated = useAppStore((state) => state.hydrated)
   const stored = useAppStore((state) => state.quotes.find((entry) => entry.id === id))
   const pricingConfig = useAppStore((state) => state.pricingConfig)
@@ -41,7 +42,9 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
   const quote = stored ?? (fetched && fetched.id === id ? fetched.quote : null)
   const handlePrint = useReactToPrint({
     contentRef,
-    documentTitle: quote ? `${kind === 'work-order' ? 'Work Order' : 'Quotation'} ${quote.jobNo}` : 'Document',
+    documentTitle: quote
+      ? `${kind === 'work-order' ? 'Work Order' : quote.status === 'booked' ? 'Booking' : 'Quotation'} ${quote.jobNo}`
+      : 'Document',
   })
 
   if (!hydrated || (!stored && fetched?.id !== id)) return <p className="boot">Loading this quote…</p>
@@ -54,14 +57,28 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
     )
   }
 
-  const title = kind === 'work-order' ? 'Work order' : quote.status === 'booked' ? 'Invoice' : 'Quotation'
+  const title = kind === 'work-order' ? 'Work order' : quote.status === 'booked' ? 'Booking' : 'Quotation'
+  const fromState = location.state
+  const from =
+    fromState && typeof fromState === 'object' && 'from' in fromState && typeof fromState.from === 'string'
+      ? fromState.from
+      : quote.status === 'booked'
+        ? '/orders?status=booked'
+        : quote.status === 'draft'
+          ? '/orders?status=draft'
+          : '/orders?status=quoted'
 
   return (
     <div className="print-stage">
       <div className="print-toolbar no-print">
-        <Button variant="ghost" onClick={() => navigate(`/quote/${quote.id}`)}>
-          Back to quote
-        </Button>
+        <div className="print-back">
+          <Button variant="ghost" onClick={() => navigate(from)}>
+            Back
+          </Button>
+          <Button variant="secondary" onClick={() => navigate(`/quote/${quote.id}`)}>
+            Go to Quotation
+          </Button>
+        </div>
         <div>
           <p className="eyebrow">{title}</p>
           <strong>

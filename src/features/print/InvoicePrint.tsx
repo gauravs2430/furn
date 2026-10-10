@@ -12,7 +12,8 @@ import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
 export function InvoiceDocument({ quote, pricingConfig }: { quote: Quote; pricingConfig: PricingConfig }) {
   const catalogue = useAppStore((state) => state.catalogue)
   const totals = calculateQuoteTotals(quote, pricingConfig, catalogue)
-  const title = quote.status === 'booked' ? 'INVOICE' : 'QUOTATION'
+  const booked = quote.status === 'booked'
+  const title = booked ? 'BOOKING' : 'QUOTATION'
   const address = quote.customer.address.split('\n').filter(Boolean)
 
   return (
@@ -134,7 +135,7 @@ export function InvoiceDocument({ quote, pricingConfig }: { quote: Quote; pricin
       </div>
 
       <footer className="inv-foot">
-        <p>{company.terms}</p>
+        <p>{booked ? 'This order is booked.' : company.terms}</p>
       </footer>
     </article>
   )
