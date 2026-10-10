@@ -221,10 +221,10 @@ p {
 
 .shell-rail {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   width: 248px;
   min-width: 248px;
-  padding: 12px 8px 4px;
+  padding: 12px 10px 4px;
 }
 
 .shell-nav {
@@ -239,6 +239,7 @@ p {
 .shell-account-wrap {
   width: 248px;
   min-width: 248px;
+  margin-top: auto;
   border-top: 1px solid var(--line);
   padding: 8px;
 }
