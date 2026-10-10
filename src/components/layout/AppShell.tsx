@@ -97,6 +97,7 @@ export function AppShell() {
   const pricingNotice = useAppStore((state) => state.pricingNotice)
   const createQuote = useAppStore((state) => state.createQuote)
   const [drawer, setDrawer] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 860px)').matches)
   const [open, setOpen] = useState<Record<string, boolean>>({
     home: true,
@@ -127,7 +128,8 @@ export function AppShell() {
   const isAdmin = profile?.role === 'admin'
   const nodes = visibleNavigation(navigation, isAdmin)
   const accountName = profile?.full_name.trim() || profile?.email || 'Account'
-  const sideHidden = narrow && !drawer
+  const sideHidden = narrow ? !drawer : collapsed
+  const menuOpen = narrow ? drawer : !collapsed
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 860px)')
@@ -201,19 +203,24 @@ export function AppShell() {
     navigate('/login', { replace: true })
   }
 
+  function toggleSidebar() {
+    if (narrow) setDrawer((current) => !current)
+    else setCollapsed((current) => !current)
+  }
+
   return (
-    <div className="app-shell">
+    <div className={cx('app-shell', !narrow && collapsed && 'is-sidebar-collapsed')}>
       <header className="topbar shell-top">
         <div className="shell-top-start">
           <button
             type="button"
             className="shell-menu"
-            aria-expanded={drawer}
+            aria-expanded={menuOpen}
             aria-controls="site-nav"
-            onClick={() => setDrawer((current) => !current)}
+            onClick={toggleSidebar}
           >
-            {drawer ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={18} strokeWidth={1.75} aria-hidden="true" />}
-            <span className="sr-only">{drawer ? 'Close menu' : 'Open menu'}</span>
+            {menuOpen ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={18} strokeWidth={1.75} aria-hidden="true" />}
+            <span className="sr-only">{menuOpen ? 'Hide sidebar' : 'Show sidebar'}</span>
           </button>
           <Link to="/" className="shell-brand">
             <img className="shell-logo" src="/favicon.svg" alt="" width="36" height="36" />

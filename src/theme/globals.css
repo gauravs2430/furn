@@ -94,7 +94,7 @@ p {
 }
 
 .shell-menu {
-  display: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -104,6 +104,13 @@ p {
   border-radius: 2px;
   background: #ffffff;
   color: #14262e;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.shell-menu:hover {
+  background: #f3f6f8;
 }
 
 .shell-brand {
@@ -176,23 +183,37 @@ p {
   flex-direction: column;
   flex: none;
   width: 248px;
+  min-width: 0;
   align-self: flex-start;
   position: sticky;
   top: 64px;
   height: calc(100vh - 64px);
   height: calc(100dvh - 64px);
+  overflow: hidden;
   background: #ffffff;
   border-right: 1px solid #d5dce4;
+  transition:
+    width 0.28s ease,
+    border-color 0.28s ease;
+}
+
+.app-shell.is-sidebar-collapsed .shell-side {
+  width: 0;
+  border-right-color: transparent;
 }
 
 .shell-nav {
   flex: 1;
+  width: 248px;
+  min-width: 248px;
   min-height: 0;
   overflow: auto;
   padding: 12px 8px;
 }
 
 .shell-account-wrap {
+  width: 248px;
+  min-width: 248px;
   border-top: 1px solid var(--line);
   padding: 8px;
 }
@@ -2156,10 +2177,6 @@ select.input {
 }
 
 @media (max-width: 860px) {
-  .shell-menu {
-    display: inline-flex;
-  }
-
   .shell-top {
     padding-right: 20px;
     padding-left: 20px;
@@ -2194,6 +2211,11 @@ select.input {
     width: min(300px, 88vw);
     transform: translateX(-105%);
     transition: transform 0.28s ease;
+  }
+
+  .app-shell.is-sidebar-collapsed .shell-side {
+    width: min(300px, 88vw);
+    border-right-color: #d5dce4;
   }
 
   .shell-side.is-open {
