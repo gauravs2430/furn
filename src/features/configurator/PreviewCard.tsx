@@ -127,7 +127,7 @@ export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, o
                     <td className="num">{formatMoney(part.unitPrice)}</td>
                     <td className="num">{formatMoney(part.quantity * part.unitPrice)}</td>
                     <td className="part-action">
-                      <Button size="sm" variant="ghost" onClick={() => setPendingRemove(part)}>
+                      <Button size="sm" variant="danger" onClick={() => setPendingRemove(part)}>
                         Remove
                       </Button>
                     </td>

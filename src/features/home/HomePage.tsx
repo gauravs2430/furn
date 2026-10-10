@@ -25,12 +25,12 @@ export function HomePage() {
           <em>Open your unfinished jobs</em>
         </Link>
         <Link className="home-stat" to="/orders?status=quoted">
-          <span>Quotes</span>
+          <span>Quotation</span>
           <strong>{hydrated ? quoted : '—'}</strong>
           <em>Jobs marked ready to send</em>
         </Link>
         <Link className="home-stat" to="/orders?status=booked">
-          <span>Booked</span>
+          <span>Bookings</span>
           <strong>{hydrated ? booked : '—'}</strong>
           <em>Orders already booked</em>
         </Link>

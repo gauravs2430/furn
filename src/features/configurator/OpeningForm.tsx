@@ -231,7 +231,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
               </label>
               <Button
                 size="sm"
-                variant="ghost"
+                variant="danger"
                 disabled={item.panels.length <= 1}
                 onClick={() => onChange(withPanels(item, item.panels.filter((entry) => entry.id !== panel.id)))}
               >

@@ -102,7 +102,7 @@ export function OrderList({ items, pricingConfig, editingId, onEdit, onDuplicate
                   <Button size="sm" variant="secondary" icon={<Copy size={15} />} onClick={() => onDuplicate(item.id)}>
                     Duplicate
                   </Button>
-                  <Button size="sm" variant="ghost" icon={<Trash2 size={15} />} onClick={() => onDelete(item)}>
+                  <Button size="sm" variant="danger" icon={<Trash2 size={15} />} onClick={() => onDelete(item)}>
                     Delete
                   </Button>
                 </div>

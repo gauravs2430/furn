@@ -1113,6 +1113,7 @@ select.input {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  justify-content: center;
 }
 
 .catalog-attach {
@@ -1255,6 +1256,11 @@ select.input {
   margin-top: 12px;
 }
 
+.job-actions,
+.order-actions {
+  justify-content: center;
+}
+
 .job-actions {
   margin-top: auto;
   padding-top: 8px;
@@ -1342,9 +1348,15 @@ select.input {
 }
 
 .btn-danger {
-  background: transparent;
-  color: var(--danger);
+  background: var(--danger);
+  color: #ffffff;
   border-color: var(--danger);
+}
+
+.btn.btn-danger:hover:not(:disabled) {
+  background: #8c3226;
+  border-color: #8c3226;
+  color: #ffffff;
 }
 
 .quote-bar {

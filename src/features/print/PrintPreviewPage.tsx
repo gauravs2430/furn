@@ -49,7 +49,7 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
     return (
       <div className="empty">
         <p>This quote is not on this device.</p>
-        <Button onClick={() => navigate('/orders?status=quoted')}>Quotes</Button>
+        <Button onClick={() => navigate('/orders?status=quoted')}>Quotation</Button>
       </div>
     )
   }

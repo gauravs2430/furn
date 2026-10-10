@@ -202,7 +202,7 @@ function MaterialRow({ material, onSaved, onRemove }: { material: CatalogMateria
       </td>
       <td className="catalog-actions">
         <Button size="sm" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save'}</Button>
-        <Button size="sm" variant="ghost" disabled={busy} onClick={onRemove}>Remove</Button>
+        <Button size="sm" variant="danger" disabled={busy} onClick={onRemove}>Remove</Button>
         {error ? <span className="form-error">{error}</span> : null}
       </td>
     </tr>
@@ -370,7 +370,7 @@ function ColourRow({ colour, onSaved, onRemove }: { colour: CatalogColour; onSav
       </td>
       <td className="catalog-actions">
         <Button size="sm" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save'}</Button>
-        <Button size="sm" variant="ghost" disabled={busy} onClick={onRemove}>Remove</Button>
+        <Button size="sm" variant="danger" disabled={busy} onClick={onRemove}>Remove</Button>
         {error ? <span className="form-error">{error}</span> : null}
       </td>
     </tr>
@@ -556,7 +556,7 @@ function GlazingRow({ option, onSaved, onRemove }: { option: CatalogGlazing; onS
       </td>
       <td className="catalog-actions">
         <Button size="sm" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save'}</Button>
-        <Button size="sm" variant="ghost" disabled={busy} onClick={onRemove}>Remove</Button>
+        <Button size="sm" variant="danger" disabled={busy} onClick={onRemove}>Remove</Button>
         {error ? <span className="form-error">{error}</span> : null}
       </td>
     </tr>

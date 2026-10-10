@@ -73,7 +73,13 @@ export function DashboardPage() {
   if (!statusFilter) return <Navigate to="/orders?status=quoted" replace />
   if (!hydrated) return <p className="boot">Loading your orders…</p>
 
-  const title = statusFilter === 'draft' ? 'Drafts' : statusFilter === 'booked' ? 'Booked' : 'Quotes'
+  const title = statusFilter === 'draft' ? 'Drafts' : statusFilter === 'booked' ? 'Bookings' : 'Quotation'
+  const lede =
+    statusFilter === 'draft'
+      ? 'Jobs still being priced.'
+      : statusFilter === 'booked'
+        ? 'Orders that are booked.'
+        : 'Quotes ready to send.'
 
   return (
     <div className="page">
@@ -81,7 +87,7 @@ export function DashboardPage() {
         <div>
           <p className="eyebrow">Sales workspace</p>
           <h1>{title}</h1>
-          <p className="lede">Configure an opening with the customer, price it, and print the work order or the quote.</p>
+          <p className="lede">{lede}</p>
         </div>
         <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={startQuote}>
           {starting ? 'Starting…' : 'New quote'}
@@ -94,11 +100,11 @@ export function DashboardPage() {
           <strong>{quotes.filter((quote) => quote.status === 'draft').length}</strong>
         </article>
         <article>
-          <span>Quotes</span>
+          <span>Quotation</span>
           <strong>{quotes.filter((quote) => quote.status === 'quoted').length}</strong>
         </article>
         <article>
-          <span>Booked value</span>
+          <span>Bookings value</span>
           <strong>{formatMoney(bookedValue)}</strong>
         </article>
       </div>
@@ -129,8 +135,8 @@ export function DashboardPage() {
               : statusFilter === 'draft'
                 ? 'No drafts yet.'
                 : statusFilter === 'booked'
-                  ? 'No booked orders yet.'
-                  : 'No quotes yet.'}
+                  ? 'No bookings yet.'
+                  : 'No quotations yet.'}
           </p>
         </div>
       ) : (
@@ -190,7 +196,7 @@ export function DashboardPage() {
                   >
                     Print
                   </Button>
-                  <Button size="sm" variant="ghost" icon={<Trash2 size={15} />} onClick={() => setPendingDelete(quote.id)}>
+                  <Button size="sm" variant="danger" icon={<Trash2 size={15} />} onClick={() => setPendingDelete(quote.id)}>
                     Delete
                   </Button>
                 </div>
