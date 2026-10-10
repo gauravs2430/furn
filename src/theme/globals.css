@@ -81,7 +81,7 @@ p {
   justify-content: space-between;
   gap: 12px;
   height: 64px;
-  padding: 0 64px;
+  padding: 0 64px 0 0;
   background: #ffffff;
   border-bottom: 1px solid #d5dce4;
 }
@@ -91,6 +91,23 @@ p {
   align-items: center;
   min-width: 0;
   gap: 8px;
+}
+
+.shell-brand-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 248px;
+  flex: none;
+  transition: width 0.28s ease;
+}
+
+.app-shell.is-sidebar-collapsed .shell-brand-slot {
+  width: 64px;
+}
+
+.app-shell.is-sidebar-collapsed .shell-brand-copy {
+  display: none;
 }
 
 .shell-menu {
@@ -2212,6 +2229,16 @@ select.input {
   .shell-top {
     padding-right: 20px;
     padding-left: 20px;
+  }
+
+  .shell-brand-slot,
+  .app-shell.is-sidebar-collapsed .shell-brand-slot {
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  .app-shell.is-sidebar-collapsed .shell-brand-copy {
+    display: grid;
   }
 
   .shell-scrim {

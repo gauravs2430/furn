@@ -81,6 +81,16 @@ function linkActive(to: string, location: { pathname: string; search: string; ha
   return true
 }
 
+const SIDEBAR_KEY = 'furn.sidebar-collapsed'
+
+function readCollapsed() {
+  try {
+    return localStorage.getItem(SIDEBAR_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
   if (parts.length === 0) return '?'
@@ -97,7 +107,7 @@ export function AppShell() {
   const pricingNotice = useAppStore((state) => state.pricingNotice)
   const createQuote = useAppStore((state) => state.createQuote)
   const [drawer, setDrawer] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(readCollapsed)
   const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 860px)').matches)
   const [open, setOpen] = useState<Record<string, boolean>>({
     home: true,
@@ -130,6 +140,14 @@ export function AppShell() {
   const accountName = profile?.full_name.trim() || profile?.email || 'Account'
   const sideHidden = narrow && !drawer
   const menuOpen = narrow ? drawer : !collapsed
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0')
+    } catch {
+      // Private browsing can block storage. The sidebar still toggles for this visit.
+    }
+  }, [collapsed])
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 860px)')
@@ -222,13 +240,15 @@ export function AppShell() {
             {menuOpen ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={18} strokeWidth={1.75} aria-hidden="true" />}
             <span className="sr-only">{menuOpen ? 'Hide sidebar' : 'Show sidebar'}</span>
           </button>
-          <Link to="/" className="shell-brand">
-            <img className="shell-logo" src="/favicon.svg" alt="" width="36" height="36" />
-            <span className="shell-brand-copy">
-              <span className="shell-brand-name">{company.name}</span>
-              <span className="shell-brand-tag">{company.tagline}</span>
-            </span>
-          </Link>
+          <div className="shell-brand-slot">
+            <Link to="/" className="shell-brand">
+              <img className="shell-logo" src="/favicon.svg" alt="" width="36" height="36" />
+              <span className="shell-brand-copy">
+                <span className="shell-brand-name">{company.name}</span>
+                <span className="shell-brand-tag">{company.tagline}</span>
+              </span>
+            </Link>
+          </div>
         </div>
         <button type="button" className="shell-logout" onClick={() => void logOut()}>
           Log out
