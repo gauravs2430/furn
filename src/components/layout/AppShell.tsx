@@ -128,7 +128,7 @@ export function AppShell() {
   const isAdmin = profile?.role === 'admin'
   const nodes = visibleNavigation(navigation, isAdmin)
   const accountName = profile?.full_name.trim() || profile?.email || 'Account'
-  const sideHidden = narrow ? !drawer : collapsed
+  const sideHidden = narrow && !drawer
   const menuOpen = narrow ? drawer : !collapsed
 
   useEffect(() => {
@@ -214,7 +214,7 @@ export function AppShell() {
         <div className="shell-top-start">
           <button
             type="button"
-            className="shell-menu"
+            className="shell-menu shell-menu-bar"
             aria-expanded={menuOpen}
             aria-controls="site-nav"
             onClick={toggleSidebar}
@@ -243,6 +243,20 @@ export function AppShell() {
           aria-hidden={sideHidden || undefined}
           inert={sideHidden ? true : undefined}
         >
+          {narrow ? null : (
+            <div className="shell-rail">
+              <button
+                type="button"
+                className="shell-menu"
+                aria-expanded={menuOpen}
+                aria-controls="site-nav"
+                onClick={toggleSidebar}
+              >
+                {menuOpen ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={18} strokeWidth={1.75} aria-hidden="true" />}
+                <span className="sr-only">{menuOpen ? 'Hide sidebar' : 'Show sidebar'}</span>
+              </button>
+            </div>
+          )}
           <div className="shell-nav">
             {nodes.map((node) => (
               <SideBranch

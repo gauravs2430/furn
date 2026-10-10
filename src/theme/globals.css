@@ -198,8 +198,33 @@ p {
 }
 
 .app-shell.is-sidebar-collapsed .shell-side {
-  width: 0;
-  border-right-color: transparent;
+  width: 64px;
+}
+
+.app-shell.is-sidebar-collapsed .shell-nav {
+  display: none;
+}
+
+.app-shell.is-sidebar-collapsed .shell-account-copy {
+  display: none;
+}
+
+.app-shell.is-sidebar-collapsed .shell-account {
+  justify-content: center;
+}
+
+.app-shell.is-sidebar-collapsed .shell-account-wrap,
+.app-shell.is-sidebar-collapsed .shell-rail {
+  width: 64px;
+  min-width: 64px;
+}
+
+.shell-rail {
+  display: flex;
+  justify-content: center;
+  width: 248px;
+  min-width: 248px;
+  padding: 12px 8px 4px;
 }
 
 .shell-nav {
@@ -208,7 +233,7 @@ p {
   min-width: 248px;
   min-height: 0;
   overflow: auto;
-  padding: 12px 8px;
+  padding: 8px 8px 12px;
 }
 
 .shell-account-wrap {
@@ -2176,6 +2201,12 @@ select.input {
   }
 }
 
+@media (min-width: 861px) {
+  .shell-menu-bar {
+    display: none;
+  }
+}
+
 @media (max-width: 860px) {
   .shell-top {
     padding-right: 20px;
@@ -2215,7 +2246,10 @@ select.input {
 
   .app-shell.is-sidebar-collapsed .shell-side {
     width: min(300px, 88vw);
-    border-right-color: #d5dce4;
+  }
+
+  .shell-rail {
+    display: none;
   }
 
   .shell-side.is-open {
@@ -2471,18 +2505,20 @@ select.input {
   }
 }
 
-@media (max-width: 640px) {
-  .login-screen {
-    padding: 16px 14px max(16px, env(safe-area-inset-bottom));
-  }
-
+@media (max-width: 900px) {
   .login-split {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 420px);
+    justify-content: center;
   }
 
   .login-aside {
-    border-right: 0;
-    border-bottom: 1px solid #d5dce4;
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-screen {
+    padding: 16px 14px max(16px, env(safe-area-inset-bottom));
   }
 
   .login-brand,
