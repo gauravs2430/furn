@@ -1866,6 +1866,14 @@ select.input {
   width: 1%;
   white-space: nowrap;
   text-align: center;
+  vertical-align: middle;
+}
+
+.parts-table .part-action .btn {
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .parts-summary td {
