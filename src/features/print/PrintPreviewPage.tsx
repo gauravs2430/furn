@@ -76,7 +76,7 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
             Back
           </Button>
           <Button variant="secondary" onClick={() => navigate(`/quote/${quote.id}`)}>
-            Go to Quotation
+            {kind === 'work-order' && quote.status === 'booked' ? 'Back to Booking' : 'Go to Quotation'}
           </Button>
         </div>
         <div>

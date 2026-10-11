@@ -192,11 +192,14 @@ export function DashboardPage() {
                     size="sm"
                     variant="secondary"
                     icon={<Printer size={15} />}
-                    onClick={() =>
-                      quote.items.length
-                        ? navigate(`/quote/${quote.id}/print/quote`, { state: { from: `/orders?status=${statusFilter}` } })
-                        : pushToast('This quote has no openings to print.', 'danger')
-                    }
+                    onClick={() => {
+                      if (!quote.items.length) {
+                        pushToast('This quote has no openings to print.', 'danger')
+                        return
+                      }
+                      const printPath = quote.status === 'booked' ? 'work-order' : 'quote'
+                      navigate(`/quote/${quote.id}/print/${printPath}`, { state: { from: `/orders?status=${statusFilter}` } })
+                    }}
                   >
                     Print
                   </Button>
