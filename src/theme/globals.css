@@ -865,10 +865,109 @@ select.input {
   line-height: 1;
 }
 
+.owner-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.owner-switch button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-weight: 600;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.owner-switch button.is-on {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.owner-board {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.owner-card {
+  gap: 0;
+  padding: 20px;
+}
+
 .owner-card h2 {
-  font-size: 24px;
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: 23px;
+  font-weight: 600;
   line-height: 1.15;
   overflow-wrap: anywhere;
+}
+
+.owner-card .owner-jobs {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.owner-card .owner-id {
+  margin-top: 6px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.owner-card .owner-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.owner-card .owner-stats dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.owner-card .owner-stats dd {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.owner-card .owner-stats dd.is-booked {
+  color: var(--ok);
+}
+
+.owner-card > .btn {
+  width: 100%;
+  margin-top: auto;
+}
+
+.owner-card > .btn:focus-visible {
+  outline: 2px solid var(--glass);
+  outline-offset: 2px;
 }
 
 .owner-id {

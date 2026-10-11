@@ -45,6 +45,7 @@ export function OrdersByUserPage() {
   const [people, setPeople] = useState<OwnerCard[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [role, setRole] = useState<'admin' | 'user'>('admin')
 
   useEffect(() => {
     if (profile?.role !== 'admin') return
@@ -99,7 +100,8 @@ export function OrdersByUserPage() {
   if (!profile) return <p className="boot">Checking login…</p>
   if (profile.role !== 'admin') return <Navigate to="/" replace />
 
-  const visible = (people ?? []).filter((person) => matchesQuery(query, displayName(person), person.email, person.id))
+  const inRole = (people ?? []).filter((person) => person.role === role)
+  const visible = inRole.filter((person) => matchesQuery(query, displayName(person), person.email, person.id))
   const searching = query.trim().length > 0
 
   return (
@@ -130,48 +132,55 @@ export function OrdersByUserPage() {
       ) : null}
 
       {people && people.length === 0 ? <p>No one is listed yet.</p> : null}
-      {people && people.length > 0 && visible.length === 0 ? <p>{searching ? 'No one matches that search.' : 'No one is listed yet.'}</p> : null}
 
-      {visible.length > 0 ? (
-        <ul className="job-grid">
-          {visible.map((person) => {
-            const total = person.drafts + person.quoted + person.booked
-            return (
-              <li key={person.id} className="job-card owner-card">
-                <div className="job-top">
-                  <span className={person.role === 'admin' ? 'badge badge-quoted' : 'badge badge-draft'}>
-                    {person.role === 'admin' ? 'Admin' : 'User'}
-                  </span>
-                  <span className="job-no">
-                    {total} {total === 1 ? 'job' : 'jobs'}
-                  </span>
-                </div>
-                <h2>{displayName(person)}</h2>
-                <p className="job-ref">{person.email || 'No email'}</p>
-                <p className="owner-id">{person.id}</p>
-                <dl className="job-meta">
-                  <div>
-                    <dt>Drafts</dt>
-                    <dd>{person.drafts}</dd>
-                  </div>
-                  <div>
-                    <dt>Quotations</dt>
-                    <dd>{person.quoted}</dd>
-                  </div>
-                  <div>
-                    <dt>Bookings</dt>
-                    <dd>{person.booked}</dd>
-                  </div>
-                </dl>
-                <div className="job-actions">
-                  <Link className="btn btn-sm" to={`/admin/orders/users/${person.id}`}>
-                    View orders
-                  </Link>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+      {people && people.length > 0 ? (
+        <>
+          <div className="owner-switch" role="group" aria-label="Role">
+            <button type="button" aria-pressed={role === 'admin'} className={role === 'admin' ? 'is-on' : ''} onClick={() => setRole('admin')}>
+              Admin
+            </button>
+            <button type="button" aria-pressed={role === 'user'} className={role === 'user' ? 'is-on' : ''} onClick={() => setRole('user')}>
+              User
+            </button>
+          </div>
+          <div className="owner-board">
+            {visible.length === 0 ? (
+              <p>{searching ? 'No one matches that search.' : role === 'admin' ? 'No admins are listed.' : 'No users are listed.'}</p>
+            ) : (
+              <ul className="job-grid">
+                {visible.map((person) => {
+                  const total = person.drafts + person.quoted + person.booked
+                  return (
+                    <li key={person.id} className="job-card owner-card">
+                      <p className="owner-jobs">
+                        {total} {total === 1 ? 'job' : 'jobs'}
+                      </p>
+                      <h2>{displayName(person)}</h2>
+                      <p className="owner-id">{person.id}</p>
+                      <dl className="owner-stats">
+                        <div>
+                          <dt>Drafts</dt>
+                          <dd>{person.drafts}</dd>
+                        </div>
+                        <div>
+                          <dt>Quotations</dt>
+                          <dd>{person.quoted}</dd>
+                        </div>
+                        <div>
+                          <dt>Bookings</dt>
+                          <dd className={person.booked > 0 ? 'is-booked' : undefined}>{person.booked}</dd>
+                        </div>
+                      </dl>
+                      <Link className="btn" to={`/admin/orders/users/${person.id}`}>
+                        View orders
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+        </>
       ) : null}
     </div>
   )
