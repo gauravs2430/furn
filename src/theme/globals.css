@@ -893,50 +893,68 @@ select.input {
 }
 
 .owner-board {
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  padding: 0;
+  border: 0;
 }
 
 .owner-card {
   gap: 0;
-  padding: 20px;
+  padding: 16px;
+}
+
+.owner-card .owner-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .owner-card h2 {
-  margin-top: 8px;
+  margin: 0;
+  min-width: 0;
   color: var(--ink);
-  font-size: 23px;
+  font-size: 22px;
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 }
 
 .owner-card .owner-jobs {
+  flex: 0 0 auto;
   margin: 0;
   color: var(--ink-soft);
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  white-space: nowrap;
 }
 
 .owner-card .owner-id {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.45;
   overflow-wrap: anywhere;
 }
 
 .owner-card .owner-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
-  margin: 16px 0 18px;
-  padding-top: 14px;
+  margin: 14px 0;
+  padding-top: 12px;
   border-top: 1px solid var(--line);
+}
+
+.owner-card .owner-stats > div:nth-child(2) {
+  text-align: center;
+}
+
+.owner-card .owner-stats > div:last-child {
+  text-align: right;
 }
 
 .owner-card .owner-stats dt {
@@ -945,10 +963,11 @@ select.input {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .owner-card .owner-stats dd {
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   color: var(--ink);
   font-size: 22px;
   font-weight: 700;

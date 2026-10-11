@@ -152,10 +152,12 @@ export function OrdersByUserPage() {
                   const total = person.drafts + person.quoted + person.booked
                   return (
                     <li key={person.id} className="job-card owner-card">
-                      <p className="owner-jobs">
-                        {total} {total === 1 ? 'job' : 'jobs'}
-                      </p>
-                      <h2>{displayName(person)}</h2>
+                      <div className="owner-head">
+                        <h2>{displayName(person)}</h2>
+                        <p className="owner-jobs">
+                          {total} {total === 1 ? 'job' : 'jobs'}
+                        </p>
+                      </div>
                       <p className="owner-id">{person.id}</p>
                       <dl className="owner-stats">
                         <div>
