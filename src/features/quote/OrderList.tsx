@@ -15,12 +15,13 @@ interface OrderListProps {
   items: QuoteItem[]
   pricingConfig: PricingConfig
   editingId: string | null
+  locked?: boolean
   onEdit: (item: QuoteItem) => void
   onDuplicate: (id: string) => void
   onDelete: (item: QuoteItem) => void
 }
 
-export function OrderList({ items, pricingConfig, editingId, onEdit, onDuplicate, onDelete }: OrderListProps) {
+export function OrderList({ items, pricingConfig, editingId, locked = false, onEdit, onDuplicate, onDelete }: OrderListProps) {
   const catalogue = useAppStore((state) => state.catalogue)
   const [query, setQuery] = useState('')
   const showSearch = items.length > 1
@@ -95,17 +96,19 @@ export function OrderList({ items, pricingConfig, editingId, onEdit, onDuplicate
                   <span>{formatMoney(price.unitPrice)} each</span>
                   <strong>{formatMoney(price.lineTotal)}</strong>
                 </div>
-                <div className="order-actions">
-                  <Button size="sm" variant="secondary" icon={<Pencil size={15} />} onClick={() => onEdit(item)}>
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="secondary" icon={<Copy size={15} />} onClick={() => onDuplicate(item.id)}>
-                    Duplicate
-                  </Button>
-                  <Button size="sm" variant="danger" icon={<Trash2 size={15} />} onClick={() => onDelete(item)}>
-                    Delete
-                  </Button>
-                </div>
+                {locked ? null : (
+                  <div className="order-actions">
+                    <Button size="sm" variant="secondary" icon={<Pencil size={15} />} onClick={() => onEdit(item)}>
+                      Edit
+                    </Button>
+                    <Button size="sm" variant="secondary" icon={<Copy size={15} />} onClick={() => onDuplicate(item.id)}>
+                      Duplicate
+                    </Button>
+                    <Button size="sm" variant="danger" icon={<Trash2 size={15} />} onClick={() => onDelete(item)}>
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </li>
             )
           })}

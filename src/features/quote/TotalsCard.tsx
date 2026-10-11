@@ -6,11 +6,13 @@ import { NumberField } from '../../components/ui/Field.tsx'
 interface TotalsCardProps {
   quote: Quote
   totals: QuoteTotals
+  discountMax: number
+  locked?: boolean
   onDiscount: (value: number) => void
   onTax: (value: number) => void
 }
 
-export function TotalsCard({ quote, totals, onDiscount, onTax }: TotalsCardProps) {
+export function TotalsCard({ quote, totals, discountMax, locked = false, onDiscount, onTax }: TotalsCardProps) {
   return (
     <aside className="card totals-card">
       <h2>Order total</h2>
@@ -24,13 +26,14 @@ export function TotalsCard({ quote, totals, onDiscount, onTax }: TotalsCardProps
           suffix="%"
           value={quote.discountPercent}
           min={LIMITS.discountMin}
-          max={LIMITS.discountMax}
+          max={discountMax}
+          disabled={locked}
           onChange={onDiscount}
         />
         <span>{formatMoney(totals.discountAmount)}</span>
       </div>
       <div className="total-row total-input">
-        <NumberField label="VAT" suffix="%" value={quote.taxPercent} min={LIMITS.taxMin} max={LIMITS.taxMax} onChange={onTax} />
+        <NumberField label="VAT" suffix="%" value={quote.taxPercent} min={LIMITS.taxMin} max={LIMITS.taxMax} disabled={locked} onChange={onTax} />
         <span>{formatMoney(totals.taxAmount)}</span>
       </div>
       <div className="total-grand">

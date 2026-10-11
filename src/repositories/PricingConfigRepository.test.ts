@@ -8,6 +8,7 @@ describe('pricing config rows', () => {
     expect(config?.partPrices.frame).toBe(pricingDefaults.partPrices.frame)
     expect(config?.markupPercent).toBe(30)
     expect(config?.taxPercent).toBe(20)
+    expect(config?.discountMaxPercent).toBe(100)
   })
 
   it('rejects a row that is missing catalogue prices', () => {

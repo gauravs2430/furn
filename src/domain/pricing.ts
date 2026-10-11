@@ -22,8 +22,14 @@ export function calculateSubtotal(items: QuoteItem[], config: PricingConfig, cat
   return roundMoney(items.reduce((sum, item) => sum + calculateItemPrice(item, config, catalogue).lineTotal, 0))
 }
 
-export function calculateDiscount(subtotal: number, discountPercent: number): number {
-  const percent = Math.min(100, Math.max(0, discountPercent))
+export function discountCap(config: PricingConfig): number {
+  const cap = config.discountMaxPercent
+  if (typeof cap !== 'number' || !Number.isFinite(cap)) return 100
+  return Math.min(100, Math.max(0, cap))
+}
+
+export function calculateDiscount(subtotal: number, discountPercent: number, max = 100): number {
+  const percent = Math.min(max, Math.max(0, discountPercent))
   return roundMoney(subtotal * (percent / 100))
 }
 
@@ -38,7 +44,7 @@ export function calculateGrandTotal(net: number, tax: number): number {
 
 export function calculateQuoteTotals(quote: Quote, config: PricingConfig, catalogue: Catalogue = currentCatalogue()): QuoteTotals {
   const subtotal = calculateSubtotal(quote.items, config, catalogue)
-  const discountAmount = calculateDiscount(subtotal, quote.discountPercent)
+  const discountAmount = calculateDiscount(subtotal, quote.discountPercent, discountCap(config))
   const net = roundMoney(subtotal - discountAmount)
   const taxAmount = calculateTax(net, quote.taxPercent)
   return {

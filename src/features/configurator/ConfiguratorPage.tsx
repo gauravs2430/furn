@@ -5,7 +5,7 @@ import type { Quote, QuoteItem } from '../../domain/models.ts'
 import { itemProductId } from '../../domain/models.ts'
 import { useAuthStore } from '../../auth/session.ts'
 import { createQuoteItem } from '../../domain/factories.ts'
-import { calculateItemPrice, calculateQuoteTotals } from '../../domain/pricing.ts'
+import { calculateItemPrice, calculateQuoteTotals, discountCap } from '../../domain/pricing.ts'
 import { validateCustomer, validateItem, clampPercent } from '../../domain/validation.ts'
 import { LIMITS } from '../../data/pricingDefaults.ts'
 import { quoteRepository, useAppStore } from '../../store/useAppStore.ts'
@@ -108,7 +108,8 @@ export function ConfiguratorPage() {
 
   useEffect(() => {
     if (!booted.current || !id || !item) return
-    if (!useAppStore.getState().quotes.some((entry) => entry.id === id)) return
+    const current = useAppStore.getState().quotes.find((entry) => entry.id === id)
+    if (!current || current.status === 'booked') return
     void updateQuote(id, { configDraft: item, editingItemId: editingId }, { touch: false })
   }, [item, editingId, id, updateQuote])
 
@@ -163,6 +164,7 @@ export function ConfiguratorPage() {
   }
 
   function addOpening() {
+    if (activeQuote.status === 'booked') return
     if (issues.length > 0) {
       pushToast(issues[0]?.message ?? 'Check the opening.', 'danger')
       return
@@ -176,6 +178,7 @@ export function ConfiguratorPage() {
   }
 
   function saveOpening() {
+    if (activeQuote.status === 'booked') return
     if (!editingId) return
     if (issues.length > 0) {
       pushToast(issues[0]?.message ?? 'Check the opening.', 'danger')
@@ -221,84 +224,95 @@ export function ConfiguratorPage() {
           <StatusBadge status={activeQuote.status} />
         </div>
         <div className="quote-actions">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={savingDraft}
-            aria-busy={savingDraft}
-            onClick={() => {
-              if (savingDraft) return
-              const mark = saveMark.current
-              setSavingDraft(true)
-              void flushQuote(activeQuote.id).then((ok) => {
-                if (ok && mark === saveMark.current) setDraftSaved(true)
-                setSavingDraft(false)
-              })
-            }}
-          >
-            {savingDraft ? 'Saving…' : draftSaved ? 'Saved' : 'Save draft'}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              if (!quoteReady('mark it as quoted')) return
-              void setStatus(activeQuote.id, 'quoted').then((ok) => {
-                if (ok) pushToast('Marked as quoted')
-              })
-            }}
-          >
-            Mark quoted
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              if (!quoteReady('book it')) return
-              setBookOpen(true)
-            }}
-          >
-            Book order
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Printer size={15} />}
-            onClick={() =>
-              activeQuote.items.length
-                ? navigate(`/quote/${activeQuote.id}/print/quote`, { state: { from: `/quote/${activeQuote.id}` } })
-                : pushToast('Add an opening before printing.', 'danger')
-            }
-          >
-            Print quote
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Printer size={15} />}
-            onClick={() =>
-              activeQuote.items.length
-                ? navigate(`/quote/${activeQuote.id}/print/work-order`, { state: { from: `/quote/${activeQuote.id}` } })
-                : pushToast('Add an opening before printing.', 'danger')
-            }
-          >
-            Print work order
-          </Button>
+          {activeQuote.status === 'draft' ? (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={savingDraft}
+                aria-busy={savingDraft}
+                onClick={() => {
+                  if (savingDraft) return
+                  const mark = saveMark.current
+                  setSavingDraft(true)
+                  void flushQuote(activeQuote.id).then((ok) => {
+                    if (ok && mark === saveMark.current) setDraftSaved(true)
+                    setSavingDraft(false)
+                  })
+                }}
+              >
+                {savingDraft ? 'Saving…' : draftSaved ? 'Saved' : 'Save draft'}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  if (!quoteReady('mark it as quoted')) return
+                  void setStatus(activeQuote.id, 'quoted').then((ok) => {
+                    if (ok) pushToast('Marked as quoted')
+                  })
+                }}
+              >
+                Mark quoted
+              </Button>
+            </>
+          ) : null}
+          {activeQuote.status === 'booked' ? null : (
+            <Button
+              size="sm"
+              onClick={() => {
+                if (!quoteReady('book it')) return
+                setBookOpen(true)
+              }}
+            >
+              Book order
+            </Button>
+          )}
+          {activeQuote.status === 'quoted' ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Printer size={15} />}
+              onClick={() =>
+                activeQuote.items.length
+                  ? navigate(`/quote/${activeQuote.id}/print/quote`, { state: { from: `/quote/${activeQuote.id}` } })
+                  : pushToast('Add an opening before printing.', 'danger')
+              }
+            >
+              Print quote
+            </Button>
+          ) : null}
+          {activeQuote.status === 'booked' ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Printer size={15} />}
+              onClick={() =>
+                activeQuote.items.length
+                  ? navigate(`/quote/${activeQuote.id}/print/work-order`, { state: { from: `/quote/${activeQuote.id}` } })
+                  : pushToast('Add an opening before printing.', 'danger')
+              }
+            >
+              Print work order
+            </Button>
+          ) : null}
         </div>
       </div>
 
       <div className="config-layout">
-        <div className="config-forms">
+        <fieldset className="config-forms" disabled={activeQuote.status === 'booked'}>
           <CustomerForm quote={activeQuote} onChange={(patch) => updateQuote(activeQuote.id, patch)} />
           <OpeningForm item={draft} onChange={setItem} />
           <AppearanceForm item={draft} onChange={setItem} />
           <TechnicalForm item={draft} onChange={setItem} />
-        </div>
+        </fieldset>
         <div className="preview-column">
           <div className="preview-sticky">
             <PreviewCard
               item={draft}
               pricing={pricing}
               issues={issues}
+              locked={activeQuote.status === 'booked'}
               editing={editingId !== null}
               onChange={setItem}
               onAdd={addOpening}
@@ -326,6 +340,7 @@ export function ConfiguratorPage() {
             key={activeQuote.id}
             items={activeQuote.items}
             pricingConfig={pricingConfig}
+            locked={activeQuote.status === 'booked'}
             editingId={editingId}
             onEdit={(entry) => {
               setItem(structuredClone(entry))
@@ -342,7 +357,9 @@ export function ConfiguratorPage() {
           <TotalsCard
             quote={activeQuote}
             totals={totals}
-            onDiscount={(value) => updateQuote(activeQuote.id, { discountPercent: clampPercent(value, LIMITS.discountMax) })}
+            locked={activeQuote.status === 'booked'}
+            discountMax={discountCap(pricingConfig)}
+            onDiscount={(value) => updateQuote(activeQuote.id, { discountPercent: clampPercent(value, discountCap(pricingConfig)) })}
             onTax={(value) => updateQuote(activeQuote.id, { taxPercent: clampPercent(value, LIMITS.taxMax) })}
           />
         </div>
@@ -389,9 +406,9 @@ export function ConfiguratorPage() {
       />
       <ConfirmDialog
         open={bookOpen}
-        title="Book this order?"
-        description="The status becomes Booked. You can still print the work order and the invoice."
-        confirmLabel="Book order"
+        title="Confirm this booking?"
+        description="The order will be booked and can no longer be edited. You can still print the work order."
+        confirmLabel="Confirm booking"
         onOpenChange={setBookOpen}
         onConfirm={() => {
           setBookOpen(false)

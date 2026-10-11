@@ -79,7 +79,7 @@ export function PricesPage() {
           <h1>Prices</h1>
         </div>
       </div>
-      <p className="lede">Markup is added on top of the parts cost. VAT is the tax a new quote starts with.</p>
+      <p className="lede">Markup is added on top of the parts cost. VAT is the tax a new quote starts with. Discount cap is the highest discount a quote can use.</p>
       <div className="card prices-card">
         <div className="form-grid">
           <NumberField label="Markup" suffix="%" value={config.markupPercent} min={0} onChange={(markupPercent) => patch({ markupPercent })} />
@@ -89,6 +89,14 @@ export function PricesPage() {
             value={config.taxPercent}
             min={0}
             onChange={(taxPercent) => patch({ taxPercent })}
+          />
+          <NumberField
+            label="Discount cap"
+            suffix="%"
+            value={config.discountMaxPercent ?? 100}
+            min={0}
+            max={100}
+            onChange={(discountMaxPercent) => patch({ discountMaxPercent })}
           />
         </div>
         {error ? <p className="form-error">{error}</p> : null}

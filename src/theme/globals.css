@@ -1407,6 +1407,19 @@ select.input {
   margin-bottom: 0;
 }
 
+.config-forms {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.config-forms:disabled {
+  opacity: 1;
+}
+
 .card {
   padding: 16px;
   margin-bottom: 14px;

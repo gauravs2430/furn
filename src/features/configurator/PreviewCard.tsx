@@ -19,13 +19,14 @@ interface PreviewCardProps {
   pricing: ItemPricing
   issues: ValidationIssue[]
   editing: boolean
+  locked?: boolean
   onChange: (item: QuoteItem) => void
   onAdd: () => void
   onUpdate: () => void
   onCancel: () => void
 }
 
-export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, onUpdate, onCancel }: PreviewCardProps) {
+export function PreviewCard({ item, pricing, issues, editing, locked = false, onChange, onAdd, onUpdate, onCancel }: PreviewCardProps) {
   const catalogue = useAppStore((state) => state.catalogue)
   const markupPercent = useAppStore((state) => state.pricingConfig.markupPercent)
   const [large, setLarge] = useState(false)
@@ -73,7 +74,7 @@ export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, o
         </div>
       ) : null}
       <div className="preview-actions">
-        {editing ? (
+        {locked ? null : editing ? (
           <>
             <Button onClick={onUpdate} disabled={blocked}>
               Update opening
@@ -124,9 +125,11 @@ export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, o
                     <td className="num">{formatMoney(part.unitPrice)}</td>
                     <td className="num">{formatMoney(part.quantity * part.unitPrice)}</td>
                     <td className="part-action">
-                      <Button size="sm" variant="danger" onClick={() => setPendingRemove(part)}>
-                        Remove
-                      </Button>
+                      {locked ? null : (
+                        <Button size="sm" variant="danger" onClick={() => setPendingRemove(part)}>
+                          Remove
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -160,11 +163,13 @@ export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, o
               </tbody>
             </table>
           </div>
-          <div className="parts-add">
-            <Button variant="secondary" size="sm" onClick={() => setAddOpen(true)}>
-              Add from inventory
-            </Button>
-          </div>
+          {locked ? null : (
+            <div className="parts-add">
+              <Button variant="secondary" size="sm" onClick={() => setAddOpen(true)}>
+                Add from inventory
+              </Button>
+            </div>
+          )}
         </div>
       ) : null}
       {drawing ? (

@@ -169,6 +169,8 @@ export interface WorkOrderData {
 export interface PricingConfig {
   markupPercent: number
   taxPercent: number
+  /** Highest discount a quote may use. Missing on older price lists, which means 100. */
+  discountMaxPercent?: number
   partPrices: Record<string, number>
   materialFactors: Record<string, number>
   glazingAddons: Record<string, number>

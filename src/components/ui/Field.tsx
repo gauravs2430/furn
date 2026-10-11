@@ -84,9 +84,10 @@ interface NumberFieldProps {
   step?: number
   suffix?: string
   stepper?: boolean
+  disabled?: boolean
 }
 
-export function NumberField({ label, value, onChange, min, max, step = 1, suffix, stepper = false }: NumberFieldProps) {
+export function NumberField({ label, value, onChange, min, max, step = 1, suffix, stepper = false, disabled = false }: NumberFieldProps) {
   const id = useId()
   const [text, setText] = useState(String(value))
   const [source, setSource] = useState(value)
@@ -119,6 +120,7 @@ export function NumberField({ label, value, onChange, min, max, step = 1, suffix
       id={id}
       className="input"
       inputMode="decimal"
+      disabled={disabled}
       value={text}
       onChange={(event) => {
         setText(event.target.value)
@@ -137,11 +139,11 @@ export function NumberField({ label, value, onChange, min, max, step = 1, suffix
       </span>
       {stepper ? (
         <span className="stepper">
-          <button type="button" className="stepper-btn" onClick={() => nudge(-1)} aria-label={`Decrease ${label}`}>
+          <button type="button" className="stepper-btn" disabled={disabled} onClick={() => nudge(-1)} aria-label={`Decrease ${label}`}>
             −
           </button>
           {input}
-          <button type="button" className="stepper-btn" onClick={() => nudge(1)} aria-label={`Increase ${label}`}>
+          <button type="button" className="stepper-btn" disabled={disabled} onClick={() => nudge(1)} aria-label={`Increase ${label}`}>
             +
           </button>
         </span>

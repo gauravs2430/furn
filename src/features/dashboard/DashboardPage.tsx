@@ -200,7 +200,14 @@ export function DashboardPage() {
                   >
                     Print
                   </Button>
-                  <Button size="sm" variant="danger" icon={<Trash2 size={15} />} onClick={() => setPendingDelete(quote.id)}>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    icon={<Trash2 size={15} />}
+                    disabled={quote.status === 'booked'}
+                    title={quote.status === 'booked' ? 'Booked orders cannot be changed.' : undefined}
+                    onClick={() => setPendingDelete(quote.id)}
+                  >
                     Delete
                   </Button>
                 </div>

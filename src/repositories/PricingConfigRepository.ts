@@ -42,9 +42,14 @@ export function pricingConfigFromJson(value: unknown): PricingConfig | null {
   const glazingAddons = numberRecord(raw.glazingAddons, Object.keys(pricingDefaults.glazingAddons))
   const productFactors = numberRecord(raw.productFactors, Object.keys(pricingDefaults.productFactors))
   if (!partPrices || !materialFactors || !glazingAddons || !productFactors) return null
+  const discountMaxPercent =
+    typeof raw.discountMaxPercent === 'number' && Number.isFinite(raw.discountMaxPercent)
+      ? Math.min(100, Math.max(0, raw.discountMaxPercent))
+      : 100
   return {
     markupPercent: raw.markupPercent,
     taxPercent: raw.taxPercent,
+    discountMaxPercent,
     partPrices,
     materialFactors,
     glazingAddons,

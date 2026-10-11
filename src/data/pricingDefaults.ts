@@ -35,6 +35,7 @@ export const partCatalog: PartDefinition[] = [
 export const pricingDefaults: PricingConfig = {
   markupPercent: 30,
   taxPercent: 20,
+  discountMaxPercent: 100,
   partPrices: Object.fromEntries(partCatalog.map((part) => [part.id, part.price])),
   materialFactors: Object.fromEntries(materials.map((material) => [material.id, material.factor])),
   glazingAddons: Object.fromEntries(glazingOptions.map((option) => [option.id, option.addonPerM2])),
