@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { CatalogPart } from '../../domain/catalogue.ts'
 import type { ItemPricing, PartLine, QuoteItem } from '../../domain/models.ts'
 import type { ValidationIssue } from '../../domain/validation.ts'
-import { findColour, findGlazing, findMaterial, findProduct } from '../../domain/catalogue.ts'
+import { findColour, findProduct } from '../../domain/catalogue.ts'
 import { isDrawingFamily, itemProductId } from '../../domain/models.ts'
 import { addPartToItem, partUnitPrice, removePartFromItem } from '../../domain/parts.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
@@ -93,15 +93,9 @@ export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, o
           </Button>
         ) : null}
       </div>
-      <ul className="spec-chips">
-        <li>{findMaterial(item.materialId, catalogue).name}</li>
-        <li>{findGlazing(item.glazingId, catalogue).name}</li>
-        <li>{colour.name}</li>
-        <li>Qty {item.quantity}</li>
-      </ul>
-      <button type="button" className="text-link" aria-expanded={partsOpen} onClick={() => setPartsOpen((open) => !open)}>
-        {partsOpen ? 'Hide price build-up' : 'How this price is built'}
-      </button>
+      <Button variant="secondary" size="sm" className="parts-edit" aria-expanded={partsOpen} onClick={() => setPartsOpen((open) => !open)}>
+        {partsOpen ? 'Hide internal parts' : 'Edit internal parts'}
+      </Button>
       {partsOpen ? (
         <div className="parts-build">
           <div className="parts-scroll">

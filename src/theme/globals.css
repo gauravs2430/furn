@@ -1361,7 +1361,7 @@ select.input {
 }
 
 .quote-bar {
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
   gap: 16px 24px;
   margin-bottom: 18px;
@@ -1820,6 +1820,11 @@ select.input {
 .prices-banner {
   max-width: 1180px;
   margin: 0 auto 12px;
+}
+
+.parts-edit {
+  width: 100%;
+  margin-top: 2px;
 }
 
 .text-link {
