@@ -93,9 +93,12 @@ export function PreviewCard({ item, pricing, issues, editing, onChange, onAdd, o
           </Button>
         ) : null}
       </div>
-      <Button variant="secondary" size="sm" className="parts-edit" aria-expanded={partsOpen} onClick={() => setPartsOpen((open) => !open)}>
-        {partsOpen ? 'Hide internal parts' : 'Edit internal parts'}
-      </Button>
+      <div className="parts-intro">
+        <p>How price is built up</p>
+        <Button variant="secondary" aria-expanded={partsOpen} onClick={() => setPartsOpen((open) => !open)}>
+          {partsOpen ? 'Hide internal parts' : 'See internal parts'}
+        </Button>
+      </div>
       {partsOpen ? (
         <div className="parts-build">
           <div className="parts-scroll">

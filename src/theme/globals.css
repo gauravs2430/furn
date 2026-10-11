@@ -1767,12 +1767,12 @@ select.input {
 .preview-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   margin-top: 14px;
 }
 
 .preview-actions .btn {
-  flex: 1 1 140px;
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -1822,9 +1822,20 @@ select.input {
   margin: 0 auto 12px;
 }
 
-.parts-edit {
+.parts-intro {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.parts-intro p {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.parts-intro .btn {
   width: 100%;
-  margin-top: 2px;
 }
 
 .text-link {
@@ -1838,7 +1849,7 @@ select.input {
 }
 
 .parts-build {
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .parts-scroll {
