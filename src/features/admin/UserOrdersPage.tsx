@@ -4,6 +4,7 @@ import { useAuthStore } from '../../auth/session.ts'
 import { StatusBadge } from '../../components/ui/Badge.tsx'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
 import { supabase } from '../../lib/supabase.ts'
+import type { QuoteStatus } from '../../domain/models.ts'
 import type { QuoteAccessRow } from '../../repositories/SupabaseQuoteRepository.ts'
 import { quoteRepository, useAppStore } from '../../store/useAppStore.ts'
 import { formatDateTime } from '../../utils/dates.ts'
@@ -24,6 +25,12 @@ function listedPerson(value: unknown): ListedPerson | null {
     full_name: typeof row.full_name === 'string' ? row.full_name : '',
   }
 }
+
+const sections: { status: QuoteStatus; title: string; empty: string }[] = [
+  { status: 'booked', title: 'Booked', empty: 'No booked orders.' },
+  { status: 'quoted', title: 'Quotations', empty: 'No quotations.' },
+  { status: 'draft', title: 'Drafts', empty: 'No drafts.' },
+]
 
 function messageFrom(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
@@ -95,7 +102,7 @@ export function UserOrdersPage() {
 
   if (!profile) return <p className="boot">Checking login…</p>
   if (profile.role !== 'admin') return <Navigate to="/" replace />
-  if (!userId) return <Navigate to="/admin/users" replace />
+  if (!userId) return <Navigate to="/admin/orders/users" replace />
 
   const ready = loadedFor === userId
   const shownPerson = ready ? person : null
@@ -108,12 +115,14 @@ export function UserOrdersPage() {
     <div className="page">
       <div className="page-head">
         <div>
-          <p className="eyebrow">Orders</p>
-          <h1>{shownPerson ? shownPerson.full_name.trim() || '—' : 'Orders'}</h1>
-          {shownPerson ? <p className="lede">{shownPerson.email}</p> : null}
-          <nav className="page-links" aria-label="Admin">
-            <Link to="/admin/users">People</Link>
-          </nav>
+          <p className="eyebrow">Orders per user</p>
+          <h1>{shownPerson ? shownPerson.full_name.trim() || shownPerson.email : 'Orders'}</h1>
+          {shownPerson ? (
+            <p className="lede">
+              {shownPerson.email}
+              <span className="owner-id">{userId}</span>
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -135,51 +144,61 @@ export function UserOrdersPage() {
       ) : null}
 
       {shownRows && shownRows.length === 0 ? <p>No orders yet.</p> : null}
-      {shownRows && shownRows.length > 0 && visible.length === 0 ? <p>{searching ? 'Nothing matches that search.' : 'No orders yet.'}</p> : null}
-      {visible.length > 0 ? (
-        <div className="table-scroll">
-          <table className="admin-orders">
-            <thead>
-              <tr>
-                <th>Job</th>
-                <th>Customer</th>
-                <th>Status</th>
-                <th>Updated</th>
-                <th>Total</th>
-                <th>
-                  <span className="sr-only">Print</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((row) => {
-                const total = calculateQuoteTotals(row.quote, pricingConfig, catalogue).grandTotal
-                return (
-                  <tr key={row.quote.id}>
-                    <td>{row.quote.jobNo}</td>
-                    <td>{row.quote.customer.name.trim() || 'Unnamed customer'}</td>
-                    <td>
-                      <StatusBadge status={row.quote.status} />
-                    </td>
-                    <td>{formatDateTime(row.updatedAt)}</td>
-                    <td className="num">{formatMoney(total)}</td>
-                    <td>
-                      <div className="page-links">
-                        <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/quote`} state={{ from: `/admin/users/${userId}/orders` }}>
-                          Print quote
-                        </Link>
-                        <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/work-order`} state={{ from: `/admin/users/${userId}/orders` }}>
-                          Print work order
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
+      {shownRows && shownRows.length > 0
+        ? sections.map((section) => {
+            const items = visible.filter((row) => row.quote.status === section.status)
+            return (
+              <section key={section.status} className="people-section" aria-labelledby={`user-orders-${section.status}`}>
+                <h2 id={`user-orders-${section.status}`}>{section.title}</h2>
+                {items.length === 0 ? <p>{searching ? 'Nothing matches that search.' : section.empty}</p> : null}
+                {items.length > 0 ? (
+                  <div className="table-scroll">
+                    <table className="admin-orders">
+                      <thead>
+                        <tr>
+                          <th>Job</th>
+                          <th>Customer</th>
+                          <th>Status</th>
+                          <th>Updated</th>
+                          <th>Total</th>
+                          <th>
+                            <span className="sr-only">Print</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((row) => {
+                          const total = calculateQuoteTotals(row.quote, pricingConfig, catalogue).grandTotal
+                          return (
+                            <tr key={row.quote.id}>
+                              <td>{row.quote.jobNo}</td>
+                              <td>{row.quote.customer.name.trim() || 'Unnamed customer'}</td>
+                              <td>
+                                <StatusBadge status={row.quote.status} />
+                              </td>
+                              <td>{formatDateTime(row.updatedAt)}</td>
+                              <td className="num">{formatMoney(total)}</td>
+                              <td>
+                                <div className="page-links">
+                                  <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/quote`} state={{ from: `/admin/orders/users/${userId}` }}>
+                                    Print quote
+                                  </Link>
+                                  <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/work-order`} state={{ from: `/admin/orders/users/${userId}` }}>
+                                    Print work order
+                                  </Link>
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
+              </section>
+            )
+          })
+        : null}
     </div>
   )
 }

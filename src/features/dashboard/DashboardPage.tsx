@@ -188,21 +188,23 @@ export function DashboardPage() {
                   >
                     {duplicatingId === quote.id ? 'Duplicating…' : 'Duplicate'}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    icon={<Printer size={15} />}
-                    onClick={() => {
-                      if (!quote.items.length) {
-                        pushToast('This quote has no openings to print.', 'danger')
-                        return
-                      }
-                      const printPath = quote.status === 'booked' ? 'work-order' : 'quote'
-                      navigate(`/quote/${quote.id}/print/${printPath}`, { state: { from: `/orders?status=${statusFilter}` } })
-                    }}
-                  >
-                    Print
-                  </Button>
+                  {quote.status === 'draft' ? null : (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      icon={<Printer size={15} />}
+                      onClick={() => {
+                        if (!quote.items.length) {
+                          pushToast('This quote has no openings to print.', 'danger')
+                          return
+                        }
+                        const printPath = quote.status === 'booked' ? 'work-order' : 'quote'
+                        navigate(`/quote/${quote.id}/print/${printPath}`, { state: { from: `/orders?status=${statusFilter}` } })
+                      }}
+                    >
+                      Print
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="danger"

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { dayAfter, expiryOnOrBeforeToday, isDateAfter, localToday, userAccessLocked } from '../../auth/access.ts'
 import { useAuthStore } from '../../auth/session.ts'
 import { Button } from '../../components/ui/Button.tsx'
@@ -479,14 +479,9 @@ export function AdminPage() {
                         </td>
                         <td>{formatDate(person.created_at)}</td>
                         <td>
-                          <div className="people-actions">
-                            <Link className="btn btn-sm btn-secondary" to={`/admin/users/${person.id}/orders`}>
-                              Orders
-                            </Link>
-                            <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
-                              Set a new password
-                            </Button>
-                          </div>
+                          <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
+                            Set a new password
+                          </Button>
                         </td>
                       </tr>
                     )

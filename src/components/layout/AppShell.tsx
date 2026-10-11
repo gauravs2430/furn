@@ -37,6 +37,7 @@ const navigation: NavGroup[] = [
     admin: true,
     items: [
       { type: 'link', to: '/admin/orders', label: 'All orders' },
+      { type: 'link', to: '/admin/orders/users', label: 'Orders per user' },
       {
         type: 'group',
         id: 'manage',
@@ -72,6 +73,12 @@ function linkActive(to: string, location: { pathname: string; search: string; ha
   const queryIndex = withoutHash.indexOf('?')
   const path = queryIndex >= 0 ? withoutHash.slice(0, queryIndex) : withoutHash
   const search = queryIndex >= 0 ? withoutHash.slice(queryIndex) : ''
+  if (
+    path === '/admin/orders/users' &&
+    (location.pathname.startsWith('/admin/orders/users/') || /^\/admin\/users\/[^/]+\/orders$/.test(location.pathname))
+  ) {
+    return true
+  }
   if (location.pathname !== path) return false
   const wantedStatus = new URLSearchParams(search).get('status') ?? ''
   const currentStatus = new URLSearchParams(location.search).get('status') ?? ''

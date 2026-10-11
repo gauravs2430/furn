@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { X } from 'lucide-react'
 import type { CatalogPart } from '../../domain/catalogue.ts'
 import type { ItemPricing, PartLine, QuoteItem } from '../../domain/models.ts'
 import type { ValidationIssue } from '../../domain/validation.ts'
@@ -126,9 +127,14 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
                     <td className="num">{formatMoney(part.quantity * part.unitPrice)}</td>
                     <td className="part-action">
                       {locked ? null : (
-                        <Button size="sm" variant="danger" onClick={() => setPendingRemove(part)}>
-                          Remove
-                        </Button>
+                        <button
+                          type="button"
+                          className="part-remove"
+                          aria-label={`Remove ${part.name}`}
+                          onClick={() => setPendingRemove(part)}
+                        >
+                          <X size={14} strokeWidth={1.75} aria-hidden="true" />
+                        </button>
                       )}
                     </td>
                   </tr>
