@@ -1,27 +1,66 @@
 :root {
-  --bg: #f3f4f6;
-  --bg-accent: #e5e7eb;
+  /* ── Page backgrounds ── */
+  --bg: #f8fafc;
+  --bg-accent: #e2e8f0;
+  --bg-subtle: #f1f5f9;
+
+  /* ── Surfaces ── */
   --surface: #ffffff;
   --surface-2: #ffffff;
-  --ink: #1f2933;
-  --ink-soft: #374151;
-  --muted: #5c6770;
-  --line: #d9dde3;
-  --line-strong: #9aa3ad;
-  --glass: #374151;
-  --glass-soft: rgba(55, 65, 81, 0.08);
-  --brass: #5c6770;
-  --brass-soft: rgba(92, 103, 112, 0.12);
-  --danger: #a63d2f;
-  --danger-soft: rgba(166, 61, 47, 0.1);
-  --ok: #1d6b45;
-  --ok-soft: rgba(29, 107, 69, 0.12);
-  --shadow: 0 1px 2px rgba(20, 38, 46, 0.06);
-  --shadow-sticky: 0 8px 24px rgba(20, 38, 46, 0.12);
-  --radius: 2px;
-  --radius-sm: 2px;
-  --font: 'Barlow', 'Segoe UI', sans-serif;
-  --display: 'Barlow', 'Segoe UI', sans-serif;
+
+  /* ── Dark sidebar ── */
+  --sidebar: #0f172a;
+  --sidebar-2: #1e293b;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-active: rgba(14, 165, 233, 0.15);
+  --sidebar-text: #94a3b8;
+  --sidebar-text-bright: #f1f5f9;
+  --sidebar-line: rgba(255, 255, 255, 0.08);
+
+  /* ── Text ── */
+  --ink: #0f172a;
+  --ink-soft: #334155;
+  --muted: #64748b;
+
+  /* ── Borders ── */
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+
+  /* ── Accent (sky-blue, matching favicon glass) ── */
+  --accent: #0ea5e9;
+  --accent-hover: #0284c7;
+  --accent-soft: rgba(14, 165, 233, 0.1);
+
+  /* ── Compat aliases (used in existing components) ── */
+  --glass: #0ea5e9;
+  --glass-soft: rgba(14, 165, 233, 0.1);
+  --brass: #64748b;
+  --brass-soft: rgba(100, 116, 139, 0.12);
+
+  /* ── Semantic ── */
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.08);
+  --ok: #10b981;
+  --ok-soft: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+
+  /* ── Shadows (warm-tinted, layered) ── */
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-sticky: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
+
+  /* ── Radius ── */
+  --radius: 10px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+
+  /* ── Typography ── */
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --display: 'Roboto Slab', Georgia, serif;
+
+  /* ── Drawing background ── */
   --paper: #f6f4ef;
+
   color-scheme: light;
 }
