@@ -89,12 +89,13 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  height: 64px;
-  padding: 0 24px 0 0;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px) saturate(1.6);
-  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  height: 56px;
+  padding: 0 20px 0 0;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
 
 .shell-top-start {
@@ -125,19 +126,21 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   flex: none;
   border: 1px solid var(--line);
   border-radius: var(--radius-xs);
   background: var(--surface);
-  color: var(--ink);
+  color: var(--ink-soft);
   transition: all 0.2s ease;
 }
 
 .shell-menu:hover {
   background: var(--bg-subtle);
   border-color: var(--line-strong);
+  color: var(--ink);
+  transform: scale(1.04);
 }
 
 .shell-brand {
@@ -147,54 +150,68 @@ p {
   min-width: 0;
   color: inherit;
   text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.shell-brand:hover {
+  opacity: 0.8;
 }
 
 .shell-logo {
   display: block;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   flex: none;
   border-radius: var(--radius-xs);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shell-brand:hover .shell-logo {
+  transform: rotate(-6deg) scale(1.06);
 }
 
 .shell-brand-copy {
   display: grid;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 
 .shell-brand-name {
   font-family: var(--display);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
   color: var(--ink);
 }
 
 .shell-brand-tag {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 11px;
   line-height: 1.2;
+  letter-spacing: 0.01em;
 }
 
 .shell-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex: none;
-  min-height: 36px;
-  padding: 0 12px;
+  min-height: 34px;
+  padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-xs);
   background: transparent;
   color: var(--muted);
   font-weight: 500;
-  font-size: 13.5px;
+  font-size: 13px;
   transition: all 0.2s ease;
 }
 
 .shell-logout:hover {
-  background: var(--bg-subtle);
-  color: var(--ink);
-  border-color: var(--line-strong);
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 /* ── Shell body + sidebar ── */
@@ -217,12 +234,12 @@ p {
   min-width: 0;
   align-self: flex-start;
   position: sticky;
-  top: 64px;
-  height: calc(100vh - 64px);
-  height: calc(100dvh - 64px);
+  top: 56px;
+  height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
   overflow: hidden;
-  background: var(--sidebar);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.32s ease;
 }
 
@@ -253,7 +270,7 @@ p {
   justify-content: flex-end;
   width: 260px;
   min-width: 260px;
-  padding: 12px 10px 4px;
+  padding: 10px 10px 6px;
 }
 
 .shell-rail .shell-menu {
@@ -266,6 +283,7 @@ p {
   background: var(--sidebar-hover);
   color: var(--sidebar-text-bright);
   border-color: rgba(255, 255, 255, 0.12);
+  transform: scale(1.04);
 }
 
 .shell-nav {
@@ -274,12 +292,12 @@ p {
   min-width: 260px;
   min-height: 0;
   overflow: auto;
-  padding: 8px 8px 12px;
+  padding: 6px 8px 12px;
 }
 
 /* Scrollbar in sidebar */
 .shell-nav::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .shell-nav::-webkit-scrollbar-track {
@@ -287,8 +305,12 @@ p {
 }
 
 .shell-nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
+}
+
+.shell-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .shell-account-wrap {
@@ -304,7 +326,7 @@ p {
   align-items: center;
   gap: 10px;
   padding: 8px;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
   color: var(--sidebar-text);
   text-decoration: none;
   transition: all 0.2s ease;
@@ -316,6 +338,11 @@ p {
   color: var(--sidebar-text-bright);
 }
 
+.shell-account.is-active {
+  background: var(--sidebar-active);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.15);
+}
+
 .shell-avatar {
   display: grid;
   place-items: center;
@@ -323,11 +350,18 @@ p {
   height: 34px;
   flex: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #6366f1);
+  background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
   color: #ffffff;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+}
+
+.shell-account:hover .shell-avatar {
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
 }
 
 .shell-account-copy {
@@ -339,24 +373,27 @@ p {
 .shell-account-name {
   overflow-wrap: anywhere;
   color: var(--sidebar-text-bright);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
 }
 
 .shell-account-role {
   color: var(--sidebar-text);
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.3;
+  text-transform: capitalize;
 }
 
 /* ── Sidebar navigation ── */
 .side-group + .side-group {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .shell-nav > .side-group + .side-group {
-  margin-top: 8px;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--sidebar-line);
 }
 
 .side-group-head {
@@ -374,17 +411,30 @@ p {
   transition: all 0.18s ease;
 }
 
+.side-group-icon {
+  flex: none;
+  opacity: 0.65;
+  transition: opacity 0.18s ease;
+}
+
+.side-group-link:hover .side-group-icon,
+.side-group-toggle:hover .side-group-icon,
+.side-group-link.is-active .side-group-icon {
+  opacity: 1;
+}
+
 .side-group-link,
 .side-group-toggle {
   display: flex;
   align-items: center;
-  min-height: 38px;
+  gap: 8px;
+  min-height: 36px;
   border: 0;
   border-radius: var(--radius-xs);
   background: transparent;
   color: var(--sidebar-text-bright);
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: 13px;
   text-align: left;
   text-decoration: none;
 }
@@ -400,6 +450,10 @@ p {
   padding: 0 8px 0 10px;
 }
 
+.side-group-toggle > span {
+  flex: 1;
+}
+
 .side-group-link:hover,
 .side-group-toggle:hover,
 .side-chevron:hover,
@@ -411,14 +465,15 @@ p {
 .side-link.is-active {
   background: var(--sidebar-active);
   color: #ffffff;
+  box-shadow: inset 3px 0 0 0 var(--accent);
 }
 
 .side-chevron {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   flex: none;
   border: 0;
   border-radius: var(--radius-xs);
@@ -427,20 +482,20 @@ p {
 }
 
 .side-chevron svg,
-.side-group-toggle svg {
+.side-group-toggle svg:last-child {
   transform: rotate(-90deg);
-  transition: transform 0.26s ease;
+  transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-group.is-open > .side-group-head .side-chevron svg,
-.side-group.is-open > .side-group-toggle svg {
+.side-group.is-open > .side-group-toggle svg:last-child {
   transform: rotate(0deg);
 }
 
 .side-panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.26s ease;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-group.is-open > .side-panel {
@@ -450,7 +505,7 @@ p {
 .side-panel-inner {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-height: 0;
   overflow: hidden;
   padding: 2px 0 4px 8px;
@@ -462,7 +517,7 @@ p {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  min-height: 34px;
+  min-height: 32px;
   padding: 0 8px 0 12px;
   border: 0;
   border-radius: var(--radius-xs);
@@ -472,20 +527,48 @@ p {
   font-size: 13px;
   text-align: left;
   text-decoration: none;
+  position: relative;
 }
 
 .side-link svg {
   flex: none;
-  color: rgba(148, 163, 184, 0.5);
+  color: rgba(148, 163, 184, 0.4);
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.side-link:hover svg {
+  color: rgba(148, 163, 184, 0.7);
+  transform: translateX(2px);
 }
 
 .side-link.is-active svg {
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .side-link:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* New quote action link */
+.side-link-action {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.side-link-action .side-link-icon {
+  color: var(--accent);
+  opacity: 0.8;
+}
+
+.side-link-action:hover {
+  background: var(--sidebar-active);
+  color: #ffffff;
+}
+
+.side-link-action:hover .side-link-icon {
+  opacity: 1;
+  color: #ffffff;
 }
 
 .shell-side :focus-visible {
@@ -2517,8 +2600,8 @@ select.input {
 /* ── Mobile drawer ── */
 @media (max-width: 860px) {
   .shell-top {
-    padding-right: 20px;
-    padding-left: 20px;
+    padding-right: 16px;
+    padding-left: 16px;
   }
 
   .shell-brand-slot,
@@ -2534,14 +2617,14 @@ select.input {
   .shell-scrim {
     position: fixed;
     z-index: 25;
-    top: 64px;
+    top: 56px;
     right: 0;
     bottom: 0;
     left: 0;
     display: block;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -2555,13 +2638,14 @@ select.input {
   .shell-side {
     position: fixed;
     z-index: 28;
-    top: 64px;
+    top: 56px;
     bottom: 0;
     left: 0;
     height: auto;
     width: min(300px, 88vw);
     transform: translateX(-105%);
-    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.32s ease;
   }
 
   .app-shell.is-sidebar-collapsed .shell-side {
@@ -2574,7 +2658,7 @@ select.input {
 
   .shell-side.is-open {
     transform: translateX(0);
-    box-shadow: 8px 0 30px rgba(15, 23, 42, 0.2);
+    box-shadow: 12px 0 40px rgba(15, 23, 42, 0.25);
   }
 }
 

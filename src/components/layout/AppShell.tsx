@@ -1,5 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  House,
+  LogOut,
+  Menu,
+  Plus,
+  Settings,
+  ShieldCheck,
+  X,
+  type LucideIcon,
+} from 'lucide-react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { reloadProfile, signOut, useAuthStore } from '../../auth/session.ts'
 import { company } from '../../data/company.ts'
@@ -9,7 +21,7 @@ import { Toasts } from '../ui/Toast.tsx'
 
 type NavLinkItem = { type: 'link'; to: string; label: string }
 type NavQuoteItem = { type: 'quote'; label: string }
-type NavGroup = { type: 'group'; id: string; label: string; to?: string; admin?: boolean; items: NavNode[] }
+type NavGroup = { type: 'group'; id: string; label: string; icon?: LucideIcon; to?: string; admin?: boolean; items: NavNode[] }
 type NavNode = NavLinkItem | NavQuoteItem | NavGroup
 
 const navigation: NavGroup[] = [
@@ -17,6 +29,7 @@ const navigation: NavGroup[] = [
     type: 'group',
     id: 'home',
     label: 'Home',
+    icon: House,
     to: '/',
     items: [{ type: 'quote', label: 'New quote' }],
   },
@@ -24,6 +37,7 @@ const navigation: NavGroup[] = [
     type: 'group',
     id: 'orders',
     label: 'Orders and quotes',
+    icon: FileText,
     items: [
       { type: 'link', to: '/orders?status=draft', label: 'Drafts' },
       { type: 'link', to: '/orders?status=quoted', label: 'Quotation' },
@@ -34,6 +48,7 @@ const navigation: NavGroup[] = [
     type: 'group',
     id: 'admin',
     label: 'Admin Panel',
+    icon: ShieldCheck,
     admin: true,
     items: [
       { type: 'link', to: '/admin/orders', label: 'All orders' },
@@ -42,6 +57,7 @@ const navigation: NavGroup[] = [
         type: 'group',
         id: 'manage',
         label: 'Manage',
+        icon: Settings,
         items: [
           { type: 'link', to: '/admin/users', label: 'Users & admins' },
           { type: 'link', to: '/admin/users#new-user', label: 'Add new user' },
@@ -260,6 +276,7 @@ export function AppShell() {
           </div>
         </div>
         <button type="button" className="shell-logout" onClick={() => void logOut()}>
+          <LogOut size={15} strokeWidth={1.75} aria-hidden="true" />
           Log out
         </button>
       </header>
@@ -346,9 +363,9 @@ function SideBranch({
 }) {
   if (node.type === 'quote') {
     return (
-      <button type="button" className="side-link" disabled={starting} aria-busy={starting} onClick={onNewQuote}>
+      <button type="button" className="side-link side-link-action" disabled={starting} aria-busy={starting} onClick={onNewQuote}>
+        <Plus size={14} strokeWidth={2} aria-hidden="true" className="side-link-icon" />
         <span>{starting ? 'Starting…' : node.label}</span>
-        <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
       </button>
     )
   }
@@ -366,12 +383,14 @@ function SideBranch({
   const isOpen = open[node.id] ?? false
   const panelId = `side-panel-${node.id}`
   const current = node.to ? linkActive(node.to, location) : false
+  const IconComp = node.icon
 
   return (
     <div className={cx('side-group', isOpen && 'is-open', current && 'is-current')}>
       {node.to ? (
         <div className="side-group-head">
           <Link to={node.to} className={cx('side-group-link', current && 'is-active')} aria-current={current ? 'page' : undefined}>
+            {IconComp ? <IconComp size={16} strokeWidth={1.75} aria-hidden="true" className="side-group-icon" /> : null}
             {node.label}
           </Link>
           <button
@@ -387,6 +406,7 @@ function SideBranch({
         </div>
       ) : (
         <button type="button" className="side-group-toggle" aria-expanded={isOpen} aria-controls={panelId} onClick={() => onToggle(node.id)}>
+          {IconComp ? <IconComp size={16} strokeWidth={1.75} aria-hidden="true" className="side-group-icon" /> : null}
           <span>{node.label}</span>
           <ChevronDown size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
