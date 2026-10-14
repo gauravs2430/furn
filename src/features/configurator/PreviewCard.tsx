@@ -41,7 +41,7 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
   const product = findProduct(itemProductId(item), catalogue)
   const drawing = isDrawingFamily(item.productType) ? item.productType : null
   const blocked = issues.length > 0
-
+  
   return (
     <aside className="card preview-card">
       <div className="preview-kicker">
