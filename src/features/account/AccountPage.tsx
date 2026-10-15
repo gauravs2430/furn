@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { User, Lock, Mail, ShieldCheck, Fingerprint, KeyRound, Check } from 'lucide-react'
 import { Button } from '../../components/ui/Button.tsx'
 import { TextField } from '../../components/ui/Field.tsx'
 import { useAuthStore } from '../../auth/session.ts'
@@ -78,42 +79,112 @@ export function AccountPage() {
 
   if (!profile) return <p className="boot">Checking login…</p>
 
+  const initial = (profile.full_name?.trim() || profile.email || 'U')[0].toUpperCase()
+  const isAdmin = profile.role === 'admin'
+
   return (
-    <div className="page">
-      <h1>Account</h1>
+    <div className="page account-page">
+      <div className="page-head">
+        <div>
+          <p className="eyebrow">Settings</p>
+          <h1>Account & Profile</h1>
+          <p className="lede">Manage your personal credentials, workspace profile, and account security.</p>
+        </div>
+      </div>
+
       <div className="account-layout">
         <div className="account-forms">
-          <form className="card account-name" onSubmit={onSaveName}>
-            <h2>Name</h2>
-            <TextField label="Name" value={name} autoComplete="name" onChange={setName} />
+          <form className="card account-form-card" onSubmit={onSaveName}>
+            <div className="card-head">
+              <div className="card-head-title">
+                <User size={18} className="card-icon" />
+                <h2>Personal Details</h2>
+              </div>
+              <p>Your name as it appears to customers on printed quotations and work orders.</p>
+            </div>
+            <TextField
+              label="Full Name"
+              value={name}
+              autoComplete="name"
+              placeholder="e.g. John Smith"
+              onChange={setName}
+            />
             {nameError ? <p className="form-error">{nameError}</p> : null}
-            <Button type="submit" disabled={nameBusy}>
-              {nameBusy ? 'Saving…' : 'Save name'}
-            </Button>
+            <div className="form-submit-row">
+              <Button type="submit" disabled={nameBusy} icon={<Check size={15} />}>
+                {nameBusy ? 'Saving…' : 'Save changes'}
+              </Button>
+            </div>
           </form>
-          <form className="card account-password" onSubmit={onSubmit}>
-            <h2>New password</h2>
-            <p className="field-hint">At least 8 characters. This replaces the password you sign in with.</p>
-            <TextField label="New password" type="password" value={password} autoComplete="new-password" onChange={setPassword} />
+
+          <form className="card account-form-card" onSubmit={onSubmit}>
+            <div className="card-head">
+              <div className="card-head-title">
+                <Lock size={18} className="card-icon" />
+                <h2>Security & Password</h2>
+              </div>
+              <p>Update the password you use to authenticate into SunnyPlast.</p>
+            </div>
+            <TextField
+              label="New password"
+              type="password"
+              value={password}
+              placeholder="••••••••••••"
+              hint="Must be at least 8 characters long."
+              autoComplete="new-password"
+              onChange={setPassword}
+            />
             {error ? <p className="form-error">{error}</p> : null}
-            <Button type="submit" disabled={busy}>
-              {busy ? 'Saving…' : 'Set password'}
-            </Button>
+            <div className="form-submit-row">
+              <Button type="submit" disabled={busy} icon={<KeyRound size={15} />}>
+                {busy ? 'Saving…' : 'Update password'}
+              </Button>
+            </div>
           </form>
         </div>
-        <aside className="card account-side">
-          <p className="home-kicker">{profile.role === 'admin' ? 'Admin' : 'Staff'}</p>
-          <h2>{profile.full_name.trim() || 'Account'}</h2>
-          <dl className="account-facts">
-            <div>
-              <dt>Email</dt>
-              <dd>{profile.email}</dd>
+
+        <aside className="card account-profile-card">
+          <div className="account-profile-header">
+            <div className="account-avatar">
+              <span>{initial}</span>
             </div>
-            <div>
-              <dt>User id</dt>
-              <dd className="account-id">{profile.id}</dd>
+            <div className="account-profile-meta">
+              <h2>{profile.full_name?.trim() || 'Active User'}</h2>
+              <div className="account-role-pill">
+                <ShieldCheck size={13} />
+                <span>{isAdmin ? 'Administrator' : 'Standard Staff'}</span>
+              </div>
             </div>
-          </dl>
+          </div>
+
+          <div className="account-info-list">
+            <div className="account-info-item">
+              <div className="account-info-label">
+                <Mail size={14} />
+                <span>Email address</span>
+              </div>
+              <div className="account-info-value">{profile.email}</div>
+            </div>
+
+            <div className="account-info-item">
+              <div className="account-info-label">
+                <Fingerprint size={14} />
+                <span>User ID</span>
+              </div>
+              <div className="account-info-value code-value">{profile.id}</div>
+            </div>
+
+            <div className="account-info-item">
+              <div className="account-info-label">
+                <Lock size={14} />
+                <span>Access Status</span>
+              </div>
+              <div className="account-info-status">
+                <span className="account-status-dot" />
+                <span>Active & Verified</span>
+              </div>
+            </div>
+          </div>
         </aside>
       </div>
     </div>

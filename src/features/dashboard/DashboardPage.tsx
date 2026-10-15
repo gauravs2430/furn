@@ -1,6 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { Copy, Plus, Printer, Trash2 } from 'lucide-react'
+import {
+  Copy,
+  Plus,
+  Printer,
+  Trash2,
+  Search,
+  X,
+  FileEdit,
+  FileCheck2,
+  TrendingUp,
+  Layers,
+  Clock,
+  ArrowUpRight,
+  SearchX,
+  Receipt,
+} from 'lucide-react'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { formatDateTime } from '../../utils/dates.ts'
@@ -76,103 +91,172 @@ export function DashboardPage() {
   const title = statusFilter === 'draft' ? 'Drafts' : statusFilter === 'booked' ? 'Bookings' : 'Quotation'
   const lede =
     statusFilter === 'draft'
-      ? 'Jobs still being priced.'
+      ? 'Jobs currently being drafted and priced.'
       : statusFilter === 'booked'
-        ? 'Orders that are booked.'
-        : 'Quotes ready to send.'
+        ? 'Confirmed orders booked for factory production.'
+        : 'Priced quotations ready to send or awaiting client approval.'
 
   return (
-    <div className="page">
-      <div className="page-head">
+    <div className="page dashboard-page">
+      <div className="page-head dashboard-head">
         <div>
           <p className="eyebrow">Sales workspace</p>
           <h1>{title}</h1>
           <p className="lede">{lede}</p>
         </div>
-        <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={startQuote}>
+        <Button
+          icon={<Plus size={18} strokeWidth={2.2} />}
+          disabled={starting}
+          aria-busy={starting}
+          onClick={startQuote}
+          className="dashboard-new-btn"
+        >
           {starting ? 'Starting…' : 'New quote'}
         </Button>
       </div>
 
-      <div className="stat-row">
-        <article>
-          <span>Drafts</span>
-          <strong>{quotes.filter((quote) => quote.status === 'draft').length}</strong>
+      <div className="stat-row dashboard-stats">
+        <article className="stat-card stat-card-draft">
+          <div className="stat-card-head">
+            <span className="stat-card-label">Drafts</span>
+            <div className="stat-card-icon-wrap draft-icon">
+              <FileEdit size={18} />
+            </div>
+          </div>
+          <strong className="stat-card-value">{quotes.filter((quote) => quote.status === 'draft').length}</strong>
+          <span className="stat-card-sub">In-progress estimates</span>
         </article>
-        <article>
-          <span>Quotation</span>
-          <strong>{quotes.filter((quote) => quote.status === 'quoted').length}</strong>
+
+        <article className="stat-card stat-card-quoted">
+          <div className="stat-card-head">
+            <span className="stat-card-label">Quotations</span>
+            <div className="stat-card-icon-wrap quoted-icon">
+              <FileCheck2 size={18} />
+            </div>
+          </div>
+          <strong className="stat-card-value">{quotes.filter((quote) => quote.status === 'quoted').length}</strong>
+          <span className="stat-card-sub">Sent & pending approval</span>
         </article>
-        <article>
-          <span>Bookings value</span>
-          <strong>{formatMoney(bookedValue)}</strong>
+
+        <article className="stat-card stat-card-booked">
+          <div className="stat-card-head">
+            <span className="stat-card-label">Booked Value</span>
+            <div className="stat-card-icon-wrap booked-icon">
+              <TrendingUp size={18} />
+            </div>
+          </div>
+          <strong className="stat-card-value">{formatMoney(bookedValue)}</strong>
+          <span className="stat-card-sub">Confirmed production revenue</span>
         </article>
       </div>
 
-      <div className="toolbar">
-        <label className="search">
-          <span className="sr-only">Search quotes</span>
+      <div className="toolbar dashboard-toolbar">
+        <div className="search-wrap">
+          <Search size={16} className="search-icon" aria-hidden="true" />
           <input
+            className="input search-input"
             value={query}
-            placeholder="Search customer, reference or job number"
+            placeholder="Search by customer, reference, job # or status…"
             onChange={(event) => setQuery(event.target.value)}
           />
-        </label>
+          {query.trim() ? (
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+            >
+              <X size={15} />
+            </button>
+          ) : null}
+        </div>
+        <div className="toolbar-count">
+          Showing <strong>{visible.length}</strong> {visible.length === 1 ? 'job' : 'jobs'}
+        </div>
       </div>
 
       {quotes.length === 0 ? (
-        <div className="empty">
-          <p>No saved jobs yet.</p>
+        <div className="empty dashboard-empty">
+          <div className="empty-icon-wrap">
+            <SearchX size={36} />
+          </div>
+          <h3>No saved jobs yet</h3>
+          <p>Create your first quote with our parametric joinery configurator.</p>
           <Button disabled={starting} aria-busy={starting} onClick={startQuote}>
             {starting ? 'Starting…' : 'New quote'}
           </Button>
         </div>
       ) : visible.length === 0 ? (
-        <div className="empty">
+        <div className="empty dashboard-empty">
+          <div className="empty-icon-wrap">
+            <SearchX size={36} />
+          </div>
+          <h3>No matching jobs</h3>
           <p>
             {query.trim()
-              ? 'Nothing matches that search.'
+              ? `No orders matching "${query}". Try searching by customer name or job number.`
               : statusFilter === 'draft'
-                ? 'No drafts yet.'
+                ? 'No drafts yet in your workspace.'
                 : statusFilter === 'booked'
-                  ? 'No bookings yet.'
-                  : 'No quotations yet.'}
+                  ? 'No booked orders yet in your workspace.'
+                  : 'No active quotations yet in your workspace.'}
           </p>
+          {query.trim() ? (
+            <Button size="sm" variant="secondary" onClick={() => setQuery('')}>
+              Clear search filter
+            </Button>
+          ) : null}
         </div>
       ) : (
         <ul className="job-grid">
           {visible.map((quote) => {
             const totals = calculateQuoteTotals(quote, pricingConfig, catalogue)
             return (
-              <li key={quote.id} className="job-card">
+              <li key={quote.id} className={`job-card job-card-${quote.status}`}>
                 <div className="job-top">
+                  <span className="job-no">#{quote.jobNo}</span>
                   <StatusBadge status={quote.status} />
-                  <span className="job-no">Job {quote.jobNo}</span>
                 </div>
-                <h2>{quote.customer.name.trim() || 'Unnamed customer'}</h2>
-                <p className="job-ref">{quote.reference.trim() || 'No reference'}</p>
+                <div className="job-title-row">
+                  <h2 className="job-customer-name">{quote.customer.name.trim() || 'Unnamed customer'}</h2>
+                  {quote.reference.trim() ? (
+                    <p className="job-ref">{quote.reference.trim()}</p>
+                  ) : (
+                    <p className="job-ref is-empty">No reference</p>
+                  )}
+                </div>
                 <dl className="job-meta">
-                  <div>
-                    <dt>Openings</dt>
+                  <div className="job-meta-item">
+                    <dt>
+                      <Layers size={13} className="job-meta-icon" />
+                      <span>Openings</span>
+                    </dt>
                     <dd>{quote.items.length}</dd>
                   </div>
-                  <div>
-                    <dt>Total</dt>
-                    <dd>{formatMoney(totals.grandTotal)}</dd>
+                  <div className="job-meta-item">
+                    <dt>
+                      <Receipt size={13} className="job-meta-icon" />
+                      <span>Total</span>
+                    </dt>
+                    <dd className="job-meta-total">{formatMoney(totals.grandTotal)}</dd>
                   </div>
-                  <div>
-                    <dt>Updated</dt>
+                  <div className="job-meta-item job-meta-time">
+                    <dt>
+                      <Clock size={13} className="job-meta-icon" />
+                      <span>Updated</span>
+                    </dt>
                     <dd>{formatDateTime(quote.updatedAt)}</dd>
                   </div>
                 </dl>
                 <div className="job-actions">
-                  <Button size="sm" onClick={() => navigate(`/quote/${quote.id}`)}>
-                    Open
+                  <Button size="sm" onClick={() => navigate(`/quote/${quote.id}`)} className="job-open-btn">
+                    <span>Open</span>
+                    <ArrowUpRight size={14} />
                   </Button>
                   <Button
                     size="sm"
                     variant="secondary"
-                    icon={<Copy size={15} />}
+                    icon={<Copy size={14} />}
                     disabled={duplicatingId === quote.id}
                     aria-busy={duplicatingId === quote.id}
                     onClick={() => {
@@ -192,7 +276,7 @@ export function DashboardPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      icon={<Printer size={15} />}
+                      icon={<Printer size={14} />}
                       onClick={() => {
                         if (!quote.items.length) {
                           pushToast('This quote has no openings to print.', 'danger')
@@ -208,7 +292,7 @@ export function DashboardPage() {
                   <Button
                     size="sm"
                     variant="danger"
-                    icon={<Trash2 size={15} />}
+                    icon={<Trash2 size={14} />}
                     disabled={quote.status === 'booked'}
                     title={quote.status === 'booked' ? 'Booked orders cannot be changed.' : undefined}
                     onClick={() => setPendingDelete(quote.id)}

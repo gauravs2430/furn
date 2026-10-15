@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Search, X, Printer, FileText, CheckCircle2, Clock, FileEdit, Mail } from 'lucide-react'
 import { useAuthStore } from '../../auth/session.ts'
 import { StatusBadge } from '../../components/ui/Badge.tsx'
 import { calculateQuoteTotals } from '../../domain/pricing.ts'
@@ -26,10 +27,10 @@ function listedPerson(value: unknown): ListedPerson | null {
   }
 }
 
-const sections: { status: QuoteStatus; title: string; empty: string }[] = [
-  { status: 'booked', title: 'Booked', empty: 'No booked orders.' },
-  { status: 'quoted', title: 'Quotations', empty: 'No quotations.' },
-  { status: 'draft', title: 'Drafts', empty: 'No drafts.' },
+const sections: { status: QuoteStatus; title: string; empty: string; icon: typeof CheckCircle2 }[] = [
+  { status: 'booked', title: 'Booked Orders', empty: 'No booked orders.', icon: CheckCircle2 },
+  { status: 'quoted', title: 'Quotations Sent', empty: 'No quotations sent.', icon: Clock },
+  { status: 'draft', title: 'Active Drafts', empty: 'No draft orders.', icon: FileEdit },
 ]
 
 function messageFrom(error: unknown): string {
@@ -38,6 +39,12 @@ function messageFrom(error: unknown): string {
     if (message) return message
   }
   return 'Could not load orders.'
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+  return name.slice(0, 2).toUpperCase() || 'SP'
 }
 
 export function UserOrdersPage() {
@@ -111,59 +118,180 @@ export function UserOrdersPage() {
   const visible = (shownRows ?? []).filter((row) => matchesQuery(query, row.quote.jobNo, row.quote.customer.name, row.quote.reference ?? ''))
   const searching = query.trim().length > 0
 
+  const personName = shownPerson ? shownPerson.full_name.trim() || shownPerson.email : 'Staff Member'
+
   return (
     <div className="page">
-      <div className="page-head">
-        <div>
-          <p className="eyebrow">Orders per user</p>
-          <h1>{shownPerson ? shownPerson.full_name.trim() || shownPerson.email : 'Orders'}</h1>
-          {shownPerson ? (
-            <p className="lede">
-              {shownPerson.email}
-              <span className="owner-id">{userId}</span>
-            </p>
+      <div style={{ marginBottom: '16px' }}>
+        <Link
+          to="/admin/orders/users"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--muted)',
+            textDecoration: 'none',
+            padding: '6px 10px',
+            borderRadius: '6px',
+            background: 'var(--bg-subtle)',
+            border: '1px solid var(--line)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <ArrowLeft size={14} />
+          <span>Back to staff directory</span>
+        </Link>
+      </div>
+
+      {shownPerson ? (
+        <div className="card" style={{ padding: '20px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: '12px',
+              background: 'rgba(14, 165, 233, 0.12)',
+              color: 'var(--accent)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: '18px',
+              border: '1px solid rgba(14, 165, 233, 0.25)',
+            }}>
+              {initials(personName)}
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: 'var(--ink)' }}>{personName}</h1>
+                <span className="badge" style={{ background: 'rgba(14, 165, 233, 0.1)', color: 'var(--accent)', fontSize: '11px', fontWeight: 600 }}>
+                  Staff Account
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '13px', color: 'var(--muted)' }}>
+                  <Mail size={13} />
+                  <span>{shownPerson.email}</span>
+                </span>
+                <span style={{ fontSize: '11px', fontFamily: 'ui-monospace, monospace', color: 'var(--muted)', background: 'var(--bg-subtle)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--line)' }}>
+                  {userId}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {shownRows ? (
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Total Jobs</span>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ink)', fontFamily: 'ui-monospace, monospace' }}>{shownRows.length}</span>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Booked</span>
+                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ok)', fontFamily: 'ui-monospace, monospace' }}>
+                  {shownRows.filter((r) => r.quote.status === 'booked').length}
+                </span>
+              </div>
+            </div>
           ) : null}
         </div>
-      </div>
+      ) : null}
 
       {shownError ? <p className="form-error">{shownError}</p> : null}
       {!shownError && shownRows === null ? <p className="boot">Loading orders…</p> : null}
 
       {shownRows ? (
-        <div className="toolbar">
-          <label className="search">
-            <span className="sr-only">Search orders</span>
+        <div className="toolbar" style={{ marginBottom: '16px' }}>
+          <div style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            flex: '1 1 360px',
+            maxWidth: '480px',
+          }}>
+            <Search
+              size={15}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                color: 'var(--muted)',
+                pointerEvents: 'none',
+              }}
+            />
             <input
+              type="text"
               value={query}
-              placeholder="Search job number, customer or reference"
+              placeholder="Search job number, customer or reference…"
               autoComplete="off"
               onChange={(event) => setQuery(event.target.value)}
+              style={{
+                width: '100%',
+                paddingLeft: '34px',
+                paddingRight: query ? '34px' : '12px',
+              }}
+              className="input"
             />
-          </label>
+            {query ? (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px',
+                }}
+                aria-label="Clear search"
+              >
+                <X size={14} />
+              </button>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
-      {shownRows && shownRows.length === 0 ? <p>No orders yet.</p> : null}
+      {shownRows && shownRows.length === 0 ? <p style={{ color: 'var(--muted)', padding: '20px 0' }}>No orders recorded for this user yet.</p> : null}
+
       {shownRows && shownRows.length > 0
         ? sections.map((section) => {
             const items = visible.filter((row) => row.quote.status === section.status)
+            const SectionIcon = section.icon
             return (
               <section key={section.status} className="people-section" aria-labelledby={`user-orders-${section.status}`}>
-                <h2 id={`user-orders-${section.status}`}>{section.title}</h2>
-                {items.length === 0 ? <p>{searching ? 'Nothing matches that search.' : section.empty}</p> : null}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <SectionIcon size={17} style={{ color: section.status === 'booked' ? 'var(--ok)' : section.status === 'quoted' ? 'var(--accent)' : 'var(--warn)' }} />
+                    <h2 id={`user-orders-${section.status}`} style={{ margin: 0, fontSize: '17px', fontWeight: 600 }}>{section.title}</h2>
+                  </div>
+                  <span className="badge" style={{ background: 'var(--bg-subtle)', color: 'var(--ink-soft)', border: '1px solid var(--line)', fontWeight: 600, fontSize: '11px' }}>
+                    {items.length} {items.length === 1 ? 'order' : 'orders'}
+                  </span>
+                </div>
+
+                {items.length === 0 ? (
+                  <p style={{ margin: '8px 0', color: 'var(--muted)', fontSize: '13.5px' }}>
+                    {searching ? 'Nothing matches that search in this section.' : section.empty}
+                  </p>
+                ) : null}
+
                 {items.length > 0 ? (
                   <div className="table-scroll">
                     <table className="admin-orders">
                       <thead>
                         <tr>
-                          <th>Job</th>
+                          <th>Job #</th>
                           <th>Customer</th>
                           <th>Status</th>
-                          <th>Updated</th>
-                          <th>Total</th>
-                          <th>
-                            <span className="sr-only">Print</span>
-                          </th>
+                          <th>Last Updated</th>
+                          <th style={{ textAlign: 'right' }}>Total</th>
+                          <th style={{ textAlign: 'right' }}>Print Documents</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -171,20 +299,56 @@ export function UserOrdersPage() {
                           const total = calculateQuoteTotals(row.quote, pricingConfig, catalogue).grandTotal
                           return (
                             <tr key={row.quote.id}>
-                              <td>{row.quote.jobNo}</td>
-                              <td>{row.quote.customer.name.trim() || 'Unnamed customer'}</td>
+                              <td>
+                                <span style={{
+                                  display: 'inline-block',
+                                  fontFamily: 'ui-monospace, monospace',
+                                  fontWeight: 600,
+                                  fontSize: '12.5px',
+                                  padding: '2px 8px',
+                                  borderRadius: '6px',
+                                  background: 'var(--bg-subtle)',
+                                  border: '1px solid var(--line)',
+                                  color: 'var(--ink)',
+                                }}>
+                                  #{row.quote.jobNo}
+                                </span>
+                              </td>
+                              <td>
+                                <span style={{ fontWeight: 600, color: 'var(--ink)' }}>
+                                  {row.quote.customer.name.trim() || 'Unnamed customer'}
+                                </span>
+                              </td>
                               <td>
                                 <StatusBadge status={row.quote.status} />
                               </td>
-                              <td>{formatDateTime(row.updatedAt)}</td>
-                              <td className="num">{formatMoney(total)}</td>
                               <td>
-                                <div className="page-links">
-                                  <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/quote`} state={{ from: `/admin/orders/users/${userId}` }}>
-                                    Print quote
+                                <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+                                  {formatDateTime(row.updatedAt)}
+                                </span>
+                              </td>
+                              <td className="num" style={{ textAlign: 'right', fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: 'var(--ink)' }}>
+                                {formatMoney(total)}
+                              </td>
+                              <td>
+                                <div className="page-links" style={{ justifyContent: 'flex-end', gap: '8px' }}>
+                                  <Link
+                                    className="btn btn-sm btn-secondary"
+                                    to={`/quote/${row.quote.id}/print/quote`}
+                                    state={{ from: `/admin/orders/users/${userId}` }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                                  >
+                                    <Printer size={13} />
+                                    <span>Quote</span>
                                   </Link>
-                                  <Link className="btn btn-sm btn-secondary" to={`/quote/${row.quote.id}/print/work-order`} state={{ from: `/admin/orders/users/${userId}` }}>
-                                    Print work order
+                                  <Link
+                                    className="btn btn-sm btn-secondary"
+                                    to={`/quote/${row.quote.id}/print/work-order`}
+                                    state={{ from: `/admin/orders/users/${userId}` }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+                                  >
+                                    <FileText size={13} />
+                                    <span>Work order</span>
                                   </Link>
                                 </div>
                               </td>

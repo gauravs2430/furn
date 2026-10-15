@@ -214,14 +214,18 @@ export function ConfiguratorPage() {
             size="sm"
             icon={<ArrowLeft size={16} />}
             onClick={() => navigate(`/orders?status=${activeQuote.status}`)}
+            className="quote-back-btn"
           >
             {activeQuote.status === 'draft' ? 'Drafts' : activeQuote.status === 'booked' ? 'Bookings' : 'Quotation'}
           </Button>
-          <div>
-            <p className="eyebrow">Job {activeQuote.jobNo}</p>
-            <h1>{activeQuote.customer.name.trim() || 'New quote'}</h1>
+          <div className="quote-title-block">
+            <div className="quote-meta-pill">
+              <span className="quote-job-badge">Job #{activeQuote.jobNo}</span>
+              <StatusBadge status={activeQuote.status} />
+              {activeQuote.reference ? <span className="quote-ref-badge">{activeQuote.reference}</span> : null}
+            </div>
+            <h1 className="quote-title-text">{activeQuote.customer.name.trim() || 'New quote'}</h1>
           </div>
-          <StatusBadge status={activeQuote.status} />
         </div>
         <div className="quote-actions">
           {activeQuote.status === 'draft' ? (

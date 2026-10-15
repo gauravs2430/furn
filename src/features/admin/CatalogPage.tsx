@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
+import { Package, Plus, Search, X, CheckCircle2 } from 'lucide-react'
 import { useAuthStore } from '../../auth/session.ts'
 import { currentCatalogue, fallbackCatalogue } from '../../domain/catalogue.ts'
 import { presetsFor } from '../../data/technicalPresets.ts'
@@ -133,51 +134,122 @@ export function CatalogPage() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>Catalogue</h1>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }} className="eyebrow">
+            <Package size={13} style={{ color: 'var(--accent)' }} />
+            <span>Master Inventory</span>
+          </div>
+          <h1>System Catalogue</h1>
+          <p className="lede">Products, extrusion assemblies, hardware parts, and technical dimensions used in quote generation.</p>
         </div>
-        <Button onClick={openNew}>New product</Button>
+        <Button onClick={openNew} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Plus size={15} />
+          <span>New product</span>
+        </Button>
       </div>
-      <p className="lede">Products, parts, and the prices a new quote uses.</p>
 
-      <div className="toolbar">
-        <label className="search">
-          <span className="sr-only">Search products</span>
+      <div className="toolbar" style={{ marginBottom: '18px' }}>
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          flex: '1 1 360px',
+          maxWidth: '480px',
+        }}>
+          <Search
+            size={15}
+            style={{
+              position: 'absolute',
+              left: '12px',
+              color: 'var(--muted)',
+              pointerEvents: 'none',
+            }}
+          />
           <input
+            type="text"
             value={query}
-            placeholder="Search products"
+            placeholder="Search catalog products by name or family…"
             autoComplete="off"
             onChange={(event) => setQuery(event.target.value)}
+            style={{
+              width: '100%',
+              paddingLeft: '34px',
+              paddingRight: query ? '34px' : '12px',
+            }}
+            className="input"
           />
-        </label>
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--muted)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px',
+              }}
+              aria-label="Clear search"
+            >
+              <X size={14} />
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {error ? <p className="form-error">{error}</p> : null}
       {rows === null && !error ? <p className="boot">Loading catalogue…</p> : null}
-      {rows && rows.length === 0 ? <p>{needle ? 'Nothing matches that search.' : 'No products yet.'}</p> : null}
+      {rows && rows.length === 0 ? <p style={{ color: 'var(--muted)', padding: '20px 0' }}>{needle ? 'Nothing matches that search.' : 'No products yet.'}</p> : null}
       {rows && rows.length > 0 ? (
         <div className="table-scroll">
           <table className="people-table catalog-table">
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Product Name</th>
                 <th>Family</th>
                 <th>Factor</th>
-                <th>Active</th>
-                <th>Updated</th>
+                <th>Status</th>
+                <th>Last Modified</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="catalog-row" onClick={() => setEditingId(row.id)}>
                   <td>
-                    <button type="button" className="row-open" onClick={() => setEditingId(row.id)}>
+                    <button type="button" className="row-open" onClick={() => setEditingId(row.id)} style={{ fontWeight: 600, color: 'var(--ink)' }}>
                       {row.name}
                     </button>
                   </td>
-                  <td>{row.family}</td>
-                  <td>{row.factor}</td>
-                  <td>{row.active ? 'Active' : 'Off'}</td>
-                  <td>{formatDateTime(row.updatedAt)}</td>
+                  <td>
+                    <span className="badge" style={{ background: 'var(--bg-subtle)', color: 'var(--ink-soft)', border: '1px solid var(--line)', textTransform: 'capitalize', fontSize: '11px' }}>
+                      {row.family}
+                    </span>
+                  </td>
+                  <td>
+                    <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600, color: 'var(--ink-soft)' }}>
+                      {row.factor}
+                    </span>
+                  </td>
+                  <td>
+                    {row.active ? (
+                      <span className="badge badge-ok" style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckCircle2 size={11} />
+                        <span>Active</span>
+                      </span>
+                    ) : (
+                      <span className="badge" style={{ fontSize: '11px', background: 'var(--bg-subtle)', color: 'var(--muted)', border: '1px solid var(--line)' }}>
+                        Inactive
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+                      {formatDateTime(row.updatedAt)}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -186,12 +258,14 @@ export function CatalogPage() {
       ) : null}
       {rows && total > 0 ? <Pager page={page} total={total} onPage={setPage} /> : null}
 
-      <CatalogOptions />
+      <div style={{ marginTop: '36px' }}>
+        <CatalogOptions />
+      </div>
 
-      <Modal open={creating} title="New product" onOpenChange={setCreating}>
+      <Modal open={creating} title="New Catalogue Product" onOpenChange={setCreating}>
         <form className="catalog-editor" onSubmit={(event) => void onCreate(event)}>
           <div className="form-grid">
-            <TextField label="Name" value={name} hint="The id is a slug of this name." onChange={setName} />
+            <TextField label="Name" value={name} hint="The ID is automatically slugified from this name." onChange={setName} />
             <SelectField label="Family" value={family} onChange={applyFamily}>
               {PRODUCT_FAMILIES.map((entry) => (
                 <option key={entry} value={entry}>
@@ -216,9 +290,10 @@ export function CatalogPage() {
             <ActiveCheck checked={active} onChange={setActive} />
           </div>
           {formError ? <p className="form-error">{formError}</p> : null}
-          <div className="dialog-actions">
-            <Button type="submit" disabled={busy}>
-              {busy ? 'Saving…' : 'Save product'}
+          <div className="dialog-actions" style={{ marginTop: '16px' }}>
+            <Button type="submit" disabled={busy} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Plus size={14} />
+              <span>{busy ? 'Saving…' : 'Save product'}</span>
             </Button>
           </div>
         </form>
