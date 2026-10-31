@@ -111,7 +111,12 @@ export function AccountPage() {
             </div>
             <div>
               <dt>User id</dt>
-              <dd className="account-id">{profile.id}</dd>
+              <dd className="account-id">
+                {profile.user_code ||
+                  (profile.email.endsWith('@gmail.com')
+                    ? profile.email.replace('@gmail.com', '').toUpperCase()
+                    : profile.id.slice(0, 8))}
+              </dd>
             </div>
           </dl>
         </aside>

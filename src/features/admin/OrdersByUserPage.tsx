@@ -11,6 +11,7 @@ interface OwnerCard {
   email: string
   fullName: string
   role: 'admin' | 'user'
+  userCode?: string | null
   drafts: number
   quoted: number
   booked: number
@@ -25,7 +26,16 @@ function personFrom(value: unknown): Omit<OwnerCard, 'drafts' | 'quoted' | 'book
     email: row.email,
     fullName: typeof row.full_name === 'string' ? row.full_name : '',
     role: row.role === 'admin' ? 'admin' : 'user',
+    userCode: typeof row.user_code === 'string' ? row.user_code : null,
   }
+}
+
+function formatOwnerId(person: { userCode?: string | null; email: string; id: string }): string {
+  if (person.userCode) return person.userCode
+  if (person.email?.endsWith('@gmail.com')) {
+    return person.email.replace('@gmail.com', '').toUpperCase()
+  }
+  return person.id.slice(0, 8)
 }
 
 function messageFrom(error: unknown): string {
@@ -54,7 +64,7 @@ export function OrdersByUserPage() {
       try {
         if (!supabase) throw new Error('Supabase is not configured.')
         const [profiles, orders] = await Promise.all([
-          supabase.from('profiles').select('id, email, full_name, role').order('full_name', { ascending: true }),
+          supabase.from('profiles').select('*').order('full_name', { ascending: true }),
           quoteRepository.listAll(),
         ])
         if (cancelled) return
@@ -101,7 +111,7 @@ export function OrdersByUserPage() {
   if (profile.role !== 'admin') return <Navigate to="/" replace />
 
   const inRole = (people ?? []).filter((person) => person.role === role)
-  const visible = inRole.filter((person) => matchesQuery(query, displayName(person), person.email, person.id))
+  const visible = inRole.filter((person) => matchesQuery(query, displayName(person), person.email, person.userCode ?? '', formatOwnerId(person), person.id))
   const searching = query.trim().length > 0
 
   return (
@@ -158,7 +168,7 @@ export function OrdersByUserPage() {
                           {total} {total === 1 ? 'job' : 'jobs'}
                         </p>
                       </div>
-                      <p className="owner-id">{person.id}</p>
+                      <p className="owner-id">{formatOwnerId(person)}</p>
                       <dl className="owner-stats">
                         <div>
                           <dt>Drafts</dt>

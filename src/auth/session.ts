@@ -21,6 +21,7 @@ export interface StaffProfile {
   locked: boolean
   accessExpiresOn: string | null
   passwordSetAt: string | null
+  user_code?: string | null
 }
 
 interface AuthState {
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 }))
 
 const turnedOff = 'This account is turned off. Ask an admin.'
-const profileColumns = 'id, email, full_name, role, active, locked, access_expires_on, password_set_at'
+const profileColumns = '*'
 
 let ticket = 0
 let reloadTicket = 0
@@ -83,6 +84,7 @@ function profileFrom(value: unknown): StaffProfile | null {
     locked: row.locked === true,
     accessExpiresOn: typeof row.access_expires_on === 'string' ? row.access_expires_on.slice(0, 10) : null,
     passwordSetAt: typeof row.password_set_at === 'string' ? row.password_set_at : null,
+    user_code: typeof row.user_code === 'string' ? row.user_code : null,
   }
 }
 

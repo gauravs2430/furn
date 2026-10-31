@@ -69,8 +69,13 @@ export function LoginPage({ variant = 'staff' }: { variant?: 'staff' | 'admin' }
     clearNotice()
     setBusy(true)
     expectLoginRole(variant === 'admin' ? 'admin' : 'user')
+    const input = email.trim()
+    const loginEmail =
+      variant === 'staff' && !input.includes('@')
+        ? `${input.toLowerCase()}@gmail.com`
+        : input
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: loginEmail,
       password,
     })
     if (signInError) {
@@ -103,10 +108,11 @@ export function LoginPage({ variant = 'staff' }: { variant?: 'staff' | 'admin' }
             <p className="login-lede">{text.lede}</p>
           </div>
           <TextField
-            label="Email address"
-            type="email"
+            label={variant === 'staff' ? 'User ID' : 'Email address'}
+            type={variant === 'staff' ? 'text' : 'email'}
             name="email"
             value={email}
+            placeholder={variant === 'staff' ? 'e.g. USR10001' : undefined}
             autoComplete="username"
             autoFocus
             disabled={busy}

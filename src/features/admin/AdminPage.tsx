@@ -19,9 +19,10 @@ interface Person {
   locked: boolean
   access_expires_on: string | null
   created_at: string
+  user_code?: string | null
 }
 
-const profileColumns = 'id, email, full_name, role, active, locked, access_expires_on, created_at'
+const profileColumns = '*'
 
 function personFrom(value: unknown): Person | null {
   if (!value || typeof value !== 'object') return null
@@ -36,7 +37,16 @@ function personFrom(value: unknown): Person | null {
     locked: row.locked === true,
     access_expires_on: typeof row.access_expires_on === 'string' ? row.access_expires_on.slice(0, 10) : null,
     created_at: typeof row.created_at === 'string' ? row.created_at : '',
+    user_code: typeof row.user_code === 'string' ? row.user_code : null,
   }
+}
+
+function formatUserId(person: { user_code?: string | null; email: string; id: string }): string {
+  if (person.user_code) return person.user_code
+  if (person.email.endsWith('@gmail.com')) {
+    return person.email.replace('@gmail.com', '').toUpperCase()
+  }
+  return person.id.slice(0, 8)
 }
 
 function peopleFrom(value: unknown): Person[] {
@@ -54,6 +64,7 @@ function displayName(person: Person): string {
 interface ShownPassword {
   email: string
   password: string
+  userCode?: string | null
 }
 
 async function messageFromInvoke(error: unknown, fallback = 'Could not save that login.'): Promise<string> {
@@ -79,7 +90,11 @@ function shownPassword(value: unknown): ShownPassword | null {
   const body = value as Record<string, unknown>
   if (typeof body.email !== 'string' || typeof body.temporaryPassword !== 'string') return null
   if (!body.temporaryPassword) return null
-  return { email: body.email, password: body.temporaryPassword }
+  return {
+    email: body.email,
+    password: body.temporaryPassword,
+    userCode: typeof body.userCode === 'string' ? body.userCode : null,
+  }
 }
 
 function invokeFailure(value: unknown, fallback: string): string | null {
@@ -164,8 +179,8 @@ export function AdminPage() {
   const loaded = rows ?? []
   const users = loaded.filter((person) => person.role === 'user')
   const admins = loaded.filter((person) => person.role === 'admin')
-  const visibleUsers = users.filter((person) => matchesQuery(query, person.full_name, person.email))
-  const visibleAdmins = admins.filter((person) => matchesQuery(query, person.full_name, person.email))
+  const visibleUsers = users.filter((person) => matchesQuery(query, person.full_name, person.email, person.user_code ?? '', formatUserId(person)))
+  const visibleAdmins = admins.filter((person) => matchesQuery(query, person.full_name, person.email, person.user_code ?? '', formatUserId(person)))
   const searching = query.trim().length > 0
   const unlockNeedsDate = unlockFor ? expiryOnOrBeforeToday(unlockFor.access_expires_on, today) : false
 
@@ -176,8 +191,8 @@ export function AdminPage() {
   async function onCreate(event: FormEvent) {
     event.preventDefault()
     if (!supabase || creating) return
-    if (!email.trim().includes('@')) {
-      setFormError('Enter a valid email')
+    if (role === 'admin' && !email.trim().includes('@')) {
+      setFormError('Enter a valid email for admin')
       return
     }
     if (password.length < 8) {
@@ -187,7 +202,7 @@ export function AdminPage() {
     setFormError(null)
     setCreating(true)
     const { data, error: invokeError } = await supabase.functions.invoke('admin-users', {
-      body: { action: 'create', email, password, fullName, role },
+      body: { action: 'create', email: role === 'admin' ? email.trim() : undefined, password, fullName, role },
     })
     setCreating(false)
     if (invokeError) {
@@ -241,8 +256,11 @@ export function AdminPage() {
   async function copyPassword() {
     if (!shown) return
     try {
-      await navigator.clipboard.writeText(shown.password)
-      pushToast('Password copied')
+      const text = shown.userCode
+        ? `User ID: ${shown.userCode}\nLogin Email: ${shown.email}\nPassword: ${shown.password}`
+        : `Email: ${shown.email}\nPassword: ${shown.password}`
+      await navigator.clipboard.writeText(text)
+      pushToast('Login details copied')
     } catch (copyError) {
       pushToast(copyError instanceof Error && copyError.message ? copyError.message : 'Could not copy the password.', 'danger')
     }
@@ -355,11 +373,20 @@ export function AdminPage() {
             <h2>New login</h2>
             <div className="form-grid">
               <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />
-              <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
               <SelectField label="Role" value={role} onChange={(value) => setRole(value === 'admin' ? 'admin' : 'user')}>
                 <option value="user">user</option>
                 <option value="admin">admin</option>
               </SelectField>
+              {role === 'admin' ? (
+                <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
+              ) : (
+                <div className="field">
+                  <span className="field-label">User ID & Login</span>
+                  <p className="field-hint" style={{ margin: '0.4rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted, #64748b)' }}>
+                    Auto-generated (e.g. <strong>USR10001</strong>). User signs in with this ID and password.
+                  </p>
+                </div>
+              )}
               <TextField label="Password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
             </div>
             {formError ? <p className="form-error">{formError}</p> : null}
@@ -424,7 +451,7 @@ export function AdminPage() {
                       <tr key={person.id}>
                         <td>{person.full_name.trim() || '—'}</td>
                         <td>{person.email}</td>
-                        <td className="people-id">{person.id}</td>
+                        <td className="people-id">{formatUserId(person)}</td>
                         <td>user</td>
                         <td>
                           <button
@@ -517,7 +544,7 @@ export function AdminPage() {
                       <tr key={person.id}>
                         <td>{person.full_name.trim() || '—'}</td>
                         <td>{person.email}</td>
-                        <td className="people-id">{person.id}</td>
+                        <td className="people-id">{formatUserId(person)}</td>
                         <td>admin</td>
                         <td>{formatDate(person.created_at)}</td>
                         <td>
@@ -614,23 +641,29 @@ export function AdminPage() {
         </form>
       </Modal>
 
-      <Modal open={shown !== null} title="Password" onOpenChange={(open) => !open && closeShown()}>
+      <Modal open={shown !== null} title="New Login Credentials" onOpenChange={(open) => !open && closeShown()}>
         {shown ? (
           <>
             <dl className="password-once">
               <div>
-                <dt>Email</dt>
-                <dd>{shown.email}</dd>
+                <dt>{shown.userCode ? 'User ID' : 'Login / Email'}</dt>
+                <dd style={{ fontWeight: 600 }}>{shown.userCode || shown.email}</dd>
               </div>
+              {shown.userCode ? (
+                <div>
+                  <dt>Login Email</dt>
+                  <dd>{shown.email}</dd>
+                </div>
+              ) : null}
               <div>
                 <dt>Password</dt>
                 <dd>{shown.password}</dd>
               </div>
             </dl>
-            <p className="dialog-copy">This password is shown once. It is not stored.</p>
+            <p className="dialog-copy">This password is shown once. Make sure to copy and send it to the user.</p>
             <div className="dialog-actions">
               <Button variant="secondary" onClick={() => void copyPassword()}>
-                Copy
+                Copy Details
               </Button>
               <Button onClick={closeShown}>Close</Button>
             </div>

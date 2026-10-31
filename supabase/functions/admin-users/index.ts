@@ -37,38 +37,65 @@ Deno.serve(async (req) => {
     const action = String(body.action ?? '')
 
     if (action === 'create') {
-      const email = String(body.email ?? '').trim().toLowerCase()
       const password = String(body.password ?? '')
       const fullName = String(body.fullName ?? '').trim()
       const role = body.role === 'admin' ? 'admin' : 'user'
-      if (!email.includes('@')) return json({ error: 'Enter a valid email' }, 400)
       if (password.length < 8) return json({ error: 'Password needs at least 8 characters' }, 400)
+
+      let email = String(body.email ?? '').trim().toLowerCase()
+      let userCode = String(body.userCode ?? '').trim().toUpperCase()
+
+      if (role === 'user') {
+        if (!userCode) {
+          const { data: codeData, error: codeErr } = await admin.rpc('next_user_code')
+          if (!codeErr && codeData) {
+            userCode = String(codeData)
+          } else {
+            const { count } = await admin.from('profiles').select('*', { count: 'exact', head: true })
+            userCode = `USR${10001 + (count ?? 0)}`
+          }
+        }
+        email = `${userCode.toLowerCase()}@gmail.com`
+      } else {
+        if (!email.includes('@')) return json({ error: 'Enter a valid admin email' }, 400)
+      }
 
       const { data, error } = await admin.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
-        user_metadata: { full_name: fullName, role },
+        user_metadata: { full_name: fullName, role, user_code: userCode || undefined },
       })
       if (error) return json({ error: error.message }, 400)
 
       if (data.user) {
+        const profileUpdate: Record<string, unknown> = {
+          full_name: fullName,
+          role,
+          email,
+          password_set_at: new Date().toISOString(),
+        }
+        if (userCode) {
+          profileUpdate.user_code = userCode
+        }
+
         const { error: profileError } = await admin
           .from('profiles')
-          .update({
-            full_name: fullName,
-            role,
-            email,
-            password_set_at: new Date().toISOString(),
-          })
+          .update(profileUpdate)
           .eq('id', data.user.id)
-        if (profileError) return json({ error: profileError.message }, 400)
+
+        if (profileError && userCode) {
+          // If user_code column is not yet migrated, fallback to update without user_code
+          delete profileUpdate.user_code
+          await admin.from('profiles').update(profileUpdate).eq('id', data.user.id)
+        }
       }
 
       const emailError = await credentialEmail(email, 'Your SunnyPlast login', 'Your SunnyPlast login is ready.', password)
       return json({
         id: data.user?.id ?? '',
         email,
+        userCode: userCode || null,
         fullName,
         role,
         temporaryPassword: password,
