@@ -2,6 +2,17 @@ export const passwordExpiredNotice = 'Your password has expired. Ask an admin to
 
 const dayMs = 24 * 60 * 60 * 1000
 
+/** Long enough that daily use and a long weekend stay signed in. */
+export const sessionIdleDays = 7
+export const sessionIdleMs = sessionIdleDays * dayMs
+export const sessionIdleNotice = 'Signed out after 7 days without use. Sign in again.'
+
+/** True when the last real use was at least the idle window ago. Missing stamps are not idle. */
+export function sessionIdleExpired(lastActivityAt: number | null, now: Date, idleMs = sessionIdleMs): boolean {
+  if (lastActivityAt == null) return false
+  return now.getTime() - lastActivityAt >= idleMs
+}
+
 export function localToday(now = new Date()): string {
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')

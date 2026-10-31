@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { create } from 'zustand'
-import { localToday, passwordExpiredNotice, userAccessLocked, userPasswordExpired } from './access.ts'
+import { localToday, passwordExpiredNotice, sessionIdleNotice, userAccessLocked, userPasswordExpired } from './access.ts'
+import { idleForUser, listenToIdle, touchIdleStamp } from './idle.ts'
 import { supabase } from '../lib/supabase.ts'
 import {
   clearLoadedCatalogue,
@@ -132,6 +133,7 @@ async function settle(session: Session, profile: StaffProfile, stillCurrent: () 
 
 function holdLocked(session: Session, profile: StaffProfile) {
   leaveSession()
+  touchIdleStamp(session.user.id)
   useAuthStore.setState({
     loading: false,
     session,
@@ -142,6 +144,7 @@ function holdLocked(session: Session, profile: StaffProfile) {
 }
 
 function enterApp(session: Session, profile: StaffProfile) {
+  touchIdleStamp(session.user.id)
   useAuthStore.setState({
     loading: false,
     session,
@@ -177,6 +180,13 @@ async function syncSession(session: Session | null) {
     useAuthStore.setState({ loading: false, session: null, profile: null, accountLocked: false })
     return
   }
+
+  // A fresh password login starts a new idle clock. Restored sessions do not.
+  if (screenRole == null && idleForUser(session.user.id)) {
+    await rejectSession(sessionIdleNotice)
+    return
+  }
+  if (screenRole != null) touchIdleStamp(session.user.id)
 
   const existing = useAuthStore.getState()
   const sameUser = existing.profile?.id === session.user.id
@@ -222,7 +232,17 @@ export function listenToAuth(): () => void {
     }, 0)
   })
 
-  return () => data.subscription.unsubscribe()
+  const stopIdle = listenToIdle(
+    () => useAuthStore.getState().session?.user.id ?? null,
+    () => {
+      void rejectSession(sessionIdleNotice)
+    },
+  )
+
+  return () => {
+    stopIdle()
+    data.subscription.unsubscribe()
+  }
 }
 
 export async function signOut(): Promise<void> {

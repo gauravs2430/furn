@@ -440,6 +440,7 @@ p {
 }
 
 .side-group-link {
+  position: relative;
   flex: 1;
   padding: 0 8px 0 10px;
 }
@@ -465,7 +466,18 @@ p {
 .side-link.is-active {
   background: var(--sidebar-active);
   color: #ffffff;
-  box-shadow: inset 3px 0 0 0 var(--accent);
+}
+
+.side-group-link.is-active::before,
+.side-link.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
 }
 
 .side-chevron {
@@ -495,11 +507,15 @@ p {
 .side-panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  visibility: hidden;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.28s;
 }
 
 .side-group.is-open > .side-panel {
   grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
 }
 
 .side-panel-inner {
@@ -508,6 +524,10 @@ p {
   gap: 1px;
   min-height: 0;
   overflow: hidden;
+  padding: 0;
+}
+
+.side-group.is-open > .side-panel > .side-panel-inner {
   padding: 2px 0 4px 8px;
 }
 

@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { dayAfter, expiryOnOrBeforeToday, isDateAfter, userAccessLocked, userPasswordExpired } from './access.ts'
+import {
+  dayAfter,
+  expiryOnOrBeforeToday,
+  isDateAfter,
+  sessionIdleExpired,
+  sessionIdleMs,
+  userAccessLocked,
+  userPasswordExpired,
+} from './access.ts'
 
 const now = new Date('2026-10-07T12:00:00.000Z')
 const today = '2026-10-07'
@@ -61,5 +69,26 @@ describe('password age', () => {
   it('does not expire an admin password of the same age', () => {
     const setAt = new Date(now.getTime() - 400 * 24 * 60 * 60 * 1000).toISOString()
     expect(userPasswordExpired('admin', setAt, 90, now)).toBe(false)
+  })
+})
+
+describe('session idle', () => {
+  it('keeps a session used yesterday', () => {
+    const last = now.getTime() - 24 * 60 * 60 * 1000
+    expect(sessionIdleExpired(last, now)).toBe(false)
+  })
+
+  it('keeps a session used across a long weekend', () => {
+    const last = now.getTime() - 3 * 24 * 60 * 60 * 1000
+    expect(sessionIdleExpired(last, now)).toBe(false)
+  })
+
+  it('signs out after seven days without use', () => {
+    const last = now.getTime() - sessionIdleMs
+    expect(sessionIdleExpired(last, now)).toBe(true)
+  })
+
+  it('does not treat a missing stamp as idle', () => {
+    expect(sessionIdleExpired(null, now)).toBe(false)
   })
 })
