@@ -107,8 +107,11 @@ Deno.serve(async (req) => {
       const password = String(body.password ?? '')
       const userId = String(body.userId ?? '')
       if (password.length < 8) return json({ error: 'Password needs at least 8 characters' }, 400)
-      const { data: target } = await admin.from('profiles').select('email').eq('id', userId).single()
+      const { data: target } = await admin.from('profiles').select('email, role').eq('id', userId).single()
       if (!target) return json({ error: 'User not found' }, 404)
+      if (target.role === 'admin') {
+        return json({ error: 'Admins can change only their own password from Account.' }, 403)
+      }
       const { error } = await admin.auth.admin.updateUserById(userId, { password })
       if (error) return json({ error: error.message }, 400)
       const { error: stampError } = await admin

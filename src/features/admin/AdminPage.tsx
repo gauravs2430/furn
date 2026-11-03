@@ -534,12 +534,10 @@ export function AdminPage() {
                     <th>User id</th>
                     <th>Role</th>
                     <th>Created</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visibleAdmins.map((person) => {
-                    const busy = savingId === person.id
                     return (
                       <tr key={person.id}>
                         <td>{person.full_name.trim() || '—'}</td>
@@ -547,11 +545,6 @@ export function AdminPage() {
                         <td className="people-id">{formatUserId(person)}</td>
                         <td>admin</td>
                         <td>{formatDate(person.created_at)}</td>
-                        <td>
-                          <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
-                            Set a new password
-                          </Button>
-                        </td>
                       </tr>
                     )
                   })}

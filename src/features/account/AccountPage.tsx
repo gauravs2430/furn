@@ -77,6 +77,7 @@ export function AccountPage() {
   }
 
   if (!profile) return <p className="boot">Checking login…</p>
+  const canChangeOwnPassword = profile.role === 'admin'
 
   return (
     <div className="page">
@@ -91,15 +92,17 @@ export function AccountPage() {
               {nameBusy ? 'Saving…' : 'Save name'}
             </Button>
           </form>
-          <form className="card account-password" onSubmit={onSubmit}>
-            <h2>New password</h2>
-            <p className="field-hint">At least 8 characters. This replaces the password you sign in with.</p>
-            <TextField label="New password" type="password" value={password} autoComplete="new-password" onChange={setPassword} />
-            {error ? <p className="form-error">{error}</p> : null}
-            <Button type="submit" disabled={busy}>
-              {busy ? 'Saving…' : 'Set password'}
-            </Button>
-          </form>
+          {canChangeOwnPassword ? (
+            <form className="card account-password" onSubmit={onSubmit}>
+              <h2>New password</h2>
+              <p className="field-hint">At least 8 characters. This replaces the password you sign in with.</p>
+              <TextField label="New password" type="password" value={password} autoComplete="new-password" onChange={setPassword} />
+              {error ? <p className="form-error">{error}</p> : null}
+              <Button type="submit" disabled={busy}>
+                {busy ? 'Saving…' : 'Set password'}
+              </Button>
+            </form>
+          ) : null}
         </div>
         <aside className="card account-side">
           <p className="home-kicker">{profile.role === 'admin' ? 'Admin' : 'Staff'}</p>

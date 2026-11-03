@@ -25,8 +25,7 @@ const copy = {
 export function LoginBrand() {
   return (
     <header className="login-brand">
-      <img className="login-logo" src="/favicon.svg" alt="" width="48" height="48" />
-      <p className="login-company">SunnyPlast</p>
+      <img className="login-logo" src="/sunnyplast-logo.jpeg" alt="SunnyPlast" />
     </header>
   )
 }

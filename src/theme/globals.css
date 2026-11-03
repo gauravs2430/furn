@@ -88,19 +88,18 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  height: 56px;
-  padding: 0 20px 0 0;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border-bottom: 1px solid var(--line);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  gap: 20px;
+  height: 72px;
+  padding: 0 28px 0 0;
+  background: #182133;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.16);
 }
 
 .shell-top-start {
   display: flex;
   align-items: center;
+  align-self: stretch;
   min-width: 0;
   gap: 8px;
 }
@@ -109,7 +108,10 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 260px;
+  width: 220px;
+  height: 144px;
+  align-self: flex-start;
+  background: #ffffff;
   flex: none;
   transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -120,6 +122,10 @@ p {
 
 .app-shell.is-sidebar-collapsed .shell-brand-copy {
   display: none;
+}
+
+.app-shell.is-sidebar-collapsed .shell-logo {
+  width: 42px;
 }
 
 .shell-menu {
@@ -159,15 +165,12 @@ p {
 
 .shell-logo {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 160px;
+  height: auto;
   flex: none;
-  border-radius: var(--radius-xs);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.shell-brand:hover .shell-logo {
-  transform: rotate(-6deg) scale(1.06);
+  object-fit: contain;
+  background: transparent;
+  mix-blend-mode: multiply;
 }
 
 .shell-brand-copy {
@@ -199,13 +202,26 @@ p {
   flex: none;
   min-height: 34px;
   padding: 0 14px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: var(--radius-xs);
   background: transparent;
-  color: var(--muted);
+  color: #ffffff;
   font-weight: 500;
   font-size: 13px;
   transition: all 0.2s ease;
+}
+
+.shell-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.shell-date {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .shell-logout:hover {
@@ -230,13 +246,14 @@ p {
   display: flex;
   flex-direction: column;
   flex: none;
-  width: 260px;
+  width: 220px;
   min-width: 0;
   align-self: flex-start;
   position: sticky;
-  top: 56px;
-  height: calc(100vh - 56px);
-  height: calc(100dvh - 56px);
+  top: 72px;
+  height: calc(100vh - 144px);
+  height: calc(100dvh - 144px);
+  margin-top: 72px;
   overflow: hidden;
   background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -268,8 +285,8 @@ p {
 .shell-rail {
   display: flex;
   justify-content: flex-end;
-  width: 260px;
-  min-width: 260px;
+  width: 220px;
+  min-width: 220px;
   padding: 10px 10px 6px;
 }
 
@@ -288,8 +305,8 @@ p {
 
 .shell-nav {
   flex: 1;
-  width: 260px;
-  min-width: 260px;
+  width: 220px;
+  min-width: 220px;
   min-height: 0;
   overflow: auto;
   padding: 6px 8px 12px;
@@ -314,8 +331,8 @@ p {
 }
 
 .shell-account-wrap {
-  width: 260px;
-  min-width: 260px;
+  width: 220px;
+  min-width: 220px;
   margin-top: auto;
   border-top: 1px solid var(--sidebar-line);
   padding: 8px;
@@ -408,7 +425,7 @@ p {
 .side-link,
 .shell-account,
 .shell-logout {
-  transition: all 0.18s ease;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
 }
 
 .side-group-icon {
@@ -509,6 +526,7 @@ p {
   grid-template-rows: 0fr;
   overflow: hidden;
   visibility: hidden;
+  will-change: grid-template-rows;
   transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.28s;
 }
 
@@ -524,11 +542,15 @@ p {
   gap: 1px;
   min-height: 0;
   overflow: hidden;
-  padding: 0;
+  padding: 2px 0 4px 8px;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.18s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-group.is-open > .side-panel > .side-panel-inner {
-  padding: 2px 0 4px 8px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .side-link {
@@ -833,6 +855,13 @@ p {
   border-bottom: 1px solid var(--line);
 }
 
+/* The lede's bottom margin would sit inside the flex line and push the
+   header action (e.g. New quote) below the copy. Let the head's own
+   padding provide the spacing instead. */
+.page-head .lede {
+  margin-bottom: 0;
+}
+
 .eyebrow {
   color: var(--accent);
   font-size: 11.5px;
@@ -983,22 +1012,38 @@ select.input {
 }
 
 .job-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 18px;
+  gap: 12px;
+  min-height: 286px;
+  padding: 22px;
+  overflow: hidden;
+  border-color: var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(7, 63, 64, 0.07);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.job-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  content: '';
+  background: linear-gradient(90deg, var(--accent), var(--brand-magenta));
+}
+
 .job-card:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
+  border-color: rgba(7, 139, 136, 0.42);
+  box-shadow: 0 14px 32px rgba(7, 63, 64, 0.12);
   transform: translateY(-2px);
 }
 
 .job-card h2 {
-  font-size: 28px;
-  line-height: 1;
+  font-size: 26px;
+  line-height: 1.12;
 }
 
 .owner-switch {
@@ -1032,7 +1077,8 @@ select.input {
 
 .owner-card {
   gap: 0;
-  padding: 18px;
+  min-height: 0;
+  padding: 22px;
 }
 
 .owner-card .owner-head {
@@ -1055,8 +1101,12 @@ select.input {
 .owner-card .owner-jobs {
   flex: 0 0 auto;
   margin: 0;
-  color: var(--ink-soft);
-  font-size: 13px;
+  padding: 5px 9px;
+  border: 1px solid rgba(7, 139, 136, 0.18);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -1064,7 +1114,7 @@ select.input {
 }
 
 .owner-card .owner-id {
-  margin-top: 4px;
+  margin-top: 7px;
   color: var(--muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
@@ -1076,10 +1126,10 @@ select.input {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin: 14px 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+  gap: 8px;
+  margin: 18px 0;
+  padding: 0;
+  border-top: 0;
 }
 
 .owner-card .owner-stats > div:nth-child(2) {
@@ -1088,6 +1138,15 @@ select.input {
 
 .owner-card .owner-stats > div:last-child {
   text-align: right;
+}
+
+.owner-card .owner-stats > div {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bg-subtle);
 }
 
 .owner-card .owner-stats dt {
@@ -1109,7 +1168,7 @@ select.input {
 }
 
 .owner-card .owner-stats dd.is-booked {
-  color: var(--ok);
+  color: var(--brand-magenta);
 }
 
 .owner-card > .btn {
@@ -1492,8 +1551,8 @@ select.input {
 }
 
 .job-no {
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--ink-soft);
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -1501,11 +1560,16 @@ select.input {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin: 6px 0 0;
+  margin: 2px 0 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .job-meta dd {
-  margin: 2px 0 0;
+  margin: 5px 0 0;
+  color: var(--ink);
+  font-size: 17px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
@@ -1541,7 +1605,19 @@ select.input {
 
 .job-actions {
   margin-top: auto;
-  padding-top: 8px;
+  padding-top: 2px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
+
+.job-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.job-actions .btn:last-child:nth-child(3) {
+  grid-column: span 2;
 }
 
 /* ── Badges ── */
@@ -2620,6 +2696,7 @@ select.input {
 /* ── Mobile drawer ── */
 @media (max-width: 860px) {
   .shell-top {
+    height: 80px;
     padding-right: 16px;
     padding-left: 16px;
   }
@@ -2627,7 +2704,21 @@ select.input {
   .shell-brand-slot,
   .app-shell.is-sidebar-collapsed .shell-brand-slot {
     width: auto;
+    height: 80px;
     justify-content: flex-start;
+  }
+
+  .shell-logo {
+    width: 140px;
+    height: auto;
+  }
+
+  .shell-date {
+    display: none;
+  }
+
+  .shell-header-meta {
+    gap: 0;
   }
 
   .app-shell.is-sidebar-collapsed .shell-brand-copy {
@@ -2637,7 +2728,7 @@ select.input {
   .shell-scrim {
     position: fixed;
     z-index: 25;
-    top: 56px;
+    top: 80px;
     right: 0;
     bottom: 0;
     left: 0;
@@ -2658,10 +2749,11 @@ select.input {
   .shell-side {
     position: fixed;
     z-index: 28;
-    top: 56px;
+    top: 80px;
     bottom: 0;
     left: 0;
     height: auto;
+    margin-top: 0;
     width: min(300px, 88vw);
     transform: translateX(-105%);
     transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
@@ -2710,16 +2802,16 @@ select.input {
 .login-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
   padding: 28px 28px 0;
 }
 
 .login-logo {
   display: block;
-  width: 44px;
-  height: 44px;
+  width: 142px;
+  height: 64px;
   flex: none;
-  border-radius: var(--radius-xs);
+  object-fit: contain;
 }
 
 .login-company {
@@ -2958,8 +3050,8 @@ select.input {
   }
 
   .login-logo {
-    width: 40px;
-    height: 40px;
+    width: 136px;
+    height: 58px;
   }
 
   .login-company {

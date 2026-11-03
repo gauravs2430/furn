@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { reloadProfile, signOut, useAuthStore } from '../../auth/session.ts'
-import { company } from '../../data/company.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { cx } from '../../utils/cx.ts'
 import { Toasts } from '../ui/Toast.tsx'
@@ -106,6 +105,10 @@ function linkActive(to: string, location: { pathname: string; search: string; ha
 
 const SIDEBAR_KEY = 'furn.sidebar-collapsed'
 
+function formatLocalHeaderDate() {
+  return new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date())
+}
+
 function readCollapsed() {
   try {
     return localStorage.getItem(SIDEBAR_KEY) === '1'
@@ -132,6 +135,7 @@ export function AppShell() {
   const [drawer, setDrawer] = useState(false)
   const [collapsed, setCollapsed] = useState(readCollapsed)
   const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 860px)').matches)
+  const [headerDate, setHeaderDate] = useState(formatLocalHeaderDate)
   const [open, setOpen] = useState<Record<string, boolean>>({
     home: true,
     orders: true,
@@ -184,6 +188,11 @@ export function AppShell() {
   }, [])
 
   useEffect(() => {
+    const timer = window.setInterval(() => setHeaderDate(formatLocalHeaderDate()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
     function onPageShow(event: PageTransitionEvent) {
       if (!event.persisted) return
       startingRef.current = false
@@ -221,7 +230,11 @@ export function AppShell() {
   }, [drawer, narrow])
 
   function toggle(id: string) {
-    setOpen((current) => ({ ...current, [id]: !current[id] }))
+    setOpen((current) => {
+      const nextOpen = !current[id]
+      if (id === 'admin' && !nextOpen) return { ...current, admin: false, manage: false }
+      return { ...current, [id]: nextOpen }
+    })
   }
 
   async function startQuote() {
@@ -267,18 +280,17 @@ export function AppShell() {
           </button>
           <div className="shell-brand-slot">
             <Link to="/" className="shell-brand">
-              <img className="shell-logo" src="/favicon.svg" alt="" width="36" height="36" />
-              <span className="shell-brand-copy">
-                <span className="shell-brand-name">{company.name}</span>
-                <span className="shell-brand-tag">{company.tagline}</span>
-              </span>
+              <img className="shell-logo" src="/sunnyplast-logo.jpeg" alt="SunnyPlast" />
             </Link>
           </div>
         </div>
-        <button type="button" className="shell-logout" onClick={() => void logOut()}>
-          <LogOut size={15} strokeWidth={1.75} aria-hidden="true" />
-          Log out
-        </button>
+        <div className="shell-header-meta">
+          <time className="shell-date">{headerDate}</time>
+          <button type="button" className="shell-logout" onClick={() => void logOut()}>
+            <LogOut size={15} strokeWidth={1.75} aria-hidden="true" />
+            Log out
+          </button>
+        </div>
       </header>
       <div className="shell-body">
         <div className={cx('shell-scrim', drawer && narrow && 'is-open')} onClick={() => setDrawer(false)} />
@@ -364,8 +376,8 @@ function SideBranch({
   if (node.type === 'quote') {
     return (
       <button type="button" className="side-link side-link-action" disabled={starting} aria-busy={starting} onClick={onNewQuote}>
-        <Plus size={14} strokeWidth={2} aria-hidden="true" className="side-link-icon" />
         <span>{starting ? 'Starting…' : node.label}</span>
+        <Plus size={14} strokeWidth={2} aria-hidden="true" className="side-link-icon" />
       </button>
     )
   }

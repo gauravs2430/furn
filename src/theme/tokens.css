@@ -1,41 +1,44 @@
 :root {
   /* ── Page backgrounds ── */
-  --bg: #f8fafc;
-  --bg-accent: #e2e8f0;
-  --bg-subtle: #f1f5f9;
+  --bg: #f7faf9;
+  --bg-accent: #dce9e7;
+  --bg-subtle: #edf5f3;
 
   /* ── Surfaces ── */
   --surface: #ffffff;
   --surface-2: #ffffff;
 
   /* ── Dark sidebar ── */
-  --sidebar: #0f172a;
-  --sidebar-2: #1e293b;
+  --sidebar: #073f40;
+  --sidebar-2: #0a5655;
   --sidebar-hover: rgba(255, 255, 255, 0.06);
-  --sidebar-active: rgba(14, 165, 233, 0.15);
-  --sidebar-text: #94a3b8;
-  --sidebar-text-bright: #f1f5f9;
+  --sidebar-active: rgba(255, 255, 255, 0.14);
+  --sidebar-text: #bddbd7;
+  --sidebar-text-bright: #f7fffd;
   --sidebar-line: rgba(255, 255, 255, 0.08);
 
   /* ── Text ── */
-  --ink: #0f172a;
-  --ink-soft: #334155;
-  --muted: #64748b;
+  --ink: #123f40;
+  --ink-soft: #315c5d;
+  --muted: #668080;
 
   /* ── Borders ── */
-  --line: #e2e8f0;
-  --line-strong: #cbd5e1;
+  --line: #dbe7e5;
+  --line-strong: #bdd3cf;
 
-  /* ── Accent (sky-blue, matching favicon glass) ── */
-  --accent: #0ea5e9;
-  --accent-hover: #0284c7;
-  --accent-soft: rgba(14, 165, 233, 0.1);
+  /* ── SunnyPlast teal and magenta ── */
+  --accent: #078b88;
+  --accent-hover: #05716f;
+  --accent-soft: rgba(7, 139, 136, 0.12);
+  --brand-magenta: #92266d;
+  --brand-magenta-hover: #781c59;
+  --brand-magenta-soft: rgba(146, 38, 109, 0.1);
 
   /* ── Compat aliases (used in existing components) ── */
-  --glass: #0ea5e9;
-  --glass-soft: rgba(14, 165, 233, 0.1);
-  --brass: #64748b;
-  --brass-soft: rgba(100, 116, 139, 0.12);
+  --glass: #078b88;
+  --glass-soft: rgba(7, 139, 136, 0.12);
+  --brass: #92266d;
+  --brass-soft: rgba(146, 38, 109, 0.12);
 
   /* ── Semantic ── */
   --danger: #ef4444;
