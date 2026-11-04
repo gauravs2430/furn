@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '../../auth/session.ts'
 import { supabase } from '../../lib/supabase.ts'
 import type { QuoteStatus } from '../../domain/models.ts'
@@ -52,10 +52,37 @@ function displayName(person: OwnerCard): string {
 
 export function OrdersByUserPage() {
   const profile = useAuthStore((state) => state.profile)
+  const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [people, setPeople] = useState<OwnerCard[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [query, setQuery] = useState('')
-  const [role, setRole] = useState<'admin' | 'user'>('admin')
+  const query = searchParams.get('q') ?? ''
+  const role: 'admin' | 'user' = searchParams.get('role') === 'user' ? 'user' : 'admin'
+  const scrollKey = `furn.orders-per-user.scroll.${location.key}`
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(scrollKey)
+    if (!saved) return
+    sessionStorage.removeItem(scrollKey)
+    const position = Number(saved)
+    if (!Number.isFinite(position)) return
+    window.requestAnimationFrame(() => window.scrollTo({ top: position, behavior: 'auto' }))
+  }, [scrollKey])
+
+  function updateFilters(next: { role?: 'admin' | 'user'; query?: string }) {
+    const params = new URLSearchParams(searchParams)
+    const nextRole = next.role ?? role
+    const nextQuery = next.query ?? query
+    if (nextRole === 'admin') params.delete('role')
+    else params.set('role', nextRole)
+    if (nextQuery.trim()) params.set('q', nextQuery)
+    else params.delete('q')
+    setSearchParams(params, { replace: true })
+  }
+
+  function rememberPosition() {
+    sessionStorage.setItem(scrollKey, String(window.scrollY))
+  }
 
   useEffect(() => {
     if (profile?.role !== 'admin') return
@@ -135,7 +162,7 @@ export function OrdersByUserPage() {
               value={query}
               placeholder="Search name, email or user id"
               autoComplete="off"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => updateFilters({ query: event.target.value })}
             />
           </label>
         </div>
@@ -146,10 +173,10 @@ export function OrdersByUserPage() {
       {people && people.length > 0 ? (
         <>
           <div className="owner-switch" role="group" aria-label="Role">
-            <button type="button" aria-pressed={role === 'admin'} className={role === 'admin' ? 'is-on' : ''} onClick={() => setRole('admin')}>
+            <button type="button" aria-pressed={role === 'admin'} className={role === 'admin' ? 'is-on' : ''} onClick={() => updateFilters({ role: 'admin' })}>
               Admin
             </button>
-            <button type="button" aria-pressed={role === 'user'} className={role === 'user' ? 'is-on' : ''} onClick={() => setRole('user')}>
+            <button type="button" aria-pressed={role === 'user'} className={role === 'user' ? 'is-on' : ''} onClick={() => updateFilters({ role: 'user' })}>
               User
             </button>
           </div>
@@ -183,7 +210,7 @@ export function OrdersByUserPage() {
                           <dd className={person.booked > 0 ? 'is-booked' : undefined}>{person.booked}</dd>
                         </div>
                       </dl>
-                      <Link className="btn" to={`/admin/orders/users/${person.id}`}>
+                      <Link className="btn" to={`/admin/orders/users/${person.id}`} onClick={rememberPosition}>
                         View orders
                       </Link>
                     </li>
