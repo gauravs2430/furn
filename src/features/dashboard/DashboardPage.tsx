@@ -160,9 +160,11 @@ export function DashboardPage() {
                     <dt>Total</dt>
                     <dd>{formatMoney(totals.grandTotal)}</dd>
                   </div>
-                  <div>
+                  <div className="job-updated">
                     <dt>Updated</dt>
-                    <dd>{formatDateTime(quote.updatedAt)}</dd>
+                    <dd>
+                      <time dateTime={quote.updatedAt}>{formatDateTime(quote.updatedAt)}</time>
+                    </dd>
                   </div>
                 </dl>
                 <div className="job-actions">
