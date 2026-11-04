@@ -200,6 +200,62 @@ p {
   letter-spacing: 0.01em;
 }
 
+/* ── Header Breadcrumbs ── */
+.shell-breadcrumbs {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-left: 28px;
+}
+
+.shell-breadcrumbs-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.shell-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.shell-breadcrumb-link {
+  color: #ffffff;
+  text-decoration: none;
+  opacity: 0.92;
+  transition: opacity 0.15s ease, text-decoration 0.15s ease;
+}
+
+.shell-breadcrumb-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.shell-breadcrumb-current {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.shell-breadcrumb-sep {
+  margin: 0 10px;
+  color: #ffffff;
+  opacity: 0.75;
+  font-weight: 400;
+  font-size: 14px;
+  user-select: none;
+}
+
 .shell-logout {
   display: inline-flex;
   align-items: center;
@@ -1440,27 +1496,28 @@ select.input {
 .desk-note {
   gap: 10px;
   margin-bottom: 0;
-  padding: 30px;
-  border-color: transparent;
+  padding: 26px;
+  border-color: var(--line);
+  border-top: 3px solid var(--accent);
   border-radius: 14px;
-  background: linear-gradient(145deg, #123f40 0%, #0a5655 100%);
-  box-shadow: 0 14px 36px rgba(7, 63, 64, 0.16);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .desk-note h2 {
   font-size: 23px;
-  color: #ffffff;
+  color: var(--ink);
 }
 
 .desk-note p:last-child {
   max-width: 34ch;
   margin: 0;
-  color: var(--sidebar-text);
+  color: var(--muted);
   line-height: 1.55;
 }
 
 .desk-note .eyebrow {
-  color: #a7d8d3;
+  color: var(--accent);
 }
 
 .create-login-summary {
@@ -2966,6 +3023,21 @@ select.input {
 
   .shell-date {
     display: none;
+  }
+
+  .shell-breadcrumbs {
+    margin-left: 12px;
+    font-size: 13.5px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .shell-breadcrumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .shell-breadcrumb-sep {
+    margin: 0 6px;
   }
 
   .shell-header-meta {

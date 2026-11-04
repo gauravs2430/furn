@@ -208,7 +208,13 @@ export function AdminPage() {
     if (!supabase || creating) return
     setCreating(true)
     const { data, error: invokeError } = await supabase.functions.invoke('admin-users', {
-      body: { action: 'create', email: role === 'admin' ? email.trim() : undefined, password, fullName, role },
+      body: {
+        action: 'create',
+        email: role === 'admin' ? email.trim() : undefined,
+        password,
+        fullName,
+        role,
+      },
     })
     setCreating(false)
     if (invokeError) {
@@ -404,9 +410,9 @@ export function AdminPage() {
             </Button>
           </form>
           <aside className="card desk-note">
-            <p className="eyebrow">Before you start</p>
-            <h2>New account access</h2>
-            <p>The user ID is generated automatically. Save the password when it is shown after creation—it will only appear once.</p>
+            <p className="eyebrow">A quick note</p>
+            <h2>Account details</h2>
+            <p>The user ID is created automatically. Save the first password when it appears—it is shown only once.</p>
           </aside>
         </div>
       ) : null}

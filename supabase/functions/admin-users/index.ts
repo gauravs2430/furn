@@ -46,16 +46,9 @@ Deno.serve(async (req) => {
       let userCode = String(body.userCode ?? '').trim().toUpperCase()
 
       if (role === 'user') {
-        if (!userCode) {
-          const { data: codeData, error: codeErr } = await admin.rpc('next_user_code')
-          if (!codeErr && codeData) {
-            userCode = String(codeData)
-          } else {
-            const { count } = await admin.from('profiles').select('*', { count: 'exact', head: true })
-            userCode = `USR${10001 + (count ?? 0)}`
-          }
-        }
-        email = `${userCode.toLowerCase()}@gmail.com`
+        if (!userCode) userCode = await nextUserCode(admin)
+        if (!isValidUserCode(userCode)) return json({ error: 'Could not generate a valid user ID' }, 500)
+        email = userEmail(userCode)
       } else {
         if (!email.includes('@')) return json({ error: 'Enter a valid admin email' }, 400)
       }
@@ -191,6 +184,23 @@ Deno.serve(async (req) => {
     return json({ error: error instanceof Error ? error.message : 'Failed' }, 500)
   }
 })
+
+async function nextUserCode(admin: ReturnType<typeof createClient>): Promise<string> {
+  const { data: codeData, error: codeErr } = await admin.rpc('next_user_code')
+  if (!codeErr && typeof codeData === 'string' && isValidUserCode(codeData)) return codeData.toUpperCase()
+
+  // This fallback supports projects that have not yet applied the user-code migration.
+  const { count } = await admin.from('profiles').select('*', { count: 'exact', head: true })
+  return `USR${10001 + (count ?? 0)}`
+}
+
+function isValidUserCode(value: string): boolean {
+  return /^USR\d+$/.test(value)
+}
+
+function userEmail(userCode: string): string {
+  return `${userCode.toLowerCase()}@gmail.com`
+}
 
 async function readUser(admin: ReturnType<typeof createClient>, userId: string) {
   const { data, error } = await admin

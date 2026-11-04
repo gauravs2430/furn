@@ -17,6 +17,7 @@ import { reloadProfile, signOut, useAuthStore } from '../../auth/session.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { cx } from '../../utils/cx.ts'
 import { Toasts } from '../ui/Toast.tsx'
+import { Breadcrumbs } from './Breadcrumbs.tsx'
 
 type NavLinkItem = { type: 'link'; to: string; label: string }
 type NavQuoteItem = { type: 'quote'; label: string }
@@ -300,6 +301,7 @@ export function AppShell() {
               <img className="shell-logo" src="/sunnyplast-logo.jpeg" alt="SunnyPlast" />
             </Link>
           </div>
+          <Breadcrumbs />
         </div>
         <div className="shell-header-meta">
           <time className="shell-date">{headerDate}</time>
