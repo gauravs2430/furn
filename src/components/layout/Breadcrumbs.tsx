@@ -65,6 +65,8 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
     return base
   }
 
+  
+
   // 4. Admin routes: /admin/...
   if (pathname.startsWith('/admin')) {
     // Manage subgroup routes
