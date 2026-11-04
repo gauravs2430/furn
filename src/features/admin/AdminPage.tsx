@@ -233,7 +233,7 @@ export function AdminPage() {
     setCreateConfirmOpen(false)
     setShown(next)
     const emailError = emailErrorFrom(data)
-    pushToast(emailError ?? 'Email sent', emailError ? 'danger' : 'success')
+    pushToast(emailError ?? (role === 'user' ? 'Login created' : 'Email sent'), emailError ? 'danger' : 'success')
     await reloadPeople()
   }
 

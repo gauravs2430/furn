@@ -84,7 +84,9 @@ Deno.serve(async (req) => {
         }
       }
 
-      const emailError = await credentialEmail(email, 'Your SunnyPlast login', 'Your SunnyPlast login is ready.', password)
+      // User login emails are generated system addresses, not necessarily real inboxes.
+      // Their credentials are shown once in the admin UI instead.
+      const emailError = role === 'admin' ? await credentialEmail(email, 'Your SunnyPlast login', 'Your SunnyPlast login is ready.', password) : {}
       return json({
         id: data.user?.id ?? '',
         email,
