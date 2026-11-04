@@ -162,6 +162,8 @@ export function AppShell() {
     }
   }
   const [starting, setStarting] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const accountMenuRef = useRef<HTMLDivElement>(null)
   const startingRef = useRef(false)
   const skipProfileReload = useRef(true)
   const isAdmin = profile?.role === 'admin'
@@ -229,6 +231,21 @@ export function AppShell() {
     }
   }, [drawer, narrow])
 
+  useEffect(() => {
+    function closeAccountMenu(event: MouseEvent) {
+      if (!accountMenuRef.current?.contains(event.target as Node)) setAccountMenuOpen(false)
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setAccountMenuOpen(false)
+    }
+    document.addEventListener('mousedown', closeAccountMenu)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('mousedown', closeAccountMenu)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [])
+
   function toggle(id: string) {
     setOpen((current) => {
       const nextOpen = !current[id]
@@ -286,10 +303,28 @@ export function AppShell() {
         </div>
         <div className="shell-header-meta">
           <time className="shell-date">{headerDate}</time>
-          <button type="button" className="shell-logout" onClick={() => void logOut()}>
-            <LogOut size={15} strokeWidth={1.75} aria-hidden="true" />
-            Log out
-          </button>
+          <div ref={accountMenuRef} className={cx('header-account-menu', accountMenuOpen && 'is-open')}>
+            <button
+              type="button"
+              className="header-account-trigger"
+              aria-expanded={accountMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setAccountMenuOpen((open) => !open)}
+            >
+              <span className="header-account-avatar" aria-hidden="true">{initials(accountName)}</span>
+              <ChevronDown size={16} strokeWidth={1.8} aria-hidden="true" />
+              <span className="sr-only">Open account menu</span>
+            </button>
+            <div className="header-account-dropdown" role="menu">
+              <Link to="/account" role="menuitem" onClick={() => setAccountMenuOpen(false)}>
+                Account
+              </Link>
+              <button type="button" role="menuitem" onClick={() => void logOut()}>
+                <LogOut size={15} strokeWidth={1.75} aria-hidden="true" />
+                Log out
+              </button>
+            </div>
+          </div>
         </div>
       </header>
       <div className="shell-body">
@@ -327,21 +362,6 @@ export function AppShell() {
                 onNewQuote={startQuote}
               />
             ))}
-          </div>
-          <div className="shell-account-wrap">
-            <Link
-              to="/account"
-              className={cx('shell-account', location.pathname === '/account' && 'is-active')}
-              aria-current={location.pathname === '/account' ? 'page' : undefined}
-            >
-              <span className="shell-avatar" aria-hidden="true">
-                {initials(accountName)}
-              </span>
-              <span className="shell-account-copy">
-                <span className="shell-account-name">{accountName}</span>
-                <span className="shell-account-role">{isAdmin ? 'Admin' : 'Account'}</span>
-              </span>
-            </Link>
           </div>
         </nav>
         <main className="app-main">

@@ -73,6 +73,8 @@ p {
 
 /* ── App Shell ── */
 .app-shell {
+  --shell-sidebar-width: 250px;
+  --shell-sidebar-collapsed-width: 64px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -82,8 +84,10 @@ p {
 
 /* ── Header (top bar) ── */
 .shell-top {
-  position: sticky;
+  position: fixed;
   top: 0;
+  right: 0;
+  left: 0;
   z-index: 30;
   display: flex;
   align-items: center;
@@ -108,16 +112,17 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 220px;
+  width: var(--shell-sidebar-width);
   height: 144px;
   align-self: flex-start;
   background: #ffffff;
   flex: none;
+  flex-shrink: 0;
   transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .app-shell.is-sidebar-collapsed .shell-brand-slot {
-  width: 64px;
+  width: var(--shell-sidebar-collapsed-width);
 }
 
 .app-shell.is-sidebar-collapsed .shell-brand-copy {
@@ -214,12 +219,13 @@ p {
 .shell-header-meta {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
 .shell-date {
   color: #ffffff;
-  font-size: 18px;
+  font-family: var(--font);
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.01em;
 }
@@ -230,12 +236,106 @@ p {
   border-color: rgba(239, 68, 68, 0.2);
 }
 
+.header-account-menu {
+  position: relative;
+}
+
+.header-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0 3px 14px;
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  transition: color 0.18s ease;
+}
+
+.header-account-trigger:hover,
+.header-account-menu.is-open .header-account-trigger {
+  color: #ffffff;
+}
+
+.header-account-trigger svg {
+  transition: transform 0.2s ease;
+}
+
+.header-account-menu.is-open .header-account-trigger svg {
+  transform: rotate(180deg);
+}
+
+.header-account-avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.header-account-dropdown {
+  position: absolute;
+  top: calc(100% + 11px);
+  right: 0;
+  z-index: 40;
+  display: grid;
+  min-width: 150px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transform-origin: top right;
+  transition: opacity 0.18s ease, transform 0.2s ease, visibility 0s 0.2s;
+}
+
+.header-account-menu.is-open .header-account-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.18s ease, transform 0.2s ease, visibility 0s;
+}
+
+.header-account-dropdown a,
+.header-account-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+
+.header-account-dropdown a:hover,
+.header-account-dropdown button:hover {
+  background: var(--bg-subtle);
+  color: var(--ink);
+}
+
 /* ── Shell body + sidebar ── */
 .shell-body {
-  display: flex;
-  flex: 1;
+  display: block;
   align-items: stretch;
   min-width: 0;
+  padding-top: 72px;
 }
 
 .shell-scrim {
@@ -246,14 +346,16 @@ p {
   display: flex;
   flex-direction: column;
   flex: none;
-  width: 220px;
+  width: var(--shell-sidebar-width);
   min-width: 0;
-  align-self: flex-start;
-  position: sticky;
-  top: 72px;
+  position: fixed;
+  z-index: 20;
+  top: 144px;
+  bottom: 0;
+  left: 0;
   height: calc(100vh - 144px);
   height: calc(100dvh - 144px);
-  margin-top: 72px;
+  margin-top: 0;
   overflow: hidden;
   background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -261,7 +363,7 @@ p {
 }
 
 .app-shell.is-sidebar-collapsed .shell-side {
-  width: 64px;
+  width: var(--shell-sidebar-collapsed-width);
 }
 
 .app-shell.is-sidebar-collapsed .shell-nav {
@@ -278,15 +380,15 @@ p {
 
 .app-shell.is-sidebar-collapsed .shell-account-wrap,
 .app-shell.is-sidebar-collapsed .shell-rail {
-  width: 64px;
-  min-width: 64px;
+  width: var(--shell-sidebar-collapsed-width);
+  min-width: var(--shell-sidebar-collapsed-width);
 }
 
 .shell-rail {
   display: flex;
   justify-content: flex-end;
-  width: 220px;
-  min-width: 220px;
+  width: var(--shell-sidebar-width);
+  min-width: var(--shell-sidebar-width);
   padding: 10px 10px 6px;
 }
 
@@ -305,8 +407,8 @@ p {
 
 .shell-nav {
   flex: 1;
-  width: 220px;
-  min-width: 220px;
+  width: var(--shell-sidebar-width);
+  min-width: var(--shell-sidebar-width);
   min-height: 0;
   overflow: auto;
   padding: 6px 8px 12px;
@@ -331,8 +433,8 @@ p {
 }
 
 .shell-account-wrap {
-  width: 220px;
-  min-width: 220px;
+  width: var(--shell-sidebar-width);
+  min-width: var(--shell-sidebar-width);
   margin-top: auto;
   border-top: 1px solid var(--sidebar-line);
   padding: 8px;
@@ -828,7 +930,12 @@ p {
 .app-main {
   flex: 1;
   min-width: 0;
+  margin-left: var(--shell-sidebar-width);
   padding: 32px 32px 48px;
+}
+
+.app-shell.is-sidebar-collapsed .app-main {
+  margin-left: var(--shell-sidebar-collapsed-width);
 }
 
 .page {
@@ -2693,6 +2800,37 @@ select.input {
 
 /* ── Desktop sidebar toggle ── */
 @media (min-width: 861px) {
+  .shell-top {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+  }
+
+  .shell-body {
+    display: block;
+    padding-top: 72px;
+  }
+
+  .shell-side {
+    position: fixed;
+    z-index: 20;
+    top: 144px;
+    bottom: 0;
+    left: 0;
+    height: calc(100vh - 144px);
+    height: calc(100dvh - 144px);
+    margin-top: 0;
+  }
+
+  .app-main {
+    margin-left: var(--shell-sidebar-width);
+  }
+
+  .app-shell.is-sidebar-collapsed .app-main {
+    margin-left: var(--shell-sidebar-collapsed-width);
+  }
+
   .shell-menu-bar {
     display: none;
   }
@@ -2704,6 +2842,15 @@ select.input {
     height: 80px;
     padding-right: 16px;
     padding-left: 16px;
+  }
+
+  .shell-body {
+    padding-top: 80px;
+  }
+
+  .app-main,
+  .app-shell.is-sidebar-collapsed .app-main {
+    margin-left: 0;
   }
 
   .shell-brand-slot,
@@ -2757,7 +2904,8 @@ select.input {
     top: 80px;
     bottom: 0;
     left: 0;
-    height: auto;
+    height: calc(100vh - 80px);
+    height: calc(100dvh - 80px);
     margin-top: 0;
     width: min(300px, 88vw);
     transform: translateX(-105%);
