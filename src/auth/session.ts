@@ -100,18 +100,24 @@ async function passwordMaxAgeDays(): Promise<{ days: number } | { error: string 
 
 type Gate = { kind: 'off' } | { kind: 'locked' } | { kind: 'password' } | { kind: 'error'; message: string } | { kind: 'ok' }
 
-async function gateProfile(profile: StaffProfile): Promise<Gate> {
+async function gateProfile(profile: StaffProfile, allowPasswordRecovery = false): Promise<Gate> {
   if (!profile.active) return { kind: 'off' }
   if (userAccessLocked(profile.role, profile.locked, profile.accessExpiresOn, localToday())) return { kind: 'locked' }
   if (profile.role === 'admin') return { kind: 'ok' }
   const age = await passwordMaxAgeDays()
   if ('error' in age) return { kind: 'error', message: age.error }
-  if (userPasswordExpired(profile.role, profile.passwordSetAt, age.days, new Date())) return { kind: 'password' }
+  if (!allowPasswordRecovery && userPasswordExpired(profile.role, profile.passwordSetAt, age.days, new Date())) return { kind: 'password' }
   return { kind: 'ok' }
 }
 
-async function settle(session: Session, profile: StaffProfile, stillCurrent: () => boolean, signOutOnError: boolean): Promise<boolean> {
-  const gate = await gateProfile(profile)
+async function settle(
+  session: Session,
+  profile: StaffProfile,
+  stillCurrent: () => boolean,
+  signOutOnError: boolean,
+  allowPasswordRecovery = false,
+): Promise<boolean> {
+  const gate = await gateProfile(profile, allowPasswordRecovery)
   if (!stillCurrent()) return false
   if (gate.kind === 'off') {
     await rejectSession(turnedOff)
@@ -172,7 +178,7 @@ async function rejectSession(notice: string) {
   await supabase.auth.signOut()
 }
 
-async function syncSession(session: Session | null) {
+async function syncSession(session: Session | null, allowPasswordRecovery = false) {
   const current = ++ticket
   if (!supabase) return
 
@@ -217,7 +223,7 @@ async function syncSession(session: Session | null) {
     return
   }
 
-  const open = await settle(session, profile, () => current === ticket, true)
+  const open = await settle(session, profile, () => current === ticket, true, allowPasswordRecovery)
   if (!open || current !== ticket) return
   enterApp(session, profile)
 }
@@ -228,9 +234,9 @@ export function listenToAuth(): () => void {
     return () => {}
   }
 
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
     window.setTimeout(() => {
-      void syncSession(session)
+      void syncSession(session, event === 'PASSWORD_RECOVERY')
     }, 0)
   })
 

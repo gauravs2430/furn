@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireAuth } from '../auth/RequireAuth.tsx'
 import { AppShell } from '../components/layout/AppShell.tsx'
 import { AccountPage } from '../features/account/AccountPage.tsx'
+import { ResetPasswordPage } from '../features/account/ResetPasswordPage.tsx'
 import { AdminPage } from '../features/admin/AdminPage.tsx'
 import { AdminOrdersPage } from '../features/admin/OrdersPage.tsx'
 import { OrdersByUserPage } from '../features/admin/OrdersByUserPage.tsx'
@@ -19,6 +20,7 @@ export function AppRouter() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/admin/login" element={<LoginPage variant="admin" />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route path="/" element={<HomePage />} />
