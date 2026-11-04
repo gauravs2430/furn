@@ -175,11 +175,11 @@ export function OrdersByUserPage() {
                           <dd>{person.drafts}</dd>
                         </div>
                         <div>
-                          <dt>Quotations</dt>
+                          <dt>Quotes</dt>
                           <dd>{person.quoted}</dd>
                         </div>
                         <div>
-                          <dt>Bookings</dt>
+                          <dt>Booked</dt>
                           <dd className={person.booked > 0 ? 'is-booked' : undefined}>{person.booked}</dd>
                         </div>
                       </dl>

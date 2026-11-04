@@ -8,6 +8,7 @@ interface ConfirmDialogProps {
   description: string
   confirmLabel: string
   tone?: 'danger' | 'primary'
+  confirmDisabled?: boolean
   onConfirm: () => void
   onOpenChange: (open: boolean) => void
   children?: ReactNode
@@ -19,6 +20,7 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   tone = 'primary',
+  confirmDisabled = false,
   onConfirm,
   onOpenChange,
   children,
@@ -35,7 +37,7 @@ export function ConfirmDialog({
             <Dialog.Close asChild>
               <Button variant="secondary">Cancel</Button>
             </Dialog.Close>
-            <Button variant={tone === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
+            <Button variant={tone === 'danger' ? 'danger' : 'primary'} disabled={confirmDisabled} onClick={onConfirm}>
               {confirmLabel}
             </Button>
           </div>

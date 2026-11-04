@@ -132,6 +132,7 @@ export function AdminPage() {
   const [password, setPassword] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [createConfirmOpen, setCreateConfirmOpen] = useState(false)
   const [shown, setShown] = useState<ShownPassword | null>(null)
   const [resetFor, setResetFor] = useState<Person | null>(null)
   const [resetPassword, setResetPassword] = useState('')
@@ -188,7 +189,7 @@ export function AdminPage() {
     setRows((current) => current?.map((row) => (row.id === id ? { ...row, ...patch } : row)) ?? current)
   }
 
-  async function onCreate(event: FormEvent) {
+  function requestCreate(event: FormEvent) {
     event.preventDefault()
     if (!supabase || creating) return
     if (role === 'admin' && !email.trim().includes('@')) {
@@ -200,6 +201,11 @@ export function AdminPage() {
       return
     }
     setFormError(null)
+    setCreateConfirmOpen(true)
+  }
+
+  async function onCreate() {
+    if (!supabase || creating) return
     setCreating(true)
     const { data, error: invokeError } = await supabase.functions.invoke('admin-users', {
       body: { action: 'create', email: role === 'admin' ? email.trim() : undefined, password, fullName, role },
@@ -218,6 +224,7 @@ export function AdminPage() {
     setEmail('')
     setRole('user')
     setPassword('')
+    setCreateConfirmOpen(false)
     setShown(next)
     const emailError = emailErrorFrom(data)
     pushToast(emailError ?? 'Email sent', emailError ? 'danger' : 'success')
@@ -369,39 +376,37 @@ export function AdminPage() {
 
       {adding ? (
         <div className="split-desk">
-          <form id="new-user" className="people-create card" onSubmit={(event) => void onCreate(event)}>
-            <h2>New login</h2>
+          <form id="new-user" className="people-create card" onSubmit={requestCreate}>
+            <div className="people-create-head">
+              <p className="eyebrow">Access setup</p>
+              <h2>Create a new user</h2>
+              <p className="field-hint">Add their name, choose access, and set their first password.</p>
+            </div>
             <div className="form-grid">
               <TextField label="Full name" value={fullName} autoComplete="name" onChange={setFullName} />
               <SelectField label="Role" value={role} onChange={(value) => setRole(value === 'admin' ? 'admin' : 'user')}>
-                <option value="user">user</option>
-                <option value="admin">admin</option>
+                <option value="user">User</option>
+                <option value="admin">Administrator</option>
               </SelectField>
               {role === 'admin' ? (
                 <TextField label="Email" type="email" value={email} autoComplete="off" onChange={setEmail} />
               ) : (
-                <div className="field">
-                  <span className="field-label">User ID & Login</span>
-                  <p className="field-hint" style={{ margin: '0.4rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted, #64748b)' }}>
-                    Auto-generated (e.g. <strong>USR10001</strong>). User signs in with this ID and password.
-                  </p>
+                <div className="field user-id-note">
+                  <span className="field-label">User ID</span>
+                  <p className="field-hint">Generated automatically. They sign in with this ID and password.</p>
                 </div>
               )}
-              <TextField label="Password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
+              <TextField label="First password" type="password" value={password} autoComplete="new-password" hint="At least 8 characters" onChange={setPassword} />
             </div>
             {formError ? <p className="form-error">{formError}</p> : null}
             <Button type="submit" disabled={creating}>
-              {creating ? 'Creating…' : 'Create login'}
+              {creating ? 'Creating…' : 'Review & create'}
             </Button>
           </form>
           <aside className="card desk-note">
-            <h2>What this creates</h2>
-            <p>A staff login for this email. They sign in with the password you set here.</p>
-            <ul>
-              <li>User can work their own drafts, quotes, and booked jobs.</li>
-              <li>Admin can also open the admin panel.</li>
-              <li>The password is shown once after you create the login.</li>
-            </ul>
+            <p className="eyebrow">Before you start</p>
+            <h2>New account access</h2>
+            <p>The user ID is generated automatically. Save the password when it is shown after creation—it will only appear once.</p>
           </aside>
         </div>
       ) : null}
@@ -554,6 +559,37 @@ export function AdminPage() {
           ) : null}
         </section>
       ) : null}
+
+      <ConfirmDialog
+        open={createConfirmOpen}
+        title="Create this login?"
+        description="Review the details below. The password will be shown only once after the account is created, so save it securely."
+        confirmLabel={creating ? 'Creating…' : 'Create login'}
+        confirmDisabled={creating}
+        onConfirm={() => void onCreate()}
+        onOpenChange={(open) => {
+          if (!open && !creating) setCreateConfirmOpen(false)
+        }}
+      >
+        <dl className="password-once create-login-summary">
+          <div>
+            <dt>Name</dt>
+            <dd>{fullName.trim() || 'No name entered'}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>{role === 'admin' ? 'Administrator' : 'User'}</dd>
+          </div>
+          <div>
+            <dt>{role === 'admin' ? 'Email' : 'User ID'}</dt>
+            <dd>{role === 'admin' ? email.trim() : 'Generated automatically'}</dd>
+          </div>
+          <div>
+            <dt>First password</dt>
+            <dd>{password}</dd>
+          </div>
+        </dl>
+      </ConfirmDialog>
 
       <ConfirmDialog
         open={activeFor !== null}
