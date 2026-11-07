@@ -4,11 +4,11 @@ import { useAuthStore } from '../../auth/session.ts'
 import { currentCatalogue, fallbackCatalogue } from '../../domain/catalogue.ts'
 import { presetsFor } from '../../data/technicalPresets.ts'
 import { isDrawingFamily, PRODUCT_FAMILIES, type ProductFamily } from '../../domain/models.ts'
-import { createProduct, searchProducts, type ProductListRow } from '../../repositories/CatalogAdminRepository.ts'
+import { createProduct, removeProduct, searchProducts, type ProductListRow } from '../../repositories/CatalogAdminRepository.ts'
 import { refreshCatalogue } from '../../store/useAppStore.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { Button } from '../../components/ui/Button.tsx'
-import { Modal } from '../../components/ui/Dialog.tsx'
+import { ConfirmDialog, Modal } from '../../components/ui/Dialog.tsx'
 import { NumberField, SelectField, TextField } from '../../components/ui/Field.tsx'
 import { formatDateTime } from '../../utils/dates.ts'
 import { CatalogOptions } from './CatalogOptions.tsx'
@@ -41,6 +41,7 @@ export function CatalogPage() {
   const [total, setTotal] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [pendingRemove, setPendingRemove] = useState<ProductListRow | null>(null)
   const [creating, setCreating] = useState(false)
   const [family, setFamily] = useState<ProductFamily>('window')
   const initial = familyDefaults('window')
@@ -164,20 +165,33 @@ export function CatalogPage() {
                 <th>Factor</th>
                 <th>Active</th>
                 <th>Updated</th>
+                <th><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="catalog-row" onClick={() => setEditingId(row.id)}>
+                <tr key={row.id} className="catalog-row">
                   <td>
                     <button type="button" className="row-open" onClick={() => setEditingId(row.id)}>
                       {row.name}
                     </button>
                   </td>
-                  <td>{row.family}</td>
-                  <td>{row.factor}</td>
-                  <td>{row.active ? 'Active' : 'Off'}</td>
-                  <td>{formatDateTime(row.updatedAt)}</td>
+                  <td onClick={() => setEditingId(row.id)}>{row.family}</td>
+                  <td onClick={() => setEditingId(row.id)}>{row.factor}</td>
+                  <td onClick={() => setEditingId(row.id)}>{row.active ? 'Active' : 'Off'}</td>
+                  <td onClick={() => setEditingId(row.id)}>{formatDateTime(row.updatedAt)}</td>
+                  <td className="catalog-actions">
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPendingRemove(row)
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -227,6 +241,35 @@ export function CatalogPage() {
       {editingId ? (
         <ProductEditor key={editingId} productId={editingId} onClose={() => setEditingId(null)} onSaved={() => setReload((current) => current + 1)} />
       ) : null}
+
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        title="Remove this product?"
+        description={pendingRemove ? `Remove "${pendingRemove.name}"? This product and its part associations will be permanently removed from the catalogue.` : ''}
+        confirmLabel="Remove product"
+        tone="danger"
+        onOpenChange={(open) => {
+          if (!open) setPendingRemove(null)
+        }}
+        onConfirm={() => {
+          if (!pendingRemove) return
+          const target = pendingRemove
+          setPendingRemove(null)
+          void removeProduct(target.id)
+            .then(async () => {
+              setReload((current) => current + 1)
+              try {
+                await refreshCatalogue()
+                pushToast('Product removed')
+              } catch (refreshError) {
+                pushToast(messageFrom(refreshError, 'Saved. Reload the page to see it on quotes.'), 'info')
+              }
+            })
+            .catch((removeError: unknown) => {
+              setError(messageFrom(removeError, 'Could not remove that product.'))
+            })
+        }}
+      />
     </div>
   )
 }

@@ -8,13 +8,14 @@
   --surface: #ffffff;
   --surface-2: #ffffff;
 
-  /* ── Dark sidebar ── */
-  --sidebar: #073f40;
-  --sidebar-2: #0a5655;
+  /* ── Header & Dark sidebar (Deep Navy Blue) ── */
+  --header-bg: #111827;
+  --sidebar: #111827;
+  --sidebar-2: #111827;
   --sidebar-hover: rgba(255, 255, 255, 0.06);
-  --sidebar-active: rgba(255, 255, 255, 0.14);
-  --sidebar-text: #bddbd7;
-  --sidebar-text-bright: #f7fffd;
+  --sidebar-active: rgba(255, 255, 255, 0.12);
+  --sidebar-text: #cbd5e1;
+  --sidebar-text-bright: #ffffff;
   --sidebar-line: rgba(255, 255, 255, 0.08);
 
   /* ── Text ── */
@@ -53,10 +54,10 @@
   --shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.06);
   --shadow-sticky: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
 
-  /* ── Radius ── */
-  --radius: 10px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
+  /* ── Radius (sleek sharp-smooth curves) ── */
+  --radius: 6px;
+  --radius-sm: 4px;
+  --radius-xs: 3px;
 
   /* ── Typography ── */
   --font: 'Inter', system-ui, -apple-system, sans-serif;

@@ -246,6 +246,13 @@ export async function updateProduct(id: string, input: ProductPatch): Promise<vo
   written(updated.data, 'Could not save that product.')
 }
 
+export async function removeProduct(id: string): Promise<void> {
+  await requireClient().from('product_parts').delete().eq('product_id', id)
+  const removed = await requireClient().from('products').delete().eq('id', id).select('id')
+  fail(removed.error, 'Could not remove that product.')
+  written(removed.data, 'Could not remove that product.')
+}
+
 export async function loadProductBundle(id: string): Promise<ProductBundle> {
   const productResult = await requireClient().from('products').select(PRODUCT_COLUMNS).eq('id', id)
   fail(productResult.error, 'Could not open that product.')

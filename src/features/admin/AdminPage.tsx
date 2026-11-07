@@ -141,6 +141,7 @@ export function AdminPage() {
   const [unlockFor, setUnlockFor] = useState<Person | null>(null)
   const [unlockDate, setUnlockDate] = useState('')
   const [unlockError, setUnlockError] = useState<string | null>(null)
+  const [deleteFor, setDeleteFor] = useState<Person | null>(null)
 
   useEffect(() => {
     if (profile?.role !== 'admin' || !supabase) return
@@ -367,6 +368,30 @@ export function AdminPage() {
     if (emailError) pushToast(emailError, 'danger')
   }
 
+  async function confirmDeleteUser() {
+    if (!supabase || !deleteFor || savingRef.current) return
+    const person = deleteFor
+    savingRef.current = true
+    setSavingId(person.id)
+    const { data, error: invokeError } = await supabase.functions.invoke('admin-users', {
+      body: { action: 'delete-user', userId: person.id },
+    })
+    savingRef.current = false
+    setSavingId(null)
+    if (invokeError) {
+      pushToast(await messageFromInvoke(invokeError, 'Could not permanently delete that user.'), 'danger')
+      return
+    }
+    const failure = invokeFailure(data, 'Could not permanently delete that user.')
+    if (failure) {
+      pushToast(failure, 'danger')
+      return
+    }
+    setRows((current) => current?.filter((row) => row.id !== person.id) ?? current)
+    setDeleteFor(null)
+    pushToast('User and their related data were permanently deleted', 'success')
+  }
+
   function openReset(person: Person) {
     setResetPassword('')
     setResetFor(person)
@@ -517,9 +542,14 @@ export function AdminPage() {
                         </td>
                         <td>{formatDate(person.created_at)}</td>
                         <td>
-                          <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
-                            Set a new password
-                          </Button>
+                          <div className="people-actions">
+                            <Button variant="secondary" size="sm" disabled={busy || resetting} onClick={() => openReset(person)}>
+                              Set a new password
+                            </Button>
+                            <Button variant="danger" size="sm" disabled={busy || resetting} onClick={() => setDeleteFor(person)}>
+                              Delete user
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     )
@@ -654,6 +684,23 @@ export function AdminPage() {
           </label>
         ) : null}
       </ConfirmDialog>
+
+      <ConfirmDialog
+        open={deleteFor !== null}
+        title="Permanently delete this user?"
+        description={
+          deleteFor
+            ? `${displayName(deleteFor)} will be permanently removed. Their login, profile, and all data related to their account, including saved quotes, will be deleted and cannot be restored.`
+            : ''
+        }
+        confirmLabel={savingId && deleteFor ? 'Deleting…' : 'Delete user permanently'}
+        confirmDisabled={savingId !== null}
+        tone="danger"
+        onConfirm={() => void confirmDeleteUser()}
+        onOpenChange={(open) => {
+          if (!open && !savingRef.current) setDeleteFor(null)
+        }}
+      />
 
       <Modal
         open={resetFor !== null}

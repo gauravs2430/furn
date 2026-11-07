@@ -181,6 +181,19 @@ Deno.serve(async (req) => {
       return json({ ok: true, ...emailError })
     }
 
+    if (action === 'delete-user') {
+      const userId = String(body.userId ?? '')
+      if (!userId) return json({ error: 'User not found' }, 404)
+      const target = await readUser(admin, userId)
+      if (target.error || !target.user) return json({ error: target.error || 'User not found' }, target.status)
+
+      // Deleting the Auth user permanently removes their profile and related
+      // quotes through the database foreign-key cascades.
+      const { error } = await admin.auth.admin.deleteUser(userId)
+      if (error) return json({ error: error.message }, 400)
+      return json({ ok: true })
+    }
+
     return json({ error: 'Unknown action' }, 400)
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : 'Failed' }, 500)

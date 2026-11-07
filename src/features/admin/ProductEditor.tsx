@@ -7,6 +7,7 @@ import {
   attachPart,
   createPartOnProduct,
   loadProductBundle,
+  removeProduct,
   savePartPricing,
   setPartIncluded,
   updateProduct,
@@ -54,6 +55,7 @@ export function ProductEditor({
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [removeId, setRemoveId] = useState<string | null>(null)
+  const [removeProductOpen, setRemoveProductOpen] = useState(false)
   const [version, setVersion] = useState(0)
   const keepDraft = useRef(false)
   const seenId = useRef(productId)
@@ -175,7 +177,15 @@ export function ProductEditor({
                 ) : null}
                 <ActiveCheck checked={draft.active} onChange={(active) => setDraft({ ...draft, active })} />
               </div>
-              <div className="dialog-actions">
+              <div className="dialog-actions dialog-actions-split">
+                <Button
+                  type="button"
+                  variant="danger"
+                  disabled={saving}
+                  onClick={() => setRemoveProductOpen(true)}
+                >
+                  Remove product
+                </Button>
                 <Button type="submit" disabled={saving}>
                   {saving ? 'Saving…' : 'Save product'}
                 </Button>
@@ -242,6 +252,33 @@ export function ProductEditor({
           void setPartIncluded(productId, partId, false)
             .then(() => afterWrite('Part removed', false))
             .catch((removeError: unknown) => setError(messageFrom(removeError, 'Could not remove that part.')))
+        }}
+      />
+      <ConfirmDialog
+        open={removeProductOpen}
+        title="Remove this product?"
+        description={product ? `Remove "${product.name}"? This product and its part associations will be permanently removed from the catalogue.` : ''}
+        confirmLabel="Remove product"
+        tone="danger"
+        onOpenChange={setRemoveProductOpen}
+        onConfirm={() => {
+          setRemoveProductOpen(false)
+          setSaving(true)
+          void removeProduct(productId)
+            .then(async () => {
+              onClose()
+              onSaved()
+              try {
+                await refreshCatalogue()
+                pushToast('Product removed')
+              } catch (refreshError) {
+                pushToast(messageFrom(refreshError, 'Saved. Reload the page to see it on quotes.'), 'info')
+              }
+            })
+            .catch((removeError: unknown) => {
+              setError(messageFrom(removeError, 'Could not remove that product.'))
+              setSaving(false)
+            })
         }}
       />
     </>
