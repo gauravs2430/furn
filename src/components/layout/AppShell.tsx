@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   FileText,
   House,
   LogOut,
-  Menu,
   Plus,
   Settings,
   ShieldCheck,
-  X,
   type LucideIcon,
 } from 'lucide-react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
@@ -293,7 +292,7 @@ export function AppShell() {
             aria-controls="site-nav"
             onClick={toggleSidebar}
           >
-            {menuOpen ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={18} strokeWidth={1.75} aria-hidden="true" />}
+            {menuOpen ? <ChevronLeft size={18} strokeWidth={2} aria-hidden="true" /> : <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />}
             <span className="sr-only">{menuOpen ? 'Hide sidebar' : 'Show sidebar'}</span>
           </button>
           <div className="shell-brand-slot">
@@ -347,7 +346,7 @@ export function AppShell() {
                 aria-controls="site-nav"
                 onClick={toggleSidebar}
               >
-                {menuOpen ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Menu size={18} strokeWidth={1.75} aria-hidden="true" />}
+                {menuOpen ? <ChevronLeft size={18} strokeWidth={2} aria-hidden="true" /> : <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />}
                 <span className="sr-only">{menuOpen ? 'Hide sidebar' : 'Show sidebar'}</span>
               </button>
             </div>

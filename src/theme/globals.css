@@ -435,19 +435,26 @@ p {
   justify-content: center;
 }
 
-.app-shell.is-sidebar-collapsed .shell-account-wrap,
-.app-shell.is-sidebar-collapsed .shell-rail {
-  width: var(--shell-sidebar-collapsed-width);
-  min-width: var(--shell-sidebar-collapsed-width);
-}
-
 .shell-rail {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   flex-shrink: 0;
   width: var(--shell-sidebar-width);
   min-width: var(--shell-sidebar-width);
   padding: 10px 10px 6px;
+}
+
+.app-shell.is-sidebar-collapsed .shell-account-wrap {
+  width: var(--shell-sidebar-collapsed-width);
+  min-width: var(--shell-sidebar-collapsed-width);
+}
+
+.app-shell.is-sidebar-collapsed .shell-rail {
+  width: var(--shell-sidebar-collapsed-width);
+  min-width: var(--shell-sidebar-collapsed-width);
+  justify-content: center;
+  padding: 10px 0 6px;
 }
 
 .shell-rail .shell-menu {
@@ -997,7 +1004,7 @@ p {
   flex: 1;
   min-width: 0;
   margin-left: var(--shell-sidebar-width);
-  padding: 32px 32px 48px;
+  padding: 28px 24px 48px;
 }
 
 .app-shell.is-sidebar-collapsed .app-main {
@@ -1005,7 +1012,8 @@ p {
 }
 
 .page {
-  max-width: 1180px;
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
   animation: rise-in 0.42s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1395,7 +1403,7 @@ select.input {
 }
 
 .people-users {
-  min-width: 1240px;
+  min-width: 1160px;
 }
 
 .people-section {
