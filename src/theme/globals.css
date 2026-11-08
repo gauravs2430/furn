@@ -2847,6 +2847,38 @@ select.input {
   width: min(760px, calc(100vw - 24px));
 }
 
+.dialog-customer {
+  width: min(880px, calc(100vw - 24px));
+}
+
+.customer-onboarding {
+  display: grid;
+  gap: 18px;
+}
+
+.customer-onboarding .dialog-copy {
+  margin: -4px 0 2px;
+}
+
+.customer-onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.customer-onboarding-grid label {
+  min-width: 0;
+}
+
+.customer-onboarding-full {
+  grid-column: 1 / -1;
+}
+
+.customer-onboarding-grid .input {
+  width: 100%;
+  min-height: 52px;
+}
+
 .dialog-catalog {
   width: min(980px, calc(100vw - 24px));
 }
@@ -2911,6 +2943,11 @@ select.input {
     position: static;
   }
 
+  .quote-summary-grid,
+  .quote-notes-grid {
+    grid-template-columns: 1fr;
+  }
+
   .preview-sheet {
     height: 420px;
   }
@@ -2954,7 +2991,163 @@ select.input {
   .quote-identity h1 {
     font-size: 30px;
   }
+}
 
+/* ── Quote overview ── */
+.quote-overview-page {
+  display: grid;
+  gap: 24px;
+  padding-top: 12px;
+}
+
+.quote-customer-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.quote-customer-strip:hover,
+.quote-customer-strip:focus-visible {
+  border-color: var(--accent);
+  background: var(--bg-subtle);
+  outline: none;
+}
+
+.quote-customer-strip > span {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.quote-customer-strip strong {
+  font-weight: 700;
+}
+
+.quote-customer-strip svg,
+.quote-note-edit svg {
+  color: var(--accent);
+}
+
+.quote-summary-grid,
+.quote-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.quote-summary-card,
+.quote-note-card {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.quote-summary-card h2,
+.quote-note-card h2,
+.quote-products-placeholder h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.quote-summary-card h2 {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.quote-detail-list {
+  display: grid;
+  margin: 14px 0 0;
+}
+
+.quote-detail-list > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  min-height: 58px;
+  padding: 12px 16px;
+}
+
+.quote-detail-list > div:nth-child(odd) {
+  background: var(--bg-subtle);
+}
+
+.quote-detail-list dt {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.quote-detail-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.quote-cost-list > div {
+  min-height: 58px;
+}
+
+.quote-price-list > div {
+  min-height: 48px;
+}
+
+.quote-price-button {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.quote-note-card {
+  min-height: 116px;
+}
+
+.quote-note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.quote-note-edit {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.quote-products-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 130px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.quote-products-placeholder h2 {
+  font-size: 30px;
+}
+
+@media (max-width: 720px) {
   .form-grid,
   .product-grid,
   .glazing-grid,
@@ -2969,6 +3162,14 @@ select.input {
   .job-card {
     width: 100%;
     padding: 20px;
+  }
+
+  .customer-onboarding-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-onboarding-full {
+    grid-column: auto;
   }
 
   .job-meta {
@@ -3014,6 +3215,25 @@ select.input {
   .quote-identity > div {
     min-width: 0;
     flex: 1 1 140px;
+  }
+
+  .quote-overview-page {
+    gap: 16px;
+  }
+
+  .quote-summary-card,
+  .quote-note-card {
+    padding: 18px;
+  }
+
+  .quote-detail-list > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .quote-products-placeholder {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .toast-wrap {

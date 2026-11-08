@@ -14,7 +14,8 @@ import { formatMoney } from '../../utils/money.ts'
 import { Button } from '../../components/ui/Button.tsx'
 import { StatusBadge } from '../../components/ui/Badge.tsx'
 import { ConfirmDialog } from '../../components/ui/Dialog.tsx'
-import { CustomerForm } from './CustomerForm.tsx'
+import { CustomerForm, NewQuoteCustomerDialog } from './CustomerForm.tsx'
+import { QuoteOverview } from './QuoteOverview.tsx'
 import { OpeningForm } from './OpeningForm.tsx'
 import { AppearanceForm } from './AppearanceForm.tsx'
 import { TechnicalForm } from './TechnicalForm.tsx'
@@ -38,6 +39,7 @@ export function ConfiguratorPage() {
   const flushQuote = useAppStore((state) => state.flushQuote)
   const pushToast = useAppStore((state) => state.pushToast)
   const userId = useAuthStore((state) => state.profile?.id)
+  const quotedBy = useAuthStore((state) => state.profile?.full_name.trim() || state.profile?.email || '—')
 
   const [item, setItem] = useState<QuoteItem | null>(null)
   const [lookupId, setLookupId] = useState<string | null>(null)
@@ -45,6 +47,8 @@ export function ConfiguratorPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<QuoteItem | null>(null)
   const [bookOpen, setBookOpen] = useState(false)
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false)
+  const [productEditorOpen, setProductEditorOpen] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
   const [savingDraft, setSavingDraft] = useState(false)
   const booted = useRef(false)
@@ -151,6 +155,29 @@ export function ConfiguratorPage() {
   const issues = validateItem(draft)
   const pricing = calculateItemPrice(draft, pricingConfig, catalogue)
   const totals = calculateQuoteTotals(activeQuote, pricingConfig, catalogue)
+
+  if (!productEditorOpen) {
+    return (
+      <>
+        <QuoteOverview
+          quote={activeQuote}
+          totals={totals}
+          quotedBy={quotedBy}
+          onEditCustomer={() => setCustomerDialogOpen(true)}
+          onEditProducts={() => setProductEditorOpen(true)}
+        />
+        <NewQuoteCustomerDialog
+          open={customerDialogOpen}
+          onOpenChange={setCustomerDialogOpen}
+          onSave={async (customer) => {
+            const saved = await updateQuote(activeQuote.id, { customer })
+            if (saved) pushToast('Customer details saved', 'success')
+            return saved
+          }}
+        />
+      </>
+    )
+  }
 
   function freshCopy(source: QuoteItem): QuoteItem {
     return {
