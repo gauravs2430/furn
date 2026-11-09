@@ -55,9 +55,9 @@
   --shadow-sticky: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
 
   /* ── Radius (sleek sharp-smooth curves) ── */
-  --radius: 6px;
-  --radius-sm: 4px;
-  --radius-xs: 3px;
+  --radius: 3px;
+  --radius-sm: 2px;
+  --radius-xs: 2px;
 
   /* ── Typography ── */
   --font: 'Inter', system-ui, -apple-system, sans-serif;
