@@ -1,31 +1,65 @@
+import { useState } from 'react'
 import { Pencil } from 'lucide-react'
 import type { Quote, QuoteTotals } from '../../domain/models.ts'
 import { Button } from '../../components/ui/Button.tsx'
 import { formatMoney } from '../../utils/money.ts'
 import { formatDate } from '../../utils/dates.ts'
+import { NoteEditDialog, type NoteType } from './NoteEditDialog.tsx'
+import { useAppStore } from '../../store/useAppStore.ts'
 
-interface QuoteOverviewProps {
+export interface QuoteOverviewProps {
   quote: Quote
   totals: QuoteTotals
   quotedBy: string
   onEditCustomer: () => void
   onEditProducts: () => void
+  onSaveNotes?: (patch: Partial<Quote>) => Promise<boolean>
 }
 
-function NoteCard({ title }: { title: string }) {
+interface NoteCardProps {
+  title: string
+  content?: string
+  onEdit: () => void
+}
+
+function NoteCard({ title, content, onEdit }: NoteCardProps) {
   return (
     <section className="quote-note-card" aria-label={title}>
       <div className="quote-note-head">
         <h2>{title}</h2>
-        <button className="quote-note-edit" type="button" aria-label={`Edit ${title}`}>
+        <button
+          className="quote-note-edit"
+          type="button"
+          aria-label={`Edit ${title}`}
+          onClick={onEdit}
+        >
           <Pencil size={15} />
         </button>
       </div>
+      {content?.trim() ? (
+        <div className="quote-note-body">
+          <p>{content}</p>
+        </div>
+      ) : null}
     </section>
   )
 }
 
-export function QuoteOverview({ quote, totals, quotedBy, onEditCustomer, onEditProducts }: QuoteOverviewProps) {
+export function QuoteOverview({ quote, totals, quotedBy, onEditCustomer, onEditProducts, onSaveNotes }: QuoteOverviewProps) {
+  const [activeNoteType, setActiveNoteType] = useState<NoteType | null>(null)
+  const storeUpdateQuote = useAppStore((state) => state.updateQuote)
+  const pushToast = useAppStore((state) => state.pushToast)
+
+  async function handleSaveNote(type: NoteType, noteValue: string) {
+    const patch = { [type]: noteValue }
+    if (onSaveNotes) {
+      return await onSaveNotes(patch)
+    }
+    const saved = await storeUpdateQuote(quote.id, patch)
+    if (saved) pushToast('Notes saved', 'success')
+    return saved
+  }
+
   const hasCustomer = Boolean(quote.customer.name.trim())
 
   return (
@@ -92,10 +126,32 @@ export function QuoteOverview({ quote, totals, quotedBy, onEditCustomer, onEditP
       </div>
 
       <div className="quote-notes-grid">
-        <NoteCard title="Customer notes" />
-        <NoteCard title="Internal notes" />
-        <NoteCard title="Supplier notes" />
+        <NoteCard
+          title="Customer notes"
+          content={quote.customerNotes}
+          onEdit={() => setActiveNoteType('customerNotes')}
+        />
+        <NoteCard
+          title="Internal notes"
+          content={quote.internalNotes}
+          onEdit={() => setActiveNoteType('internalNotes')}
+        />
+        <NoteCard
+          title="Supplier notes"
+          content={quote.supplierNotes}
+          onEdit={() => setActiveNoteType('supplierNotes')}
+        />
       </div>
+
+      <NoteEditDialog
+        open={activeNoteType !== null}
+        noteType={activeNoteType}
+        currentValue={activeNoteType ? (quote[activeNoteType] ?? '') : ''}
+        onOpenChange={(open) => {
+          if (!open) setActiveNoteType(null)
+        }}
+        onSave={handleSaveNote}
+      />
 
       <section className="quote-products-placeholder" aria-labelledby="quote-products-heading">
         <h2 id="quote-products-heading">Products</h2>

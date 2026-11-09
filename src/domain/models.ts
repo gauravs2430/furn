@@ -107,6 +107,9 @@ export interface Quote {
   taxPercent: number
   configDraft: QuoteItem | null
   editingItemId: string | null
+  customerNotes?: string
+  internalNotes?: string
+  supplierNotes?: string
 }
 
 export interface PartLine {

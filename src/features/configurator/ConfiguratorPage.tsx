@@ -20,6 +20,8 @@ import { OpeningForm } from './OpeningForm.tsx'
 import { AppearanceForm } from './AppearanceForm.tsx'
 import { TechnicalForm } from './TechnicalForm.tsx'
 import { PreviewCard } from './PreviewCard.tsx'
+import { ProductPicker } from './ProductPicker.tsx'
+import type { PickedProduct } from './ProductPicker.tsx'
 import { OrderList } from '../quote/OrderList.tsx'
 import { TotalsCard } from '../quote/TotalsCard.tsx'
 
@@ -49,6 +51,7 @@ export function ConfiguratorPage() {
   const [bookOpen, setBookOpen] = useState(false)
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false)
   const [productEditorOpen, setProductEditorOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
   const [savingDraft, setSavingDraft] = useState(false)
   const booted = useRef(false)
@@ -164,7 +167,12 @@ export function ConfiguratorPage() {
           totals={totals}
           quotedBy={quotedBy}
           onEditCustomer={() => setCustomerDialogOpen(true)}
-          onEditProducts={() => setProductEditorOpen(true)}
+          onEditProducts={() => setPickerOpen(true)}
+          onSaveNotes={async (patch) => {
+            const saved = await updateQuote(activeQuote.id, patch)
+            if (saved) pushToast('Notes saved', 'success')
+            return saved
+          }}
         />
         <NewQuoteCustomerDialog
           open={customerDialogOpen}
@@ -175,8 +183,28 @@ export function ConfiguratorPage() {
             return saved
           }}
         />
+        {pickerOpen ? (
+          <ProductPicker onClose={() => setPickerOpen(false)} onPick={pickProduct} />
+        ) : null}
       </>
     )
+  }
+
+  function pickProduct(picked: PickedProduct) {
+    setPickerOpen(false)
+    const catalogProduct =
+      catalogue.products.find((entry) => entry.active && entry.family === picked.type) ??
+      catalogue.products.find((entry) => entry.id === picked.type)
+    const quantity = Math.max(1, picked.quantity)
+
+    // Keep the in-progress opening when the family is unchanged, so switching
+    // between window or door variants does not wipe the work already done.
+    if (item && item.productType === picked.type) {
+      setItem({ ...item, quantity })
+    } else {
+      setItem({ ...createQuoteItem(catalogProduct?.id ?? picked.type), quantity })
+    }
+    setProductEditorOpen(true)
   }
 
   function freshCopy(source: QuoteItem): QuoteItem {

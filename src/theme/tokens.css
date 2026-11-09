@@ -2,7 +2,7 @@
   /* ── Page backgrounds ── */
   --bg: #f7faf9;
   --bg-accent: #dce9e7;
-  --bg-subtle: #edf5f3;
+  --bg-subtle: #f3f4f6;
 
   /* ── Surfaces ── */
   --surface: #ffffff;
@@ -27,17 +27,17 @@
   --line: #dbe7e5;
   --line-strong: #bdd3cf;
 
-  /* ── SunnyPlast teal and magenta ── */
-  --accent: #078b88;
-  --accent-hover: #05716f;
-  --accent-soft: rgba(7, 139, 136, 0.12);
+  /* ── Brand green and magenta ── */
+  --accent: #208b58;
+  --accent-hover: #197548;
+  --accent-soft: rgba(32, 139, 88, 0.12);
   --brand-magenta: #92266d;
   --brand-magenta-hover: #781c59;
   --brand-magenta-soft: rgba(146, 38, 109, 0.1);
 
   /* ── Compat aliases (used in existing components) ── */
-  --glass: #078b88;
-  --glass-soft: rgba(7, 139, 136, 0.12);
+  --glass: #208b58;
+  --glass-soft: rgba(32, 139, 88, 0.12);
   --brass: #92266d;
   --brass-soft: rgba(146, 38, 109, 0.12);
 

@@ -104,6 +104,9 @@ export function createQuote(jobNo: string, taxPercent = pricingDefaults.taxPerce
     taxPercent,
     configDraft: createQuoteItem('window'),
     editingItemId: null,
+    customerNotes: '',
+    internalNotes: '',
+    supplierNotes: '',
   }
 }
 

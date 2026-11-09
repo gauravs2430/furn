@@ -13,34 +13,12 @@ interface CustomerFormProps {
 export function CustomerForm({ quote, onChange }: CustomerFormProps) {
   const customer = quote.customer
   return (
-    <section className="card" aria-labelledby="customer-heading">
+    <section className="card" aria-labelledby="quote-details-heading">
       <div className="card-head">
-        <h2 id="customer-heading">Customer & site</h2>
+        <h2 id="quote-details-heading">Quote details</h2>
         {/* <p>Who the quote is for, and where it will be installed.</p> */}
       </div>
       <div className="form-grid">
-        <TextField
-          label="Customer name"
-          value={customer.name}
-          autoComplete="name"
-          placeholder="Test Customer"
-          onChange={(name) => onChange({ customer: { ...customer, name } })}
-        />
-        <TextField
-          label="Phone"
-          value={customer.phone}
-          autoComplete="tel"
-          placeholder="07700 900000"
-          onChange={(phone) => onChange({ customer: { ...customer, phone } })}
-        />
-        <TextField
-          label="Email"
-          type="email"
-          value={customer.email}
-          autoComplete="email"
-          placeholder="name@example.com"
-          onChange={(email) => onChange({ customer: { ...customer, email } })}
-        />
         <TextField
           label="Salesperson"
           value={customer.salesperson}
