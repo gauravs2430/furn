@@ -6,7 +6,7 @@ import { findProduct } from '../../domain/catalogue.ts'
 import { panelKindLabels, panelKindsFor } from '../../data/productCatalog.ts'
 import { useAppStore } from '../../store/useAppStore.ts'
 import { matchPreset, presetsFor, tileFor } from '../../data/technicalPresets.ts'
-import { applyProductType, describeConfiguration, equalPanelWidths, layoutForPreset, withLayout } from '../../domain/factories.ts'
+import { applyProductType, describeConfiguration, equalPanelWidths, layoutForPreset, productGroup, withLayout } from '../../domain/factories.ts'
 import {
   canMirror,
   crossTotal,
@@ -50,8 +50,9 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
   const [query, setQuery] = useState('')
   const drawing = isDrawingFamily(item.productType) ? item.productType : null
   const layout = layoutOf(item)
-  const presets = drawing ? presetsFor(drawing) : []
-  const activeTile = tileFor(matchPreset(layout, drawing ?? 'window'))
+  const group = productGroup(item, catalogue)
+  const presets = drawing ? presetsFor(drawing, group) : []
+  const activeTile = tileFor(matchPreset(layout, drawing ?? 'window', group))
   const product = findProduct(itemProductId(item), catalogue)
   const selectedId = itemProductId(item)
   const needle = query.trim().toLowerCase()
@@ -66,7 +67,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
   const mainSum = sizeTotal(layout.sections)
   const mainDelta = main - mainSum
   const stacked = layout.sections.filter((section) => section.cells.length > 1)
-  const kinds = drawing ? panelKindsFor(drawing) : []
+  const kinds = drawing ? panelKindsFor(drawing, group) : []
   const canStack = drawing === 'window'
   const [keepLevel, setKeepLevel] = useState(true)
   const showLevel = cols && stacked.length > 1

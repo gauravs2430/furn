@@ -121,13 +121,16 @@ export const panelKindLabels: Record<PanelKind, string> = {
   'tilt-turn-left': 'Tilt & turn left',
   'tilt-turn-right': 'Tilt & turn right',
   'top-hung': 'Top hung',
+  'french-left': 'French pair (master left)',
+  'french-right': 'French pair (master right)',
   sliding: 'Sliding',
   bifold: 'Bi-fold',
   solid: 'Solid',
   'half-glazed': 'Half glazed',
 }
 
-export function panelKindsFor(product: ProductTypeId): PanelKind[] {
+export function panelKindsFor(product: ProductTypeId, group?: string): PanelKind[] {
+  if (group === 'french') return ['french-left', 'french-right', 'fixed']
   switch (product) {
     case 'door':
       return ['solid', 'half-glazed', 'casement-left', 'casement-right', 'fixed']

@@ -1,8 +1,8 @@
 import type { Catalogue } from './catalogue.ts'
 import { currentCatalogue, findProduct } from './catalogue.ts'
 import type { OpeningLayout, Panel, Quote, QuoteItem } from './models.ts'
-import { isDrawingFamily } from './models.ts'
-import { findPreset, matchPreset, presetLayout, technicalDefaults } from '../data/technicalPresets.ts'
+import { isDrawingFamily, itemProductId } from './models.ts'
+import { findPreset, groupOf, matchPreset, presetLayout, technicalDefaults } from '../data/technicalPresets.ts'
 import { cloneLayout, flatPanels, layoutKinds, layoutOf, resizeLayout, rowLayout } from './layout.ts'
 import { panelKindLabels } from '../data/productCatalog.ts'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
@@ -122,9 +122,14 @@ export function createQuote(jobNo: string, taxPercent = pricingDefaults.taxPerce
 }
 
 /** The layout's name, or its cells in reading order when it is not a named layout. */
-export function describeConfiguration(item: Pick<QuoteItem, 'layout' | 'panels' | 'heightMm' | 'productType'>): string {
+/** The layout group for an opening's product, e.g. French doors within doors. */
+export function productGroup(item: Pick<QuoteItem, 'productId' | 'productType'>, catalogue: Catalogue = currentCatalogue()): string | undefined {
+  return groupOf(findProduct(itemProductId(item), catalogue).defaultPreset)
+}
+
+export function describeConfiguration(item: Pick<QuoteItem, 'layout' | 'panels' | 'heightMm' | 'productType' | 'productId'>): string {
   const layout = layoutOf(item)
-  const preset = matchPreset(layout, isDrawingFamily(item.productType) ? item.productType : 'window')
+  const preset = matchPreset(layout, isDrawingFamily(item.productType) ? item.productType : 'window', productGroup(item))
   if (preset) return preset.label
   const kinds = layoutKinds(layout)
   if (kinds.length === 0) return 'Custom'

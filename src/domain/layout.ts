@@ -7,6 +7,8 @@ const MIRRORED: Partial<Record<PanelKind, PanelKind>> = {
   'casement-right': 'casement-left',
   'tilt-turn-left': 'tilt-turn-right',
   'tilt-turn-right': 'tilt-turn-left',
+  'french-left': 'french-right',
+  'french-right': 'french-left',
 }
 
 export function mirrorKind(kind: PanelKind): PanelKind {
@@ -375,3 +377,103 @@ export function sectionLabel(layout: OpeningLayout): { section: string; sections
 }
 
 export type { LayoutCell, LayoutSection, OpeningLayout }
+
+/* ── Bars as the factory cuts them ─────────────────────────────────────── */
+
+interface Run {
+  pos: number
+  from: number
+  to: number
+}
+
+function mergeRuns(runs: Run[]): Run[] {
+  const sorted = [...runs].sort((a, b) => a.pos - b.pos || a.from - b.from)
+  const out: Run[] = []
+  for (const run of sorted) {
+    const last = out[out.length - 1]
+    if (last && Math.abs(last.pos - run.pos) < 0.5 && run.from <= last.to + 0.5) last.to = Math.max(last.to, run.to)
+    else out.push({ ...run })
+  }
+  return out
+}
+
+function cutRun(run: Run, cuts: number[]): Run[] {
+  const points = [run.from, ...cuts.filter((cut) => cut > run.from + 0.5 && cut < run.to - 0.5).sort((a, b) => a - b), run.to]
+  return points.slice(1).map((to, index) => ({ pos: run.pos, from: points[index] ?? run.from, to }))
+}
+
+/**
+ * Mullions and transoms laid out like a fabricator would: any mullion that lines up
+ * from the top of the frame to the bottom runs full height, transoms stop at those
+ * mullions, and the remaining short mullions stop at the transoms. Unlike
+ * layoutBars this does not depend on whether the layout was entered as rows or columns.
+ */
+export function gridBars(layout: OpeningLayout, widthMm: number, heightMm: number): Bar[] {
+  const boxes = cellBoxes(layout, widthMm, heightMm)
+  const near = (a: number, b: number) => Math.abs(a - b) < 0.5
+  const vertical: Run[] = []
+  const horizontal: Run[] = []
+  for (const a of boxes) {
+    for (const b of boxes) {
+      if (near(a.x + a.width, b.x)) {
+        const from = Math.max(a.y, b.y)
+        const to = Math.min(a.y + a.height, b.y + b.height)
+        if (to - from > 0.5) vertical.push({ pos: b.x, from, to })
+      }
+      if (near(a.y + a.height, b.y)) {
+        const from = Math.max(a.x, b.x)
+        const to = Math.min(a.x + a.width, b.x + b.width)
+        if (to - from > 0.5) horizontal.push({ pos: b.y, from, to })
+      }
+    }
+  }
+  const verticalRuns = mergeRuns(vertical)
+  const full = verticalRuns.filter((run) => near(run.from, 0) && near(run.to, heightMm))
+  const transoms = mergeRuns(horizontal).flatMap((run) => cutRun(run, full.map((line) => line.pos)))
+  const short = verticalRuns
+    .filter((run) => !full.includes(run))
+    .flatMap((run) => cutRun(run, transoms.filter((t) => run.pos > t.from && run.pos < t.to).map((t) => t.pos)))
+
+  const kindAtPoint = (x: number, y: number) =>
+    boxes.find((box) => x > box.x && x < box.x + box.width && y > box.y && y < box.y + box.height)?.kind
+
+  const toBar = (run: Run, orientation: 'vert' | 'horiz', level: 'main' | 'sub'): Bar => {
+    const span = orientation === 'vert' ? heightMm : widthMm
+    const cuts = new Set<number>([run.from, run.to])
+    for (const box of boxes) {
+      const a = orientation === 'vert' ? box.y : box.x
+      const b = orientation === 'vert' ? box.y + box.height : box.x + box.width
+      if (a > run.from && a < run.to) cuts.add(a)
+      if (b > run.from && b < run.to) cuts.add(b)
+    }
+    const points = [...cuts].sort((a, b) => a - b)
+    const segments: BarSegment[] = []
+    for (let i = 0; i < points.length - 1; i += 1) {
+      const from = points[i] ?? run.from
+      const to = points[i + 1] ?? run.to
+      const mid = (from + to) / 2
+      const before = orientation === 'vert' ? kindAtPoint(run.pos - 1, mid) : kindAtPoint(mid, run.pos - 1)
+      const after = orientation === 'vert' ? kindAtPoint(run.pos + 1, mid) : kindAtPoint(mid, run.pos + 1)
+      const type = barType(before, after)
+      const previous = segments[segments.length - 1]
+      if (previous && previous.type === type) previous.to = to
+      else segments.push({ from, to, type })
+    }
+    return {
+      orientation,
+      pos: run.pos,
+      start: run.from,
+      end: run.to,
+      startEdge: near(run.from, 0) ? 'frame' : 'bar',
+      endEdge: near(run.to, span) ? 'frame' : 'bar',
+      level,
+      segments,
+    }
+  }
+
+  return [
+    ...full.map((run) => toBar(run, 'vert', 'main')),
+    ...transoms.map((run) => toBar(run, 'horiz', near(run.from, 0) && near(run.to, widthMm) ? 'main' : 'sub')),
+    ...short.map((run) => toBar(run, 'vert', 'sub')),
+  ]
+}

@@ -30,6 +30,8 @@ export type IndicatorKind =
 
 export interface DrawnPanel {
   id: string
+  /** The layout cell this belongs to; both leaves of a French pair share one. */
+  cellId: string
   kind: PanelKind
   module: Rect
   cell: Rect
@@ -39,6 +41,10 @@ export interface DrawnPanel {
   railY: number | null
   indicator: IndicatorKind | null
   handle: { x: number; y: number } | null
+  /** Door lever handle (points towards the hinges) instead of a window handle. */
+  lever?: 'left' | 'right'
+  /** Flag hinges on the outer edge of a door leaf. */
+  hinges?: { x: number; y: number }[]
 }
 
 export interface DrawModel {
@@ -131,6 +137,40 @@ function handlePoint(rect: Rect, kind: PanelKind, productType: ProductTypeId): {
   return { x, y }
 }
 
+/**
+ * A French pair drawn as two leaves that open out from the middle: each leaf is
+ * hinged on its outer edge (three flag hinges) with a lever handle at the meeting
+ * stiles, and the leaves meet without a mullion.
+ */
+function frenchLeaves(id: string, module: Rect, cell: Rect, sashPx: number): DrawnPanel[] {
+  const meet = Math.max(1, sashPx * 0.12)
+  const half = (cell.width - meet) / 2
+  const leaves: { side: 'left' | 'right'; rect: Rect }[] = [
+    { side: 'left', rect: { x: cell.x, y: cell.y, width: half, height: cell.height } },
+    { side: 'right', rect: { x: cell.x + half + meet, y: cell.y, width: half, height: cell.height } },
+  ]
+  return leaves.map(({ side, rect }) => {
+    const glass = insetRect(rect, sashPx)
+    const hingeX = side === 'left' ? rect.x : rect.x + rect.width
+    const handleX = side === 'left' ? glass.x + glass.width + (rect.x + rect.width - glass.x - glass.width) / 2 : rect.x + (glass.x - rect.x) / 2
+    return {
+      id: `${id}-${side}`,
+      cellId: id,
+      kind: side === 'left' ? 'casement-left' : 'casement-right',
+      module,
+      cell: rect,
+      sash: rect,
+      glass,
+      solid: null,
+      railY: null,
+      indicator: side === 'left' ? 'casement-left' : 'casement-right',
+      handle: { x: handleX, y: rect.y + rect.height * 0.5 },
+      lever: side === 'left' ? 'left' : 'right',
+      hinges: [0.12, 0.5, 0.88].map((share) => ({ x: hingeX, y: rect.y + rect.height * share })),
+    }
+  })
+}
+
 export function layoutDrawing(input: LayoutInput): DrawModel {
   const viewWidth = Math.max(input.viewportWidth, 40)
   const viewHeight = Math.max(input.viewportHeight, 40)
@@ -181,7 +221,7 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
   const py = (mm: number) => outer.y + (mm / heightMm) * innerH
   const inset = (edge: 'frame' | 'bar') => (edge === 'frame' ? framePx : mullionPx / 2)
 
-  const drawn: DrawnPanel[] = boxes.map((box) => {
+  const drawn: DrawnPanel[] = boxes.flatMap((box): DrawnPanel[] => {
     const module: Rect = {
       x: px(box.x),
       y: py(box.y),
@@ -222,19 +262,23 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
         height: Math.max(1, cell.y + cell.height - openingInset - (railY + sashPx * 0.35)),
       }
     }
+    if (kind === 'french-left' || kind === 'french-right') return frenchLeaves(box.id, module, cell, sashPx)
     const indicatorRect = glass ?? solid ?? cell
-    return {
-      id: box.id,
-      kind,
-      module,
-      cell,
-      sash: kind === 'fixed' ? null : cell,
-      glass,
-      solid,
-      railY,
-      indicator: indicatorFor(kind),
-      handle: handlePoint(indicatorRect, kind, input.productType),
-    }
+    return [
+      {
+        id: box.id,
+        cellId: box.id,
+        kind,
+        module,
+        cell,
+        sash: kind === 'fixed' ? null : cell,
+        glass,
+        solid,
+        railY,
+        indicator: indicatorFor(kind),
+        handle: handlePoint(indicatorRect, kind, input.productType),
+      },
+    ]
   })
 
   // Sub bars first so the frame-to-frame bars sit over their ends.

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ADMIN_QUANTITY_RULES, QUANTITY_RULE_LABELS, type AdminQuantityRule } from '../../domain/catalogAdmin.ts'
 import type { CatalogPart, ProductPartLink, QuantityRule } from '../../domain/catalogue.ts'
 import { isDrawingFamily, type ProductFamily } from '../../domain/models.ts'
-import { presetsFor } from '../../data/technicalPresets.ts'
+import { allPresetsFor } from '../../data/technicalPresets.ts'
 import {
   attachPart,
   createPartOnProduct,
@@ -128,7 +128,7 @@ export function ProductEditor({
   const showQtyColumn = product?.family === 'accessory' || included.some((row) => row.part.quantityRule === 'fixed')
   const removePart = included.find((row) => row.part.id === removeId)?.part ?? null
   const drawing = product && isDrawingFamily(product.family) ? product.family : null
-  const presets = drawing ? presetsFor(drawing) : []
+  const presets = drawing ? allPresetsFor(drawing) : []
 
   return (
     <>

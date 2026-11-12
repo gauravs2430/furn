@@ -21,6 +21,13 @@ export interface LayoutPreset {
   sample: { width: number; height: number }
   /** Set on the flipped twin of a layout. It is reached with the Flip button, not its own tile. */
   mirrorOf?: string
+  /**
+   * Layouts for one kind of opening within a family, such as French doors among doors.
+   * A product uses the group of its default layout; no group is the family's own list.
+   */
+  group?: string
+  /** Kept so older quotes still find their name, but no longer offered as a tile. */
+  hidden?: boolean
 }
 
 const F: PanelKind = 'fixed'
@@ -59,6 +66,54 @@ function rows(id: string, label: string, width: number, height: number, sections
 }
 
 const W: ProductTypeId[] = ['window']
+
+const FL: PanelKind = 'french-left'
+
+/** French door layouts from the factory work orders for job 340; one per unique shape. */
+function frenchDoorPresets(): LayoutPreset[] {
+  const french = (
+    id: string,
+    label: string,
+    split: 'cols' | 'rows',
+    width: number,
+    height: number,
+    sections: PresetSection[],
+  ): LayoutPreset => ({ id, label, products: ['door'], split, sections, sample: { width, height }, group: 'french' })
+  return [
+    french('french-door-pair', 'French Pair', 'cols', 1200, 1800, [{ size: 1200, cells: [[FL, 1800]] }]),
+    french('french-door-top-light', 'Top Light over Pair', 'cols', 1400, 2000, [{ size: 1400, cells: [[F, 450], [FL, 1550]] }]),
+    french('french-door-two-top-lights', '2 Top Lights over Pair', 'rows', 1400, 1900, [
+      { size: 400, cells: [[F, 700], [F, 700]] },
+      { size: 1500, cells: [[FL, 1400]] },
+    ]),
+    french('french-door-side-light', 'Side Light + Pair', 'cols', 2100, 1900, [
+      { size: 400, cells: [[F, 1900]] },
+      { size: 1700, cells: [[FL, 1900]] },
+    ]),
+    french('french-door-side-light-top-lights', 'Side Light + Pair, with Top Lights', 'cols', 1800, 2100, [
+      { size: 350, cells: [[F, 400], [F, 1700]] },
+      { size: 1450, cells: [[F, 400], [FL, 1700]] },
+    ]),
+    french('french-door-two-side-lights', 'Pair between Side Lights', 'cols', 1800, 2100, [
+      { size: 300, cells: [[F, 2100]] },
+      { size: 1200, cells: [[FL, 2100]] },
+      { size: 300, cells: [[F, 2100]] },
+    ]),
+    french('french-door-two-side-lights-top-lights', 'Pair between Side Lights, with Top Lights', 'cols', 1800, 1900, [
+      { size: 300, cells: [[F, 350], [F, 1550]] },
+      { size: 1200, cells: [[F, 350], [FL, 1550]] },
+      { size: 300, cells: [[F, 350], [F, 1550]] },
+    ]),
+    french('french-door-side-light-split-top-lights', 'Side Light + Pair, 3 Top Lights', 'rows', 1700, 2100, [
+      { size: 350, cells: [[F, 400], [F, 650], [F, 650]] },
+      { size: 1750, cells: [[F, 400], [FL, 1300]] },
+    ]),
+    french('french-door-four-top-lights', 'Pair between Side Lights, 4 Top Lights', 'rows', 1800, 2100, [
+      { size: 300, cells: [[F, 300], [F, 600], [F, 600], [F, 300]] },
+      { size: 1800, cells: [[F, 300], [FL, 1200], [F, 300]] },
+    ]),
+  ]
+}
 
 /**
  * Window layouts follow the factory work orders (job 347): sizes are the sample
@@ -165,7 +220,10 @@ const basePresets: LayoutPreset[] = [
   // Doors and folding sets
   row('single-solid', 'Single solid', ['door'], ['solid']),
   row('single-half', 'Single half glazed', ['door'], ['half-glazed']),
-  row('french', 'French pair', ['door'], ['casement-left', 'casement-right']),
+  row('french', 'French pair', ['door'], ['casement-left', 'casement-right'], undefined, { hidden: true }),
+  // French doors (job 340): one French pair cell draws both leaves; the master leaf is on the left.
+  ...frenchDoorPresets(),
+
   row('bifold-3', '3-panel bi-fold', ['bifold'], ['bifold', 'bifold', 'bifold']),
   row('bifold-4', '4-panel bi-fold', ['bifold'], ['bifold', 'bifold', 'bifold', 'bifold']),
 ]
@@ -210,9 +268,21 @@ export const layoutPresets: LayoutPreset[] = withMirrors(basePresets)
 
 const signatureOf = new Map(layoutPresets.map((preset) => [preset.id, layoutSignature(presetLayout(preset))]))
 
+/** The layout group a product belongs to: the group of its default layout. */
+export function groupOf(defaultPreset: string | undefined): string | undefined {
+  return defaultPreset ? findPreset(defaultPreset)?.group : undefined
+}
+
 /** Tiles to offer for a product. Flipped twins are reached with the Flip button. */
-export function presetsFor(product: ProductTypeId): LayoutPreset[] {
-  return layoutPresets.filter((preset) => preset.products.includes(product) && !preset.mirrorOf)
+export function presetsFor(product: ProductTypeId, group?: string): LayoutPreset[] {
+  return layoutPresets.filter(
+    (preset) => preset.products.includes(product) && !preset.mirrorOf && !preset.hidden && preset.group === group,
+  )
+}
+
+/** Every tile of a family, all groups included, for choosing a product's default layout. */
+export function allPresetsFor(product: ProductTypeId): LayoutPreset[] {
+  return layoutPresets.filter((preset) => preset.products.includes(product) && !preset.mirrorOf && !preset.hidden)
 }
 
 export function findPreset(id: string): LayoutPreset | undefined {
@@ -220,9 +290,10 @@ export function findPreset(id: string): LayoutPreset | undefined {
 }
 
 /** The named layout with this shape and these opening types, flipped twins included. */
-export function matchPreset(layout: OpeningLayout, product: ProductTypeId = 'window'): LayoutPreset | undefined {
+export function matchPreset(layout: OpeningLayout, product: ProductTypeId = 'window', group?: string): LayoutPreset | undefined {
   const signature = layoutSignature(layout)
-  return layoutPresets.find((preset) => preset.products.includes(product) && signatureOf.get(preset.id) === signature)
+  const candidates = layoutPresets.filter((preset) => preset.products.includes(product) && signatureOf.get(preset.id) === signature)
+  return candidates.find((preset) => preset.group === group) ?? candidates[0]
 }
 
 /** The tile that represents a layout: itself, or the twin it was flipped from. */
@@ -272,6 +343,16 @@ function describeSash(kinds: PanelKind[], product: ProductTypeId): string {
   return 'Mixed'
 }
 
+export function isFrenchKind(kind: PanelKind): boolean {
+  return kind === 'french-left' || kind === 'french-right'
+}
+
+/** Doors need toughened safety glass: "4-20-4 Clear Low E" becomes "4-20-4 Clear Tuff Low E". */
+export function toughened(glassType: string): string {
+  if (/tuff|toughened/i.test(glassType) || glassType === 'None') return glassType
+  return /clear/i.test(glassType) ? glassType.replace(/clear/i, (word) => `${word} Tuff`) : `${glassType} Tuff`
+}
+
 function isOpeningKind(kind: PanelKind): boolean {
   return kind !== 'fixed'
 }
@@ -288,6 +369,29 @@ export function technicalDefaults(
   const opening = kinds.some(isOpeningKind)
   const isWindow = product === 'window'
   const sliding = kinds.some((kind) => kind === 'sliding' || kind === 'bifold')
+  const french = kinds.some(isFrenchKind)
+
+  if (french) {
+    // French doors follow the factory work orders for job 340.
+    return {
+      frameProfile: profiles.frame,
+      mullion: kinds.length > 1 ? profiles.mullion : 'None',
+      cill: 'None',
+      joint: material.id === 'timber' ? 'Mechanical (Standard)' : 'Welded (Standard)',
+      bead: glazing.id === 'triple' ? '36mm' : '28mm',
+      sashType: 'French door',
+      locking: 'Standard Door Lock',
+      handle: 'White Handle Lever/Lever (Short Backplate)',
+      hinge: 'Flag Hinge',
+      glassGroup: 'Standard',
+      glazingMethod: 'Glazed',
+      glassType: toughened(glazing.glassType),
+      gasFill: glazing.gasFill,
+      componentType: 'Glass',
+      drainage: 'Concealed Drainage',
+      horizontalSplit: 'Equal Split',
+    }
+  }
 
   return {
     frameProfile: profiles.frame,

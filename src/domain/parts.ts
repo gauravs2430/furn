@@ -1,11 +1,23 @@
 import type { CatalogPart, Catalogue, QuantityRule } from './catalogue.ts'
 import { currentCatalogue } from './catalogue.ts'
-import type { AddedPart, PanelKind, PartLine, QuoteItem } from './models.ts'
+import type { AddedPart, Panel, PanelKind, PartLine, QuoteItem } from './models.ts'
 import { itemProductId } from './models.ts'
 import { calculateArea, calculatePerimeter } from './measures.ts'
 
 function roundQty(value: number): number {
   return Math.round(value * 100) / 100
+}
+
+/** Panels as priced: a French pair counts as its two door leaves. */
+function panelsOf(item: QuoteItem): Panel[] {
+  return item.panels.flatMap((panel) =>
+    panel.kind === 'french-left' || panel.kind === 'french-right'
+      ? [
+          { ...panel, id: `${panel.id}-l`, widthMm: panel.widthMm / 2, kind: 'casement-left' as const },
+          { ...panel, id: `${panel.id}-r`, widthMm: panel.widthMm / 2, kind: 'casement-right' as const },
+        ]
+      : [panel],
+  )
 }
 
 function isOpening(kind: PanelKind): boolean {
@@ -17,10 +29,10 @@ function isGlazed(kind: PanelKind): boolean {
 }
 
 function glassFactor(item: QuoteItem): number {
-  if (item.panels.every((panel) => panel.kind === 'solid')) return 0
+  if (panelsOf(item).every((panel) => panel.kind === 'solid')) return 0
   if (item.productType === 'door') {
-    if (item.panels.some((panel) => panel.kind === 'half-glazed')) return 0.5
-    if (item.panels.length >= 2) return 0.75
+    if (panelsOf(item).some((panel) => panel.kind === 'half-glazed')) return 0.5
+    if (panelsOf(item).length >= 2) return 0.75
     return 0.5
   }
   return 0.9
@@ -30,19 +42,19 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
   const area = calculateArea(item.widthMm, item.heightMm)
   const perimeter = calculatePerimeter(item.widthMm, item.heightMm)
   const widthM = item.widthMm / 1000
-  const openings = item.panels.filter((panel) => isOpening(panel.kind))
+  const openings = panelsOf(item).filter((panel) => isOpening(panel.kind))
   const openingCount = openings.length
-  const sashCount = item.panels.filter((panel) =>
+  const sashCount = panelsOf(item).filter((panel) =>
     ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right', 'top-hung'].includes(panel.kind),
   ).length
-  const slidingCount = item.panels.filter((panel) => panel.kind === 'sliding' || panel.kind === 'bifold').length
-  const french = item.productType === 'door' && item.panels.length >= 2 && item.panels.every((panel) => isGlazed(panel.kind))
-  const solidLeaf = item.productType === 'door' && item.panels.length === 1 && !french
+  const slidingCount = panelsOf(item).filter((panel) => panel.kind === 'sliding' || panel.kind === 'bifold').length
+  const french = item.productType === 'door' && panelsOf(item).length >= 2 && panelsOf(item).every((panel) => isGlazed(panel.kind))
+  const solidLeaf = item.productType === 'door' && panelsOf(item).length === 1 && !french
   const glazed = glassFactor(item) > 0
   const isWindow = item.productType === 'window'
   const moving = item.productType === 'patio' || item.productType === 'bifold' || slidingCount > 0
 
-  const bifoldCount = item.panels.filter((panel) => panel.kind === 'bifold').length
+  const bifoldCount = panelsOf(item).filter((panel) => panel.kind === 'bifold').length
   const hingeCount = french
     ? 6
     : item.productType === 'door' && openingCount > 0
@@ -56,9 +68,9 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
   return {
     frame: roundQty(perimeter),
     glass: glazed ? roundQty(area * glassFactor(item)) : 0,
-    leaf: solidLeaf ? roundQty(area * (item.panels[0]?.kind === 'solid' ? 0.95 : 0.5)) : 0,
+    leaf: solidLeaf ? roundQty(area * (panelsOf(item)[0]?.kind === 'solid' ? 0.95 : 0.5)) : 0,
     french: french ? 2 : 0,
-    panel: item.productType === 'patio' || item.productType === 'bifold' ? Math.max(item.panels.length, 1) : 0,
+    panel: item.productType === 'patio' || item.productType === 'bifold' ? Math.max(panelsOf(item).length, 1) : 0,
     track: moving ? 1 : 0,
     sash: sashCount,
     hinge: hingeCount,
@@ -75,11 +87,11 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
 }
 
 function openingCount(item: QuoteItem): number {
-  return item.panels.filter((panel) => panel.kind !== 'fixed').length
+  return panelsOf(item).filter((panel) => panel.kind !== 'fixed').length
 }
 
 function sashCount(item: QuoteItem): number {
-  return item.panels.filter((panel) =>
+  return panelsOf(item).filter((panel) =>
     ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right', 'top-hung'].includes(panel.kind),
   ).length
 }
@@ -99,7 +111,7 @@ function quantityForRule(rule: QuantityRule, item: QuoteItem, partId: string, fi
     case 'per-sash':
       return sashCount(item)
     case 'per-panel':
-      return item.panels.length
+      return panelsOf(item).length
     case 'one':
       return 1
     case 'fixed':

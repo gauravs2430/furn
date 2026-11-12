@@ -55,7 +55,7 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
       technical: {
         ...item.technical,
         bead: defaults.bead,
-        glassType: defaults.glazingMethod === 'Unglazed' ? 'None' : option.glassType,
+        glassType: defaults.glazingMethod === 'Unglazed' ? 'None' : defaults.glassType,
         gasFill: defaults.glazingMethod === 'Unglazed' ? 'None' : option.gasFill,
         glazingMethod: defaults.glazingMethod,
       },

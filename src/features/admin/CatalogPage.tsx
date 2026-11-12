@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../auth/session.ts'
 import { currentCatalogue, fallbackCatalogue } from '../../domain/catalogue.ts'
-import { presetsFor } from '../../data/technicalPresets.ts'
+import { allPresetsFor } from '../../data/technicalPresets.ts'
 import { isDrawingFamily, PRODUCT_FAMILIES, type ProductFamily } from '../../domain/models.ts'
 import { createProduct, removeProduct, searchProducts, type ProductListRow } from '../../repositories/CatalogAdminRepository.ts'
 import { refreshCatalogue } from '../../store/useAppStore.ts'
@@ -27,7 +27,7 @@ function familyDefaults(family: ProductFamily) {
     factor: seed?.factor ?? 1,
     width: seed?.defaultWidth ?? 1000,
     height: seed?.defaultHeight ?? 1000,
-    preset: seed?.defaultPreset || presetsFor(family)[0]?.id || '',
+    preset: seed?.defaultPreset || allPresetsFor(family)[0]?.id || '',
   }
 }
 
@@ -128,7 +128,7 @@ export function CatalogPage() {
     }
   }
 
-  const presets = isDrawingFamily(family) ? presetsFor(family) : []
+  const presets = isDrawingFamily(family) ? allPresetsFor(family) : []
 
   return (
     <div className="page">

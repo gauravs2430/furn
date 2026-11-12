@@ -106,7 +106,17 @@ describe('window presets', () => {
     }
   })
 
-  it('flags parts that no longer add up', () => {
+  it('builds valid French door openings for every French layout', () => {
+    for (const preset of presetsFor('door', 'french')) {
+      const base = { ...createQuoteItem('door'), widthMm: preset.sample.width, heightMm: preset.sample.height }
+      const item = withLayout(base, layoutForPreset(preset.id, preset.sample.width, preset.sample.height))
+      expect(validateItem(item), preset.id).toEqual([])
+    }
+    expect(presetsFor('door', 'french')).toHaveLength(9)
+    expect(presetsFor('door').some((preset) => preset.group === 'french')).toBe(false)
+  })
+
+    it('flags parts that no longer add up', () => {
     const item = withLayout({ ...createQuoteItem('window'), widthMm: 700, heightMm: 1600 }, {
       ...topLightOverSash,
       sections: [{ ...topLightOverSash.sections[0]!, cells: topLightOverSash.sections[0]!.cells.map((cell) => ({ ...cell, sizeMm: 500 })) }],

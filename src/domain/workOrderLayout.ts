@@ -62,15 +62,15 @@ export function hingeSize(dimension: number, topHung: boolean): number | null {
   return fits.length ? (fits[fits.length - 1] ?? null) : null
 }
 
-function metres(mm: number): string {
+export function metres(mm: number): string {
   return String(Number((mm / 1000).toFixed(3)))
 }
 
-function frameName(item: QuoteItem): string {
+export function frameName(item: QuoteItem): string {
   return item.materialId === 'aluminium' ? 'Aluminium Frame' : item.materialId === 'timber' ? 'Timber Frame' : 'Frame 6 Chamber'
 }
 
-function endPrep(index: number, count: number, whole: string, first: string, last: string): string {
+export function endPrep(index: number, count: number, whole: string, first: string, last: string): string {
   if (count === 1) return whole
   if (index === 0) return first
   if (index === count - 1) return last
@@ -83,7 +83,7 @@ function frameSide(length: number, cuts: number[]): number[] {
   return points.slice(1).map((point, index) => point - (points[index] ?? 0))
 }
 
-function frameCuts(bars: Bar[], widthMm: number, heightMm: number) {
+export function frameCuts(bars: Bar[], widthMm: number, heightMm: number) {
   const cuts = { top: [] as number[], bottom: [] as number[], left: [] as number[], right: [] as number[] }
   for (const bar of bars) {
     const first = bar.segments[0]
@@ -100,7 +100,7 @@ function frameCuts(bars: Bar[], widthMm: number, heightMm: number) {
 }
 
 /** Adds rows together when everything but the quantity matches, keeping first-seen order. */
-function grouped(rows: SectionRow[]): SectionRow[] {
+export function grouped(rows: SectionRow[]): SectionRow[] {
   const out: SectionRow[] = []
   for (const row of rows) {
     const same = out.find(

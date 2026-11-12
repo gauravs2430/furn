@@ -27,11 +27,55 @@ function Handle({ x, y, size, color, flat }: { x: number; y: number; size: numbe
   )
 }
 
+/** Door lever on a backplate, with the lever pointing towards the hinges. */
+function Lever({ x, y, size, color, towards }: { x: number; y: number; size: number; color: string; towards: 'left' | 'right' }) {
+  const body = mixHex(color, '#ffffff', 0.35)
+  const edge = mixHex(color, '#1b2328', 0.5)
+  const plateW = size * 0.26
+  const plateH = size * 1.2
+  const leverL = size * 0.95
+  const dir = towards === 'left' ? -1 : 1
+  return (
+    <g>
+      <rect x={x - plateW / 2} y={y - plateH * 0.35} width={plateW} height={plateH} rx={plateW / 2} fill={body} stroke={edge} strokeWidth={0.6} />
+      <rect
+        x={dir < 0 ? x - leverL : x}
+        y={y - size * 0.11}
+        width={leverL}
+        height={size * 0.22}
+        rx={size * 0.11}
+        fill={body}
+        stroke={edge}
+        strokeWidth={0.6}
+      />
+      <circle cx={x} cy={y + plateH * 0.42} r={plateW * 0.28} fill="#c9a24e" stroke="#8a6b2a" strokeWidth={0.4} />
+    </g>
+  )
+}
+
+/** Flag hinge: a small leaf sitting across the frame and sash on the hinge side. */
+function Hinge({ x, y, size, color }: { x: number; y: number; size: number; color: string }) {
+  const w = size * 0.55
+  const h = size * 0.95
+  return (
+    <rect
+      x={x - w / 2}
+      y={y - h / 2}
+      width={w}
+      height={h}
+      rx={w * 0.3}
+      fill={mixHex(color, '#ffffff', 0.25)}
+      stroke={mixHex(color, '#1b2328', 0.5)}
+      strokeWidth={0.6}
+    />
+  )
+}
+
 export function Panel({ panel, frameColor, gradientId, patternId, onSelect }: PanelProps) {
   const indicatorRect = panel.glass ?? panel.solid ?? panel.cell
   const sashInner = panel.glass ?? panel.solid
   const handleSize = Math.max(7, Math.min(34, Math.min(panel.cell.width, panel.cell.height) * 0.2))
-  const select = onSelect ? () => onSelect(panel.id) : undefined
+  const select = onSelect ? () => onSelect(panel.cellId) : undefined
   return (
     <g
       className={onSelect ? 'drawing-cell is-clickable' : 'drawing-cell'}
@@ -78,7 +122,12 @@ export function Panel({ panel, frameColor, gradientId, patternId, onSelect }: Pa
         />
       ) : null}
       {panel.indicator ? <OpeningIndicator kind={panel.indicator} rect={indicatorRect} /> : null}
-      {panel.handle ? (
+      {panel.hinges?.map((hinge, index) => (
+        <Hinge key={index} x={hinge.x} y={hinge.y} size={handleSize * 0.6} color={frameColor} />
+      ))}
+      {panel.handle && panel.lever ? (
+        <Lever x={panel.handle.x} y={panel.handle.y} size={handleSize * 0.8} color={frameColor} towards={panel.lever} />
+      ) : panel.handle ? (
         <Handle x={panel.handle.x} y={panel.handle.y} size={handleSize} color={frameColor} flat={panel.kind === 'top-hung'} />
       ) : null}
     </g>
