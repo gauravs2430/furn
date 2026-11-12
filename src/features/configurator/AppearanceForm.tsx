@@ -19,6 +19,9 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
     (colour) => colour.active || colour.id === item.externalColourId || colour.id === item.internalColourId,
   )
 
+  const externalColour = colours.find((colour) => colour.id === item.externalColourId)
+  const internalColour = colours.find((colour) => colour.id === item.internalColourId)
+
   function setMaterial(materialId: string) {
     const defaults = technicalDefaults(
       family,
@@ -66,8 +69,13 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
         <p>Frame finish is shown on the drawing. Internal colour is kept for the work order.</p>
       </div>
 
-      <h3 className="subhead">Frame material</h3>
-      <div className="segment" role="radiogroup" aria-label="Frame material">
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">Frame material</span>
+          <span className="config-section-value">{materials.find((material) => material.id === item.materialId)?.name}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="segment config-section-body" role="radiogroup" aria-label="Frame material">
         {materials.map((material) => (
           <button
             key={material.id}
@@ -81,9 +89,15 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
           </button>
         ))}
       </div>
+      </details>
 
-      <h3 className="subhead">Glazing</h3>
-      <div className="glazing-grid">
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">Glazing</span>
+          <span className="config-section-value">{glazingOptions.find((option) => option.id === item.glazingId)?.name}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="glazing-grid config-section-body">
         {glazingOptions.map((option) => (
           <button
             key={option.id}
@@ -97,9 +111,16 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
           </button>
         ))}
       </div>
+      </details>
 
-      <h3 className="subhead">External colour</h3>
-      <div className="swatches" role="radiogroup" aria-label="External colour">
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">External colour</span>
+          <span className="config-section-value">{externalColour ? <span className="swatch-chip" style={{ background: externalColour.hex }} /> : null}
+          {externalColour?.name}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="swatches config-section-body" role="radiogroup" aria-label="External colour">
         {colours.map((colour) => (
           <button
             key={colour.id}
@@ -114,9 +135,16 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
           </button>
         ))}
       </div>
+      </details>
 
-      <h3 className="subhead">Internal colour</h3>
-      <div className="swatches" role="radiogroup" aria-label="Internal colour">
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">Internal colour</span>
+          <span className="config-section-value">{internalColour ? <span className="swatch-chip" style={{ background: internalColour.hex }} /> : null}
+          {internalColour?.name}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="swatches config-section-body" role="radiogroup" aria-label="Internal colour">
         {colours.map((colour) => (
           <button
             key={`in-${colour.id}`}
@@ -131,6 +159,7 @@ export function AppearanceForm({ item, onChange }: AppearanceFormProps) {
           </button>
         ))}
       </div>
+      </details>
     </section>
   )
 }

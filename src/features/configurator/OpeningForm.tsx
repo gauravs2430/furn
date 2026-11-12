@@ -86,7 +86,13 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
         </p>
       </div>
 
-      <div className="product-picker">
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">Product</span>
+          <span className="config-section-value">{product.name}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="product-picker config-section-body">
         <label className="search">
           <span className="sr-only">Search products</span>
           <input
@@ -119,10 +125,16 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
           </ul>
         )}
       </div>
+      </details>
 
-      {drawing ? <h3 className="subhead">Layout</h3> : null}
       {drawing ? (
-      <div className="preset-grid">
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">Layout</span>
+          <span className="config-section-value">{active?.label ?? 'Custom'}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="preset-grid config-section-body">
         {presets.map((preset) => (
           <LayoutThumb
             key={preset.id}
@@ -136,9 +148,16 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
           <span className="preset-label">Custom</span>
         </div>
       </div>
+      </details>
       ) : null}
 
-      <div className="form-grid measure-grid">
+      <details className="config-section" open>
+        <summary className="config-section-head">
+          <span className="config-section-title">Size & quantity</span>
+          <span className="config-section-value">{drawing ? `${item.widthMm} × ${item.heightMm} mm · ` : ''}Qty {item.quantity}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="form-grid measure-grid config-section-body">
         {drawing ? (
           <NumberField
             label="Overall width"
@@ -179,10 +198,17 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
           onChange={(location) => onChange({ ...item, location })}
         />
       </div>
+      </details>
 
-      {drawing ? <div className="panel-editor">
+      {drawing ? (
+      <details className="config-section">
+        <summary className="config-section-head">
+          <span className="config-section-title">Panel widths</span>
+          <span className="config-section-value">{item.panels.length} {item.panels.length === 1 ? 'panel' : 'panels'}{matched ? '' : ' · check widths'}</span>
+          <span className="chevron" aria-hidden="true" />
+        </summary>
+      <div className="panel-editor config-section-body">
         <div className="panel-editor-head">
-          <h3 className="subhead">Panel widths</h3>
           <Button
             size="sm"
             variant="secondary"
@@ -265,7 +291,9 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
             Add panel
           </Button>
         </div>
-      </div> : null}
+      </div>
+      </details>
+      ) : null}
 
       <TextField label="Notes" value={item.notes} placeholder="Obscure glass, restrictor, pet door" onChange={(notes) => onChange({ ...item, notes })} />
     </section>
