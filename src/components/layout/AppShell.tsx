@@ -304,6 +304,9 @@ export function AppShell() {
         </div>
         <div className="shell-header-meta">
           <time className="shell-date">{headerDate}</time>
+          <Link to="/" className="shell-home-link" aria-label="Home">
+            <House size={17} strokeWidth={2} aria-hidden="true" />
+          </Link>
           <div ref={accountMenuRef} className={cx('header-account-menu', accountMenuOpen && 'is-open')}>
             <button
               type="button"

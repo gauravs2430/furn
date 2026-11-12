@@ -326,6 +326,11 @@ h3 {
   transform: rotate(180deg);
 }
 
+/* Home shortcut in the header: phones and tablets only. */
+.shell-home-link {
+  display: none;
+}
+
 .header-account-avatar {
   display: grid;
   width: 34px;
@@ -854,7 +859,7 @@ h3 {
 
 .home-stat strong {
   font-family: var(--display);
-  font-size: 42px;
+  font-size: 34px;
   font-weight: 600;
   line-height: 1;
   color: var(--ink);
@@ -978,7 +983,7 @@ h3 {
 .account-name h2,
 .account-details h2,
 .account-password h2 {
-  font-size: 22px;
+  font-size: 19px;
 }
 
 .desk-note ul {
@@ -1053,7 +1058,7 @@ h3 {
 
 h1 {
   margin-top: 4px;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -1126,7 +1131,7 @@ h1 {
   display: block;
   margin-top: 6px;
   font-family: var(--display);
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -1230,7 +1235,7 @@ select.input {
 
 .job-card h2 {
   margin: 0;
-  font-size: 26px;
+  font-size: 21px;
   line-height: 1.12;
   overflow-wrap: anywhere;
 }
@@ -1283,7 +1288,7 @@ select.input {
   margin: 0;
   min-width: 0;
   color: var(--ink);
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 600;
   line-height: 1.2;
   overflow-wrap: anywhere;
@@ -1426,7 +1431,7 @@ select.input {
 }
 
 .people-section h2 {
-  font-size: 26px;
+  font-size: 19px;
 }
 
 .people-actions {
@@ -1473,7 +1478,7 @@ select.input {
 }
 
 .people-create-head h2 {
-  font-size: 28px;
+  font-size: 22px;
   letter-spacing: -0.02em;
 }
 
@@ -1517,7 +1522,7 @@ select.input {
 }
 
 .desk-note h2 {
-  font-size: 23px;
+  font-size: 19px;
   color: var(--ink);
 }
 
@@ -2045,7 +2050,7 @@ select.input {
 }
 
 .quote-identity h1 {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1.15;
 }
 
@@ -2119,12 +2124,12 @@ select.input {
 }
 
 .card h2 {
-  font-size: 24px;
+  font-size: 19px;
 }
 
 .subhead {
   margin: 16px 0 8px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .form-grid {
@@ -2397,7 +2402,7 @@ select.input {
 .disclosure-title {
   display: block;
   font-family: var(--display);
-  font-size: 24px;
+  font-size: 19px;
   font-weight: 600;
 }
 
@@ -2455,7 +2460,7 @@ select.input {
   flex: none;
   white-space: nowrap;
   font-family: var(--display);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   transition: color 0.2s ease;
 }
@@ -3006,7 +3011,7 @@ select.input {
 }
 
 .dialog-title {
-  font-size: 28px;
+  font-size: 22px;
 }
 
 .dialog-copy {
@@ -3125,7 +3130,7 @@ select.input {
 
   h1,
   .quote-identity h1 {
-    font-size: 30px;
+    font-size: 24px;
   }
 }
 
@@ -3141,7 +3146,7 @@ select.input {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 18px 20px;
+  padding: 14px 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -3177,7 +3182,7 @@ select.input {
 .quote-notes-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 @media (max-width: 1020px) {
@@ -3190,7 +3195,7 @@ select.input {
 .quote-summary-card,
 .quote-note-card {
   min-width: 0;
-  padding: 22px;
+  padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -3200,17 +3205,17 @@ select.input {
 .quote-note-card h2,
 .quote-products-placeholder h2 {
   margin: 0;
-  font-size: 21px;
+  font-size: 17px;
 }
 
 .quote-summary-card h2 {
-  padding-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
 
 .quote-detail-list {
   display: grid;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
 }
 
 .quote-detail-list>div {
@@ -3218,8 +3223,8 @@ select.input {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
   align-items: center;
-  min-height: 58px;
-  padding: 12px 16px;
+  min-height: 46px;
+  padding: 10px 16px;
 }
 
 .quote-detail-list>div:nth-child(odd) {
@@ -3228,7 +3233,7 @@ select.input {
 
 .quote-detail-list dt {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .quote-detail-list dd {
@@ -3238,11 +3243,11 @@ select.input {
 }
 
 .quote-cost-list>div {
-  min-height: 58px;
+  min-height: 46px;
 }
 
 .quote-price-list>div {
-  min-height: 48px;
+  min-height: 44px;
 }
 
 .quote-price-button {
@@ -3251,7 +3256,7 @@ select.input {
 }
 
 .quote-note-card {
-  min-height: 116px;
+  min-height: 84px;
 }
 
 .quote-note-head {
@@ -3259,14 +3264,14 @@ select.input {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--line);
 }
 
 .quote-note-edit {
   display: inline-grid;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   place-items: center;
   flex: 0 0 auto;
   padding: 0;
@@ -3317,7 +3322,7 @@ select.input {
 
 .note-dialog-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 600;
   color: #1f2937;
   font-family: var(--font);
@@ -3449,7 +3454,7 @@ select.input {
 }
 
 .quote-products-placeholder h2 {
-  font-size: 30px;
+  font-size: 24px;
 }
 
 @media (max-width: 720px) {
@@ -4496,27 +4501,44 @@ select.input {
     min-width: 0;
   }
 
-  /* Show the logo as a neat white badge on the dark bar instead of a full-height white block. */
+  /* No logo in the phone/tablet header; the menu button sits on the bar instead. */
   .shell-brand-slot,
   .app-shell.is-sidebar-collapsed .shell-brand-slot {
-    align-self: center;
-    height: 54px;
-    padding: 6px 10px;
-    border-radius: var(--radius);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+    display: none;
+  }
+
+  .shell-menu-bar,
+  .shell-menu-bar:hover {
+    border-color: #ffffff;
+    background: #1d3a5f;
+    color: #ffffff;
+  }
+
+  .shell-breadcrumbs {
+    margin-left: 14px;
+  }
+
+  .shell-home-link {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    margin-right: 12px;
+    place-items: center;
+    flex: none;
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+    background: #1d3a5f;
+    color: #ffffff;
+    transition: opacity 0.15s ease;
+  }
+
+  .shell-home-link:hover {
+    opacity: 0.85;
   }
 }
 
 /* ── Small phones: give the header and quote preview room ── */
 @media (max-width: 480px) {
-  .shell-logo {
-    width: 104px;
-  }
-
-  .shell-breadcrumbs {
-    margin-left: 8px;
-  }
-
   .config-layout .preview-sheet {
     height: 300px;
   }
