@@ -2430,6 +2430,82 @@ select.input {
   align-items: end;
 }
 
+/* Stacked parts (top lights) under a column or row. */
+.layout-section {
+  display: grid;
+  gap: 8px;
+}
+
+.layout-section+.layout-section {
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+
+.panel-cells {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 0 42px;
+  padding: 0 0 0 12px;
+  list-style: none;
+  border-left: 2px solid var(--line);
+}
+
+.panel-row.panel-cell-row {
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 1fr) auto;
+}
+
+.panel-row-note {
+  align-self: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.link-btn {
+  justify-self: start;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.link-btn:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+.panel-add-cell {
+  margin-left: 42px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 12px;
+  font-size: 13.5px;
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.layout-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.layout-tools .field-hint {
+  margin: 0;
+}
+
 .panel-row>.btn {
   height: 44px;
   min-height: 44px;
@@ -3591,6 +3667,15 @@ select.input {
 
   .order-actions {
     justify-content: flex-start;
+  }
+
+  .panel-cells,
+  .panel-add-cell {
+    margin-left: 0;
+  }
+
+  .panel-row.panel-cell-row {
+    grid-template-columns: 1fr;
   }
 
   .stat-row {

@@ -12,10 +12,11 @@ export function OpeningIndicator({ kind, rect }: OpeningIndicatorProps) {
   const stroke = '#243038'
   const shared = { fill: 'none', stroke, strokeWidth: 1.15, strokeLinejoin: 'miter' as const }
 
-  if (kind === 'casement-left' || kind === 'tilt-left' || kind === 'door-swing') {
+  // Viewed from outside, the point of the V marks the hinge side (UK convention).
+  if (kind === 'casement-left' || kind === 'tilt-left') {
     return (
       <g>
-        <path d={`M ${x} ${y} L ${x + w} ${y + h / 2} L ${x} ${y + h}`} {...shared} />
+        <path d={`M ${x + w} ${y} L ${x} ${y + h / 2} L ${x + w} ${y + h}`} {...shared} />
         {kind === 'tilt-left' ? (
           <path d={`M ${x} ${y + h} L ${x + w / 2} ${y} L ${x + w} ${y + h}`} {...shared} strokeDasharray="3 2.5" />
         ) : null}
@@ -26,12 +27,21 @@ export function OpeningIndicator({ kind, rect }: OpeningIndicatorProps) {
   if (kind === 'casement-right' || kind === 'tilt-right') {
     return (
       <g>
-        <path d={`M ${x + w} ${y} L ${x} ${y + h / 2} L ${x + w} ${y + h}`} {...shared} />
+        <path d={`M ${x} ${y} L ${x + w} ${y + h / 2} L ${x} ${y + h}`} {...shared} />
         {kind === 'tilt-right' ? (
           <path d={`M ${x} ${y + h} L ${x + w / 2} ${y} L ${x + w} ${y + h}`} {...shared} strokeDasharray="3 2.5" />
         ) : null}
       </g>
     )
+  }
+
+  if (kind === 'door-swing') {
+    return <path d={`M ${x} ${y} L ${x + w} ${y + h / 2} L ${x} ${y + h}`} {...shared} />
+  }
+
+  // Top hung: hinged along the top, so the point is at the top.
+  if (kind === 'top-hung') {
+    return <path d={`M ${x} ${y + h} L ${x + w / 2} ${y} L ${x + w} ${y + h}`} {...shared} />
   }
 
   if (kind === 'sliding') {

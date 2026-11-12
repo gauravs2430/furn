@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { LIMITS } from '../data/pricingDefaults.ts'
-import { PANEL_KINDS, PRODUCT_TYPES } from './models.ts'
+import { PRODUCT_TYPES } from './models.ts'
 import type { Customer, QuoteItem } from './models.ts'
-import { panelWidthTotal } from './factories.ts'
+import { crossTotal, layoutCells, layoutOf, mainTotal, sizeTotal } from './layout.ts'
 
 export interface ValidationIssue {
   path: string
@@ -15,16 +15,6 @@ const itemSchema = z.object({
   heightMm: z.number().min(LIMITS.heightMin).max(LIMITS.heightMax),
   quantity: z.number().int().min(LIMITS.quantityMin).max(LIMITS.quantityMax),
   location: z.string(),
-  panels: z
-    .array(
-      z.object({
-        id: z.string(),
-        widthMm: z.number().positive(),
-        kind: z.enum(PANEL_KINDS),
-      }),
-    )
-    .min(1)
-    .max(LIMITS.maxPanels),
 })
 
 export function validateItem(item: QuoteItem): ValidationIssue[] {
@@ -54,17 +44,32 @@ export function validateItem(item: QuoteItem): ValidationIssue[] {
     }
   }
 
-  const total = panelWidthTotal(item.panels)
-  if (item.panels.length > 0 && total !== item.widthMm) {
-    const delta = item.widthMm - total
+  const layout = layoutOf(item)
+  const cols = layout.split === 'cols'
+  const part = cols ? 'Column' : 'Row'
+  if (layout.sections.length === 0 || layout.sections.length > LIMITS.maxPanels) {
+    issues.push({ path: 'layout', message: `Use 1 to ${LIMITS.maxPanels} ${part.toLowerCase()}s.` })
+  }
+  if (layoutCells(layout).some((cell) => !(cell.sizeMm > 0)) || layout.sections.some((section) => !(section.sizeMm > 0))) {
+    issues.push({ path: 'layout', message: 'Each panel size must be greater than 0.' })
+  }
+  const main = mainTotal(layout, item.widthMm, item.heightMm)
+  const total = sizeTotal(layout.sections)
+  if (layout.sections.length > 0 && total !== main) {
+    const delta = main - total
+    const name = cols ? 'Column widths' : 'Row heights'
     issues.push({
-      path: 'panels',
-      message:
-        delta > 0
-          ? `Panel widths total ${total} mm. ${delta} mm remaining.`
-          : `Panel widths total ${total} mm. ${Math.abs(delta)} mm over the overall width.`,
+      path: 'layout',
+      message: delta > 0 ? `${name} total ${total} mm. ${delta} mm remaining.` : `${name} total ${total} mm. ${Math.abs(delta)} mm over.`,
     })
   }
+  const cross = crossTotal(layout, item.widthMm, item.heightMm)
+  layout.sections.forEach((section, index) => {
+    const sum = sizeTotal(section.cells)
+    if (section.cells.length > 1 && sum !== cross) {
+      issues.push({ path: 'layout', message: `${part} ${index + 1} parts total ${sum} mm but should be ${cross} mm.` })
+    }
+  })
 
   const singleSolid =
     item.productType === 'door' &&

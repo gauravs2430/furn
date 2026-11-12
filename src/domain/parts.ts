@@ -33,7 +33,7 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
   const openings = item.panels.filter((panel) => isOpening(panel.kind))
   const openingCount = openings.length
   const sashCount = item.panels.filter((panel) =>
-    ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right'].includes(panel.kind),
+    ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right', 'top-hung'].includes(panel.kind),
   ).length
   const slidingCount = item.panels.filter((panel) => panel.kind === 'sliding' || panel.kind === 'bifold').length
   const french = item.productType === 'door' && item.panels.length >= 2 && item.panels.every((panel) => isGlazed(panel.kind))
@@ -80,7 +80,7 @@ function openingCount(item: QuoteItem): number {
 
 function sashCount(item: QuoteItem): number {
   return item.panels.filter((panel) =>
-    ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right'].includes(panel.kind),
+    ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right', 'top-hung'].includes(panel.kind),
   ).length
 }
 

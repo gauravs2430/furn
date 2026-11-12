@@ -1,81 +1,234 @@
-import type { PanelKind, ProductTypeId, TechnicalOptions } from '../domain/models.ts'
+import type { OpeningLayout, PanelKind, ProductTypeId, TechnicalOptions } from '../domain/models.ts'
 import { findGlazing, findMaterial } from '../domain/catalogue.ts'
+import { layoutSignature, mirrorLayout } from '../domain/layout.ts'
+import { createId } from '../utils/ids.ts'
+
+type Cell = [kind: PanelKind, sizeMm: number]
+
+interface PresetSection {
+  /** Width of a column, or height of a row, at the sample size. */
+  size: number
+  cells: Cell[]
+}
 
 export interface LayoutPreset {
   id: string
   label: string
   products: ProductTypeId[]
-  panels: PanelKind[]
-  /** Optional explicit millimetre widths used only for the reference window default. */
-  sampleWidths?: number[]
+  split: 'cols' | 'rows'
+  sections: PresetSection[]
+  /** The size the proportions come from (the factory sample where there is one). */
+  sample: { width: number; height: number }
+  /** Set on the flipped twin of a layout. It is reached with the Flip button, not its own tile. */
+  mirrorOf?: string
 }
 
-export const layoutPresets: LayoutPreset[] = [
-  { id: 'fixed', label: 'Fixed', products: ['window'], panels: ['fixed'] },
-  { id: 'left-casement', label: 'Left Casement', products: ['window'], panels: ['casement-left'] },
-  { id: 'right-casement', label: 'Right Casement', products: ['window'], panels: ['casement-right'] },
-  { id: 'tilt-left', label: 'Tilt & Turn Left', products: ['window'], panels: ['tilt-turn-left'] },
-  { id: 'tilt-right', label: 'Tilt & Turn Right', products: ['window'], panels: ['tilt-turn-right'] },
-  {
-    id: 'fixed-casement',
-    label: 'Fixed + Casement',
-    products: ['window'],
-    panels: ['fixed', 'casement-right'],
-  },
-  {
-    id: 'casement-fixed',
-    label: 'Casement + Fixed',
-    products: ['window'],
-    panels: ['casement-left', 'fixed'],
-  },
-  {
-    id: 'casement-fixed-casement',
-    label: 'Casement + Fixed + Casement',
-    products: ['window'],
-    panels: ['casement-left', 'fixed', 'casement-right'],
-    sampleWidths: [600, 615, 600],
-  },
-  {
-    id: 'fixed-fixed-fixed',
-    label: 'Fixed + Fixed + Fixed',
-    products: ['window'],
-    panels: ['fixed', 'fixed', 'fixed'],
-  },
-  { id: 'sliding-2', label: 'Sliding 2-panel', products: ['window', 'patio'], panels: ['sliding', 'sliding'] },
-  {
-    id: 'sliding-3',
-    label: 'Sliding 3-panel',
-    products: ['window', 'patio'],
-    panels: ['sliding', 'fixed', 'sliding'],
-  },
-  { id: 'single-solid', label: 'Single solid', products: ['door'], panels: ['solid'] },
-  { id: 'single-half', label: 'Single half glazed', products: ['door'], panels: ['half-glazed'] },
-  {
-    id: 'french',
-    label: 'French pair',
-    products: ['door'],
-    panels: ['casement-left', 'casement-right'],
-  },
-  { id: 'bifold-3', label: '3-panel bi-fold', products: ['bifold'], panels: ['bifold', 'bifold', 'bifold'] },
-  {
-    id: 'bifold-4',
-    label: '4-panel bi-fold',
-    products: ['bifold'],
-    panels: ['bifold', 'bifold', 'bifold', 'bifold'],
-  },
+const F: PanelKind = 'fixed'
+const TH: PanelKind = 'top-hung'
+const SL: PanelKind = 'casement-left'
+const SR: PanelKind = 'casement-right'
+
+/** A single row of panels, as every layout was before stacked cells existed. */
+function row(
+  id: string,
+  label: string,
+  products: ProductTypeId[],
+  kinds: PanelKind[],
+  sample?: { widths: number[]; height: number },
+  extra: Partial<LayoutPreset> = {},
+): LayoutPreset {
+  const widths = sample?.widths ?? kinds.map(() => 1000)
+  const height = sample?.height ?? Math.round(widths.reduce((sum, width) => sum + width, 0) * 0.72)
+  return {
+    id,
+    label,
+    products,
+    split: 'cols',
+    sections: kinds.map((kind, index) => ({ size: widths[index] ?? 1000, cells: [[kind, height]] })),
+    sample: { width: widths.reduce((sum, width) => sum + width, 0), height },
+    ...extra,
+  }
+}
+
+function cols(id: string, label: string, width: number, height: number, sections: PresetSection[]): LayoutPreset {
+  return { id, label, products: ['window'], split: 'cols', sections, sample: { width, height } }
+}
+
+function rows(id: string, label: string, width: number, height: number, sections: PresetSection[]): LayoutPreset {
+  return { id, label, products: ['window'], split: 'rows', sections, sample: { width, height } }
+}
+
+const W: ProductTypeId[] = ['window']
+
+/**
+ * Window layouts follow the factory work orders (job 347): sizes are the sample
+ * sizes, and the side-hung symbol points at the hinge. Only one of each mirror
+ * pair has a tile; the other is reached with Flip.
+ */
+const basePresets: LayoutPreset[] = [
+  // Single lights
+  row('fixed', 'Fixed', W, [F], { widths: [800], height: 1000 }),
+  row('left-casement', 'Side Hung (left)', W, [SL], { widths: [700], height: 1200 }),
+  row('right-casement', 'Side Hung (right)', W, [SR], { widths: [600], height: 1000 }, { mirrorOf: 'left-casement' }),
+  row('top-hung', 'Top Hung', W, [TH], { widths: [900], height: 1000 }),
+  row('tilt-left', 'Tilt & Turn (left)', W, ['tilt-turn-left']),
+  row('tilt-right', 'Tilt & Turn (right)', W, ['tilt-turn-right'], undefined, { mirrorOf: 'tilt-left' }),
+
+  // Side by side
+  row('fixed-casement', 'Fixed + Side Hung', W, [F, SR]),
+  row('casement-fixed', 'Side Hung + Fixed', W, [SL, F], { widths: [650, 650], height: 900 }, { mirrorOf: 'fixed-casement' }),
+  row('top-hung-fixed', 'Top Hung + Fixed', W, [TH, F], { widths: [600, 600], height: 900 }),
+  row('top-hung-pair', 'Top Hung Pair', W, [TH, TH], { widths: [600, 600], height: 900 }),
+  row('casement-pair', 'Side Hung Pair', W, [SL, SR], { widths: [600, 600], height: 800 }),
+  row('casement-fixed-casement', 'Side Hung + Fixed + Side Hung', W, [SL, F, SR], { widths: [600, 615, 600], height: 1130 }),
+  row('fixed-fixed-fixed', 'Fixed + Fixed + Fixed', W, [F, F, F]),
+  row('top-hung-fixed-fixed', 'Top Hung + Fixed + Fixed', W, [TH, F, F], { widths: [600, 450, 450], height: 1000 }),
+  row('casement-fixed-fixed', 'Side Hung + Fixed + Fixed', W, [SL, F, F], { widths: [550, 400, 350], height: 1100 }),
+  row('casement-pair-fixed', 'Side Hung Pair + Fixed', W, [SL, SR, F], { widths: [500, 500, 400], height: 1200 }),
+  row('casement-pair-fixed-fixed', 'Side Hung Pair + Fixed + Fixed', W, [SL, SR, F, F], {
+    widths: [400, 400, 350, 350],
+    height: 1000,
+  }),
+  row('sliding-2', 'Sliding 2-panel', ['window', 'patio'], ['sliding', 'sliding']),
+  row('sliding-3', 'Sliding 3-panel', ['window', 'patio'], ['sliding', 'fixed', 'sliding']),
+
+  // Top lights in a single column
+  cols('fixed-over-fixed', 'Fixed Top Light over Fixed', 600, 1400, [{ size: 600, cells: [[F, 450], [F, 950]] }]),
+  cols('top-hung-over-fixed', 'Top Hung over Fixed', 600, 1600, [{ size: 600, cells: [[TH, 450], [F, 1150]] }]),
+  cols('casement-over-fixed', 'Side Hung Top Light over Fixed', 700, 1600, [{ size: 700, cells: [[SR, 400], [F, 1200]] }]),
+  cols('top-hung-over-casement', 'Top Hung over Side Hung', 700, 1600, [{ size: 700, cells: [[TH, 450], [SL, 1150]] }]),
+
+  // A row of top lights over one wide light
+  rows('two-fixed-over-fixed', '2 Fixed Top Lights over Fixed', 1300, 1000, [
+    { size: 600, cells: [[F, 750], [F, 550]] },
+    { size: 400, cells: [[F, 1300]] },
+  ]),
+  rows('top-hung-fixed-over-fixed', 'Top Hung + Fixed over Fixed', 1200, 1100, [
+    { size: 450, cells: [[TH, 600], [F, 600]] },
+    { size: 650, cells: [[F, 1200]] },
+  ]),
+  rows('two-fixed-over-top-hung', '2 Fixed Top Lights over Top Hung', 1100, 1300, [
+    { size: 450, cells: [[F, 550], [F, 550]] },
+    { size: 850, cells: [[TH, 1100]] },
+  ]),
+  rows('casement-fixed-over-fixed', 'Side Hung + Fixed over Fixed', 1200, 1000, [
+    { size: 450, cells: [[SL, 650], [F, 550]] },
+    { size: 550, cells: [[F, 1200]] },
+  ]),
+
+  // Columns, some with top lights
+  cols('top-hung-stack-tall-fixed', 'Top Hung over Fixed + Tall Fixed', 1200, 1400, [
+    { size: 700, cells: [[TH, 600], [F, 800]] },
+    { size: 500, cells: [[F, 1400]] },
+  ]),
+  cols('fixed-stack-tall-casement', 'Fixed over Fixed + Tall Side Hung', 1300, 1200, [
+    { size: 650, cells: [[F, 450], [F, 750]] },
+    { size: 650, cells: [[SR, 1200]] },
+  ]),
+  cols('fixed-top-hung-stack-fixed', 'Fixed + Top Hung over Fixed + Fixed', 1400, 1100, [
+    { size: 500, cells: [[F, 1100]] },
+    { size: 500, cells: [[TH, 500], [F, 600]] },
+    { size: 400, cells: [[F, 1100]] },
+  ]),
+  cols('casement-top-hung-stack-casement', 'Side Hung + Top Hung over Fixed + Side Hung', 1500, 1200, [
+    { size: 450, cells: [[SL, 1200]] },
+    { size: 600, cells: [[TH, 350], [F, 850]] },
+    { size: 450, cells: [[SR, 1200]] },
+  ]),
+  cols('casement-top-hung-pair-casement', 'Side Hung + Top Hung over Top Hung + Side Hung', 1500, 1200, [
+    { size: 450, cells: [[SL, 1200]] },
+    { size: 600, cells: [[TH, 450], [TH, 750]] },
+    { size: 450, cells: [[SR, 1200]] },
+  ]),
+  cols('five-top-lights-top-hung-first', '5 Top Lights, Top Hung + 4 Fixed', 1800, 1200, [
+    { size: 500, cells: [[F, 350], [TH, 850]] },
+    { size: 300, cells: [[F, 350], [F, 850]] },
+    { size: 300, cells: [[F, 350], [F, 850]] },
+    { size: 300, cells: [[F, 350], [F, 850]] },
+    { size: 400, cells: [[F, 350], [F, 850]] },
+  ]),
+  cols('five-top-lights-top-hung-second', '5 Top Lights, Top Hung in Column 2', 1800, 1300, [
+    { size: 300, cells: [[F, 300], [F, 1000]] },
+    { size: 600, cells: [[F, 300], [TH, 1000]] },
+    { size: 300, cells: [[F, 300], [F, 1000]] },
+    { size: 300, cells: [[F, 300], [F, 1000]] },
+    { size: 300, cells: [[F, 300], [F, 1000]] },
+  ]),
+  cols('five-columns-mixed', '5 Columns with Opening Top Lights', 2000, 1200, [
+    { size: 500, cells: [[TH, 450], [SL, 750]] },
+    { size: 300, cells: [[F, 450], [F, 750]] },
+    { size: 500, cells: [[TH, 450], [TH, 750]] },
+    { size: 200, cells: [[F, 450], [F, 750]] },
+    { size: 500, cells: [[TH, 450], [SR, 750]] },
+  ]),
+
+  // Doors and folding sets
+  row('single-solid', 'Single solid', ['door'], ['solid']),
+  row('single-half', 'Single half glazed', ['door'], ['half-glazed']),
+  row('french', 'French pair', ['door'], ['casement-left', 'casement-right']),
+  row('bifold-3', '3-panel bi-fold', ['bifold'], ['bifold', 'bifold', 'bifold']),
+  row('bifold-4', '4-panel bi-fold', ['bifold'], ['bifold', 'bifold', 'bifold', 'bifold']),
 ]
 
+export function presetLayout(preset: LayoutPreset): OpeningLayout {
+  return {
+    split: preset.split,
+    sections: preset.sections.map((section) => ({
+      id: createId(),
+      sizeMm: section.size,
+      cells: section.cells.map(([kind, sizeMm]) => ({ id: createId(), sizeMm, kind })),
+    })),
+  }
+}
+
+/** Every layout that has a different flipped twin gets one, unless a named twin already exists. */
+function withMirrors(list: LayoutPreset[]): LayoutPreset[] {
+  const out = [...list]
+  const signatures = new Set(list.map((preset) => layoutSignature(presetLayout(preset))))
+  for (const preset of list) {
+    if (preset.mirrorOf) continue
+    const mirrored = mirrorLayout(presetLayout(preset))
+    const signature = layoutSignature(mirrored)
+    if (signatures.has(signature)) continue
+    signatures.add(signature)
+    out.push({
+      ...preset,
+      id: `${preset.id}-flipped`,
+      label: `${preset.label} (flipped)`,
+      split: mirrored.split,
+      sections: mirrored.sections.map((section) => ({
+        size: section.sizeMm,
+        cells: section.cells.map((cell) => [cell.kind, cell.sizeMm] as Cell),
+      })),
+      mirrorOf: preset.id,
+    })
+  }
+  return out
+}
+
+export const layoutPresets: LayoutPreset[] = withMirrors(basePresets)
+
+const signatureOf = new Map(layoutPresets.map((preset) => [preset.id, layoutSignature(presetLayout(preset))]))
+
+/** Tiles to offer for a product. Flipped twins are reached with the Flip button. */
 export function presetsFor(product: ProductTypeId): LayoutPreset[] {
-  return layoutPresets.filter((preset) => preset.products.includes(product))
+  return layoutPresets.filter((preset) => preset.products.includes(product) && !preset.mirrorOf)
 }
 
 export function findPreset(id: string): LayoutPreset | undefined {
   return layoutPresets.find((preset) => preset.id === id)
 }
 
-export function matchPreset(kinds: PanelKind[]): LayoutPreset | undefined {
-  const signature = kinds.join('|')
-  return layoutPresets.find((preset) => preset.panels.join('|') === signature)
+/** The named layout with this shape and these opening types, flipped twins included. */
+export function matchPreset(layout: OpeningLayout, product: ProductTypeId = 'window'): LayoutPreset | undefined {
+  const signature = layoutSignature(layout)
+  return layoutPresets.find((preset) => preset.products.includes(product) && signatureOf.get(preset.id) === signature)
+}
+
+/** The tile that represents a layout: itself, or the twin it was flipped from. */
+export function tileFor(preset: LayoutPreset | undefined): LayoutPreset | undefined {
+  if (!preset?.mirrorOf) return preset
+  return findPreset(preset.mirrorOf) ?? preset
 }
 
 const frameProfiles: Record<string, { frame: string; mullion: string }> = {
@@ -93,16 +246,27 @@ const frameProfiles: Record<string, { frame: string; mullion: string }> = {
   },
 }
 
-function describeSash(kinds: PanelKind[]): string {
+/**
+ * Windows follow the factory work orders: the first opening sash in reading
+ * order names the window, and top-hung sashes take the window's handing.
+ */
+function describeSash(kinds: PanelKind[], product: ProductTypeId): string {
   const left = kinds.some((kind) => kind === 'casement-left' || kind === 'tilt-turn-left')
   const right = kinds.some((kind) => kind === 'casement-right' || kind === 'tilt-turn-right')
   if (kinds.every((kind) => kind === 'fixed')) return 'Fixed light'
   if (kinds.every((kind) => kind === 'solid')) return 'Solid door leaf'
   if (kinds.some((kind) => kind === 'half-glazed') && kinds.length === 1) return 'Half glazed door'
   if (kinds.some((kind) => kind.startsWith('tilt-turn'))) return 'Tilt and turn'
+  if (product === 'window') {
+    const first = kinds.find((kind) => kind === 'top-hung' || kind === 'casement-left' || kind === 'casement-right')
+    if (first === 'top-hung') return `Casement top hung ${right && !left ? 'right' : 'left'} hand`
+    if (first === 'casement-left') return 'Casement left hung'
+    if (first === 'casement-right') return 'Casement right hung'
+  }
   if (left && right) return 'Casement left and right hung'
   if (left) return 'Casement left hung'
   if (right) return 'Casement right hung'
+  if (kinds.some((kind) => kind === 'top-hung')) return 'Casement top hung left hand'
   if (kinds.some((kind) => kind === 'sliding')) return 'Sliding sash'
   if (kinds.some((kind) => kind === 'bifold')) return 'Bi-fold sash'
   return 'Mixed'
@@ -131,7 +295,7 @@ export function technicalDefaults(
     cill: isWindow ? 'GL-1-00150 150mm' : 'None',
     joint: material.id === 'timber' ? 'Mechanical (Standard)' : 'Welded (Standard)',
     bead: glazing.id === 'triple' ? '36mm' : '28mm',
-    sashType: describeSash(kinds),
+    sashType: describeSash(kinds, product),
     locking: !opening ? 'None' : sliding ? 'Sliding hook lock' : product === 'window' ? 'Espag Locking' : 'Multi-point lock',
     handle: !opening ? 'None' : product === 'window' ? 'White Inline Handle' : 'Lever handle',
     hinge: !opening || sliding ? 'None' : product === 'window' ? 'Standard' : 'Butt hinge',

@@ -14,6 +14,7 @@ import { NumberField } from '../../components/ui/Field.tsx'
 import { ConfirmDialog, Modal } from '../../components/ui/Dialog.tsx'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
 import { matchesQuery } from '../admin/filters.ts'
+import { layoutOf } from '../../domain/layout.ts'
 
 interface PreviewCardProps {
   item: QuoteItem
@@ -46,7 +47,7 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
     <aside className="card preview-card">
       <div className="preview-kicker">
         <span>{product.name}</span>
-        <span>{drawing ? describeConfiguration(item.panels) : 'Accessory'}</span>
+        <span>{drawing ? describeConfiguration(item) : 'Accessory'}</span>
       </div>
       <p className="preview-size">
         {item.widthMm} × {item.heightMm} <span>mm</span>
@@ -65,7 +66,7 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
           <OpeningDrawing
             widthMm={item.widthMm}
             heightMm={item.heightMm}
-            panels={item.panels}
+            layout={layoutOf(item)}
             frameColor={colour.hex}
             finish={colour.finish}
             showCill={item.technical.cill !== 'None'}
@@ -184,7 +185,7 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
             <OpeningDrawing
               widthMm={item.widthMm}
               heightMm={item.heightMm}
-              panels={item.panels}
+              layout={layoutOf(item)}
               frameColor={colour.hex}
               finish={colour.finish}
               showCill={item.technical.cill !== 'None'}

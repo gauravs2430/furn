@@ -6,6 +6,7 @@ import { buildWorkOrder } from '../../domain/workOrder.ts'
 import { formatMm } from '../../utils/money.ts'
 import { formatPrintDate } from '../../utils/dates.ts'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
+import { layoutOf } from '../../domain/layout.ts'
 
 export function WorkOrderDocument({ quote, printedAt }: { quote: Quote; printedAt: string }) {
   const catalogue = useAppStore((state) => state.catalogue)
@@ -65,7 +66,7 @@ export function WorkOrderDocument({ quote, printedAt }: { quote: Quote; printedA
                   <OpeningDrawing
                     widthMm={item.widthMm}
                     heightMm={item.heightMm}
-                    panels={item.panels}
+                    layout={layoutOf(item)}
                     frameColor={colour.hex}
                     finish={colour.finish}
                     showCill={item.technical.cill !== 'None'}

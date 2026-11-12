@@ -10,6 +10,7 @@ import { formatMoney } from '../../utils/money.ts'
 import { Button } from '../../components/ui/Button.tsx'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
 import { matchesQuery } from '../admin/filters.ts'
+import { layoutOf } from '../../domain/layout.ts'
 
 interface OrderListProps {
   items: QuoteItem[]
@@ -71,7 +72,7 @@ export function OrderList({ items, pricingConfig, editingId, locked = false, onE
                     <OpeningDrawing
                       widthMm={item.widthMm}
                       heightMm={item.heightMm}
-                      panels={item.panels}
+                      layout={layoutOf(item)}
                       frameColor={colour.hex}
                       finish={colour.finish}
                       showDimensions={false}
@@ -84,7 +85,7 @@ export function OrderList({ items, pricingConfig, editingId, locked = false, onE
                   <p className="order-location">{item.location.trim() || 'No location'}</p>
                   <p className="order-title">
                     {index + 1}. {findProduct(itemProductId(item), catalogue).name}
-                    <span> · {drawing ? describeConfiguration(item.panels) : 'Accessory'}</span>
+                    <span> · {drawing ? describeConfiguration(item) : 'Accessory'}</span>
                   </p>
                   <p className="order-spec">
                     {item.widthMm} × {item.heightMm} mm · Qty {item.quantity} · {findMaterial(item.materialId, catalogue).name} ·{' '}

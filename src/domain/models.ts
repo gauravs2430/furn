@@ -20,6 +20,7 @@ export const PANEL_KINDS = [
   'casement-right',
   'tilt-turn-left',
   'tilt-turn-right',
+  'top-hung',
   'sliding',
   'bifold',
   'solid',
@@ -34,6 +35,29 @@ export interface Panel {
   id: string
   widthMm: number
   kind: PanelKind
+}
+
+/**
+ * How an opening is divided. `cols` splits the frame left to right into
+ * sections (columns), and each column can be stacked top to bottom into cells.
+ * `rows` splits it top to bottom into rows, and each row can be split left to
+ * right. Section sizes run along the split; cell sizes run across it.
+ */
+export interface LayoutCell {
+  id: string
+  sizeMm: number
+  kind: PanelKind
+}
+
+export interface LayoutSection {
+  id: string
+  sizeMm: number
+  cells: LayoutCell[]
+}
+
+export interface OpeningLayout {
+  split: 'cols' | 'rows'
+  sections: LayoutSection[]
 }
 
 export interface TechnicalOptions {
@@ -73,7 +97,13 @@ export interface QuoteItem {
   externalColourId: string
   internalColourId: string
   glazingId: string
+  /**
+   * One entry per cell, left to right then top to bottom. Kept for pricing and
+   * older quotes; the drawing and work order read `layout` when it is present.
+   */
   panels: Panel[]
+  /** The divided frame. Missing on older quotes, which were a single row of `panels`. */
+  layout?: OpeningLayout
   technical: TechnicalOptions
   notes: string
   /** Catalogue part ids left off this opening. Absent on older quotes. */

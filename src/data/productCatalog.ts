@@ -116,10 +116,11 @@ export const supplyOptions = ['Supply & fit', 'Supply only'] as const
 
 export const panelKindLabels: Record<PanelKind, string> = {
   fixed: 'Fixed',
-  'casement-left': 'Left casement',
-  'casement-right': 'Right casement',
+  'casement-left': 'Side hung (left)',
+  'casement-right': 'Side hung (right)',
   'tilt-turn-left': 'Tilt & turn left',
   'tilt-turn-right': 'Tilt & turn right',
+  'top-hung': 'Top hung',
   sliding: 'Sliding',
   bifold: 'Bi-fold',
   solid: 'Solid',
@@ -139,6 +140,7 @@ export function panelKindsFor(product: ProductTypeId): PanelKind[] {
         'fixed',
         'casement-left',
         'casement-right',
+        'top-hung',
         'tilt-turn-left',
         'tilt-turn-right',
         'sliding',

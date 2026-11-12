@@ -1,6 +1,7 @@
 import type { PanelKind, QuoteItem, WorkOrderData } from './models.ts'
 import { findColour } from './catalogue.ts'
 import { formatMm } from '../utils/money.ts'
+import { buildLayoutWorkOrder, usesLayoutEngine } from './workOrderLayout.ts'
 
 function isSash(kind: PanelKind): boolean {
   return (
@@ -25,6 +26,7 @@ function glassDeduction(kind: PanelKind): { width: number; height: number } | nu
  * They are not a machining engine.
  */
 export function buildWorkOrder(item: QuoteItem): WorkOrderData {
+  if (usesLayoutEngine(item)) return buildLayoutWorkOrder(item)
   const external = findColour(item.externalColourId)
   const internal = findColour(item.internalColourId)
   const location = item.location.trim() || 'Please Specify'

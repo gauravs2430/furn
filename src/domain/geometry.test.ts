@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { drawingScale, layoutDrawing } from './geometry.ts'
+import { layoutFromPanels } from './layout.ts'
 
 describe('drawingScale', () => {
   it('uses the tighter of width and height so aspect ratio is preserved', () => {
@@ -21,11 +22,11 @@ describe('layoutDrawing', () => {
     const model = layoutDrawing({
       widthMm: 1815,
       heightMm: 1130,
-      panels: [
+      layout: layoutFromPanels([
         { id: 'a', widthMm: 600, kind: 'casement-left' },
         { id: 'b', widthMm: 615, kind: 'fixed' },
         { id: 'c', widthMm: 600, kind: 'casement-right' },
-      ],
+      ], 1),
       viewportWidth: 640,
       viewportHeight: 420,
       showDimensions: true,
@@ -55,7 +56,7 @@ describe('layoutDrawing', () => {
       const model = layoutDrawing({
         widthMm: size[0],
         heightMm: size[1],
-        panels: [{ id: 'a', widthMm: size[0], kind: 'fixed' }],
+        layout: layoutFromPanels([{ id: 'a', widthMm: size[0], kind: 'fixed' }], size[1]),
         viewportWidth: 480,
         viewportHeight: 320,
         showDimensions: true,

@@ -10,6 +10,7 @@ import { validateCustomer, validateItem, clampPercent } from '../../domain/valid
 import { LIMITS } from '../../data/pricingDefaults.ts'
 import { quoteRepository, useAppStore } from '../../store/useAppStore.ts'
 import { createId } from '../../utils/ids.ts'
+import { cloneLayout } from '../../domain/layout.ts'
 import { formatMoney } from '../../utils/money.ts'
 import { Button } from '../../components/ui/Button.tsx'
 import { StatusBadge } from '../../components/ui/Badge.tsx'
@@ -192,6 +193,7 @@ export function ConfiguratorPage() {
       removedPartIds: [],
       addedParts: [],
       panels: source.panels.map((panel) => ({ ...panel, id: createId() })),
+      ...(source.layout ? { layout: cloneLayout(source.layout) } : {}),
     }
   }
 

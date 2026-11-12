@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react'
-import type { Panel as PanelModel, ProductTypeId } from '../../domain/models.ts'
+import type { OpeningLayout, ProductTypeId } from '../../domain/models.ts'
 import { layoutDrawing } from '../../domain/geometry.ts'
 import { cx } from '../../utils/cx.ts'
 import { DimensionLine } from './DimensionLine.tsx'
@@ -10,7 +10,7 @@ import { Panel } from './Panel.tsx'
 interface OpeningDrawingProps {
   widthMm: number
   heightMm: number
-  panels: PanelModel[]
+  layout: OpeningLayout
   frameColor: string
   finish?: 'solid' | 'oak'
   showDimensions?: boolean
@@ -23,7 +23,7 @@ interface OpeningDrawingProps {
 export function OpeningDrawing({
   widthMm,
   heightMm,
-  panels,
+  layout,
   frameColor,
   finish = 'solid',
   showDimensions = true,
@@ -54,7 +54,7 @@ export function OpeningDrawing({
       ? layoutDrawing({
           widthMm,
           heightMm,
-          panels,
+          layout,
           viewportWidth: size.w,
           viewportHeight: size.h,
           showDimensions,

@@ -8,6 +8,7 @@ import { calculateItemPrice, calculateQuoteTotals } from '../../domain/pricing.t
 import { formatMoney } from '../../utils/money.ts'
 import { formatPrintDate } from '../../utils/dates.ts'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
+import { layoutOf } from '../../domain/layout.ts'
 
 export function InvoiceDocument({ quote, pricingConfig }: { quote: Quote; pricingConfig: PricingConfig }) {
   const catalogue = useAppStore((state) => state.catalogue)
@@ -80,7 +81,7 @@ export function InvoiceDocument({ quote, pricingConfig }: { quote: Quote; pricin
                       <OpeningDrawing
                         widthMm={item.widthMm}
                         heightMm={item.heightMm}
-                        panels={item.panels}
+                        layout={layoutOf(item)}
                         frameColor={colour.hex}
                         finish={colour.finish}
                         showDimensions={false}
@@ -95,7 +96,7 @@ export function InvoiceDocument({ quote, pricingConfig }: { quote: Quote; pricin
                     {index + 1}. {item.location.trim() || 'Opening'} — {findProduct(itemProductId(item), catalogue).name}
                   </strong>
                   <p>
-                    {drawing ? describeConfiguration(item.panels) : 'Accessory'} · {item.widthMm} × {item.heightMm} mm
+                    {drawing ? describeConfiguration(item) : 'Accessory'} · {item.widthMm} × {item.heightMm} mm
                   </p>
                   <p>
                     {findMaterial(item.materialId, catalogue).name} · {findGlazing(item.glazingId, catalogue).name} · {colour.name} outside /{' '}

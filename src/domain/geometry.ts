@@ -1,4 +1,5 @@
-import type { PanelKind, ProductTypeId } from './models.ts'
+import type { OpeningLayout, PanelKind, ProductTypeId } from './models.ts'
+import { cellBoxes, layoutBars } from './layout.ts'
 
 export interface Rect {
   x: number
@@ -22,6 +23,7 @@ export type IndicatorKind =
   | 'casement-right'
   | 'tilt-left'
   | 'tilt-right'
+  | 'top-hung'
   | 'sliding'
   | 'bifold'
   | 'door-swing'
@@ -54,7 +56,7 @@ export interface DrawModel {
 export interface LayoutInput {
   widthMm: number
   heightMm: number
-  panels: { id: string; widthMm: number; kind: PanelKind }[]
+  layout: OpeningLayout
   viewportWidth: number
   viewportHeight: number
   showDimensions: boolean
@@ -77,7 +79,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
-function inset(rect: Rect, amount: number): Rect {
+function insetRect(rect: Rect, amount: number): Rect {
   const next = amount * 2
   return {
     x: rect.x + amount,
@@ -97,6 +99,8 @@ function indicatorFor(kind: PanelKind): IndicatorKind | null {
       return 'tilt-left'
     case 'tilt-turn-right':
       return 'tilt-right'
+    case 'top-hung':
+      return 'top-hung'
     case 'sliding':
       return 'sliding'
     case 'bifold':
@@ -111,6 +115,7 @@ function indicatorFor(kind: PanelKind): IndicatorKind | null {
 
 function handlePoint(rect: Rect, kind: PanelKind, productType: ProductTypeId): { x: number; y: number } | null {
   if (kind === 'fixed') return null
+  if (kind === 'top-hung') return { x: rect.x + rect.width / 2, y: rect.y + rect.height - Math.min(14, rect.height * 0.18) }
   const onRight =
     kind === 'casement-left' ||
     kind === 'tilt-turn-left' ||
@@ -129,10 +134,20 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
   const viewHeight = Math.max(input.viewportHeight, 40)
   const widthMm = Math.max(input.widthMm, 1)
   const heightMm = Math.max(input.heightMm, 1)
-  const panels = input.panels.length > 0 ? input.panels : [{ id: 'panel', widthMm, kind: 'fixed' as const }]
+  const layout: OpeningLayout =
+    input.layout.sections.length > 0
+      ? input.layout
+      : { split: 'cols', sections: [{ id: 'panel', sizeMm: widthMm, cells: [{ id: 'cell', sizeMm: heightMm, kind: 'fixed' }] }] }
+
+  const boxes = cellBoxes(layout, widthMm, heightMm)
+  const bars = layoutBars(layout, widthMm, heightMm)
+
+  // Which runs of sizes get their own dimension lines, as on the factory drawings.
+  const bottomSizes = bottomRun(layout, boxes)
+  const sideSizes = sideRun(layout, boxes)
 
   const pad = input.showDimensions
-    ? { top: 34, right: 22, bottom: input.panels.length > 1 ? 48 : 36, left: 56 }
+    ? { top: 34, right: sideSizes ? 48 : 22, bottom: bottomSizes ? 48 : 36, left: 56 }
     : { top: 8, right: 10, bottom: 10, left: 10 }
   if (input.showCill) {
     pad.left += 6
@@ -158,52 +173,37 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
   const cillPx = input.showCill ? clamp(30 * scale, mini ? 3 : 5, mini ? 7 : 12) : 0
   const horn = input.showCill ? clamp(50 * scale, 4, 14) : 0
 
-  const sum = panels.reduce((total, panel) => total + Math.max(panel.widthMm, 0), 0)
-  const denom = Math.max(widthMm, sum, 1)
-  let cursorMm = 0
-  const modules = panels.map((panel) => {
-    const start = cursorMm / denom
-    const width = Math.max(panel.widthMm, 0)
-    cursorMm += width
-    const end = cursorMm / denom
+  // Millimetres to pixels. The cill sits over the bottom of the frame.
+  const innerH = Math.max(outer.height - cillPx, 1)
+  const px = (mm: number) => outer.x + (mm / widthMm) * outer.width
+  const py = (mm: number) => outer.y + (mm / heightMm) * innerH
+  const inset = (edge: 'frame' | 'bar') => (edge === 'frame' ? framePx : mullionPx / 2)
+
+  const drawn: DrawnPanel[] = boxes.map((box) => {
     const module: Rect = {
-      x: outer.x + start * outer.width,
-      y: outer.y,
-      width: Math.max((end - start) * outer.width, 0),
-      height: outer.height,
+      x: px(box.x),
+      y: py(box.y),
+      width: px(box.x + box.width) - px(box.x),
+      height: py(box.y + box.height) - py(box.y),
     }
-    return { panel, module }
-  })
-
-  const mullions: Rect[] = []
-  for (let index = 0; index < modules.length - 1; index += 1) {
-    const current = modules[index]
-    if (!current) continue
-    const boundary = current.module.x + current.module.width
-    mullions.push({
-      x: boundary - mullionPx / 2,
-      y: outer.y + framePx,
-      width: mullionPx,
-      height: Math.max(4, outer.height - framePx * 2 - cillPx),
-    })
-  }
-
-  const drawn: DrawnPanel[] = modules.map(({ panel, module }, index) => {
-    const last = index === modules.length - 1
-    const leftInset = index === 0 ? framePx : mullionPx / 2
-    const rightInset = last ? framePx : mullionPx / 2
+    const left = inset(box.edges.left)
+    const right = inset(box.edges.right)
+    const top = inset(box.edges.top)
+    const bottom = inset(box.edges.bottom)
     const cell: Rect = {
-      x: module.x + leftInset,
-      y: module.y + framePx,
-      width: Math.max(1, module.width - leftInset - rightInset),
-      height: Math.max(1, module.height - framePx * 2 - cillPx),
+      x: module.x + left,
+      y: module.y + top,
+      width: Math.max(1, module.width - left - right),
+      height: Math.max(1, module.height - top - bottom),
     }
-    const openingInset = panel.kind === 'fixed' ? Math.min(2, cell.width / 5) : panel.kind === 'sliding' || panel.kind === 'bifold' ? sashPx * 0.72 : sashPx
-    const glassRect = inset(cell, openingInset)
-    const solidKind = panel.kind === 'solid'
-    const half = panel.kind === 'half-glazed'
+    const kind = box.kind
+    const openingInset =
+      kind === 'fixed' ? Math.min(2, cell.width / 5) : kind === 'sliding' || kind === 'bifold' ? sashPx * 0.72 : sashPx
+    const glassRect = insetRect(cell, openingInset)
+    const solidKind = kind === 'solid'
+    const half = kind === 'half-glazed'
     let glass: Rect | null = solidKind ? null : glassRect
-    let solid: Rect | null = solidKind ? inset(cell, Math.max(2, sashPx * 0.4)) : null
+    let solid: Rect | null = solidKind ? insetRect(cell, Math.max(2, sashPx * 0.4)) : null
     let railY: number | null = null
     if (half && glass) {
       railY = cell.y + cell.height * 0.46
@@ -222,31 +222,33 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
     }
     const indicatorRect = glass ?? solid ?? cell
     return {
-      id: panel.id,
-      kind: panel.kind,
+      id: box.id,
+      kind,
       module,
       cell,
-      sash: panel.kind === 'fixed' ? null : cell,
+      sash: kind === 'fixed' ? null : cell,
       glass,
       solid,
       railY,
-      indicator: indicatorFor(panel.kind),
-      handle: handlePoint(indicatorRect, panel.kind, input.productType),
+      indicator: indicatorFor(kind),
+      handle: handlePoint(indicatorRect, kind, input.productType),
     }
   })
 
-  let gap: Rect | null = null
-  if (sum < widthMm - 0.5 && denom === widthMm) {
-    const start = sum / widthMm
-    const x = outer.x + start * outer.width
-    gap = {
-      x: x + (modules.length === 0 ? framePx : mullionPx / 2),
-      y: outer.y + framePx,
-      width: Math.max(0, outer.x + outer.width - framePx - x),
-      height: Math.max(1, outer.height - framePx * 2 - cillPx),
+  // Sub bars first so the frame-to-frame bars sit over their ends.
+  const ordered = [...bars.filter((bar) => bar.level === 'sub'), ...bars.filter((bar) => bar.level === 'main')]
+  const mullions: Rect[] = ordered.map((bar) => {
+    const startInset = bar.startEdge === 'frame' ? framePx : mullionPx / 2
+    const endInset = bar.endEdge === 'frame' ? framePx : mullionPx / 2
+    if (bar.orientation === 'vert') {
+      const y0 = py(bar.start) + startInset
+      const y1 = py(bar.end) - endInset
+      return { x: px(bar.pos) - mullionPx / 2, y: y0, width: mullionPx, height: Math.max(4, y1 - y0) }
     }
-    if (gap.width < 2) gap = null
-  }
+    const x0 = px(bar.start) + startInset
+    const x1 = px(bar.end) - endInset
+    return { x: x0, y: py(bar.pos) - mullionPx / 2, width: Math.max(4, x1 - x0), height: mullionPx }
+  })
 
   const cill: Rect | null = input.showCill
     ? {
@@ -277,18 +279,27 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
       orientation: 'v',
       extend: 'right',
     })
-    if (panels.length > 1) {
-      for (const entry of modules) {
-        dimensions.push({
-          x1: entry.module.x,
-          y1: outer.y + outer.height + 18,
-          x2: entry.module.x + entry.module.width,
-          y2: outer.y + outer.height + 18,
-          label: `${Math.round(entry.panel.widthMm)}`,
-          orientation: 'h',
-          extend: 'up',
-        })
-      }
+    for (const run of bottomSizes ?? []) {
+      dimensions.push({
+        x1: px(run.from),
+        y1: outer.y + outer.height + 18,
+        x2: px(run.to),
+        y2: outer.y + outer.height + 18,
+        label: `${Math.round(run.size)}`,
+        orientation: 'h',
+        extend: 'up',
+      })
+    }
+    for (const run of sideSizes ?? []) {
+      dimensions.push({
+        x1: outer.x + outer.width + 20,
+        y1: py(run.from),
+        x2: outer.x + outer.width + 20,
+        y2: py(run.to),
+        label: `${Math.round(run.size)}`,
+        orientation: 'v',
+        extend: 'left',
+      })
     }
   }
 
@@ -300,7 +311,47 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
     cill,
     panels: drawn,
     mullions,
-    gap,
+    gap: null,
     dimensions,
   }
+}
+
+interface SizeRun {
+  from: number
+  to: number
+  size: number
+}
+
+/** Widths along the bottom: the columns, or the most divided row. */
+function bottomRun(layout: OpeningLayout, boxes: ReturnType<typeof cellBoxes>): SizeRun[] | null {
+  if (layout.split === 'cols') {
+    if (layout.sections.length < 2) return null
+    return layout.sections.map((section, index) => {
+      const box = boxes.find((entry) => entry.sectionIndex === index)
+      return { from: box?.x ?? 0, to: (box?.x ?? 0) + (box?.width ?? 0), size: section.sizeMm }
+    })
+  }
+  const row = layout.sections.findIndex((section) => section.cells.length > 1)
+  if (row < 0) return null
+  return (layout.sections[row]?.cells ?? []).map((cell, index) => {
+    const box = boxes.find((entry) => entry.sectionIndex === row && entry.cellIndex === index)
+    return { from: box?.x ?? 0, to: (box?.x ?? 0) + (box?.width ?? 0), size: cell.sizeMm }
+  })
+}
+
+/** Heights up the right side: the rows, or the first stacked column. */
+function sideRun(layout: OpeningLayout, boxes: ReturnType<typeof cellBoxes>): SizeRun[] | null {
+  if (layout.split === 'rows') {
+    if (layout.sections.length < 2) return null
+    return layout.sections.map((section, index) => {
+      const box = boxes.find((entry) => entry.sectionIndex === index)
+      return { from: box?.y ?? 0, to: (box?.y ?? 0) + (box?.height ?? 0), size: section.sizeMm }
+    })
+  }
+  const column = layout.sections.findIndex((section) => section.cells.length > 1)
+  if (column < 0) return null
+  return (layout.sections[column]?.cells ?? []).map((cell, index) => {
+    const box = boxes.find((entry) => entry.sectionIndex === column && entry.cellIndex === index)
+    return { from: box?.y ?? 0, to: (box?.y ?? 0) + (box?.height ?? 0), size: cell.sizeMm }
+  })
 }

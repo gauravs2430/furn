@@ -1,8 +1,9 @@
 import type { Catalogue } from './catalogue.ts'
 import { currentCatalogue, findProduct } from './catalogue.ts'
-import type { Panel, PanelKind, Quote, QuoteItem } from './models.ts'
+import type { OpeningLayout, Panel, Quote, QuoteItem } from './models.ts'
 import { isDrawingFamily } from './models.ts'
-import { findPreset, matchPreset, technicalDefaults } from '../data/technicalPresets.ts'
+import { findPreset, matchPreset, presetLayout, technicalDefaults } from '../data/technicalPresets.ts'
+import { cloneLayout, flatPanels, layoutKinds, layoutOf, resizeLayout, rowLayout } from './layout.ts'
 import { panelKindLabels } from '../data/productCatalog.ts'
 import { pricingDefaults } from '../data/pricingDefaults.ts'
 import { createId } from '../utils/ids.ts'
@@ -19,31 +20,45 @@ export function equalPanelWidths(total: number, count: number): number[] {
   return widths
 }
 
-export function panelsForPreset(presetId: string, totalWidth: number, explicit?: number[]): Panel[] {
+/** A preset's layout scaled to the given overall size, with fresh ids. */
+export function layoutForPreset(presetId: string, widthMm: number, heightMm: number): OpeningLayout {
   const preset = findPreset(presetId)
-  const kinds: PanelKind[] = preset?.panels ?? ['fixed']
-  const widths =
-    explicit && explicit.length === kinds.length
-      ? explicit.map((width) => Math.round(width))
-      : equalPanelWidths(totalWidth, kinds.length)
-  return kinds.map((kind, index) => ({
-    id: createId(),
-    widthMm: widths[index] ?? 0,
-    kind,
-  }))
+  const layout = preset ? presetLayout(preset) : rowLayout(['fixed'], [widthMm], heightMm)
+  return resizeLayout(cloneLayout(layout), widthMm, heightMm)
+}
+
+/**
+ * Sets the layout and keeps everything that depends on it in step: the flat
+ * panel list (pricing) and the technical options that follow the layout.
+ */
+export function withLayout(item: QuoteItem, layout: OpeningLayout): QuoteItem {
+  const family = isDrawingFamily(item.productType) ? item.productType : 'window'
+  const kinds = layoutKinds(layout)
+  const defaults = technicalDefaults(family, item.materialId, item.glazingId, kinds)
+  return {
+    ...item,
+    layout,
+    panels: flatPanels(layout, item.widthMm, item.heightMm),
+    technical: {
+      ...item.technical,
+      mullion: kinds.length > 1 ? defaults.mullion : 'None',
+      sashType: defaults.sashType,
+      locking: defaults.locking,
+      handle: defaults.handle,
+      hinge: defaults.hinge,
+      glazingMethod: defaults.glazingMethod,
+      glassType: defaults.glassType === 'None' ? defaults.glassType : item.technical.glassType || defaults.glassType,
+      gasFill: defaults.gasFill === 'None' ? defaults.gasFill : item.technical.gasFill || defaults.gasFill,
+    },
+  }
 }
 
 export function createQuoteItem(productId = 'window', catalogue: Catalogue = currentCatalogue()): QuoteItem {
   const product = findProduct(productId, catalogue)
   const family = product.family
   const drawing = isDrawingFamily(family) ? family : null
-  const preset = drawing && product.defaultPreset ? findPreset(product.defaultPreset) : undefined
-  const useSample =
-    preset?.sampleWidths &&
-    product.defaultWidth === preset.sampleWidths.reduce((sum, width) => sum + width, 0)
-  const panels = drawing
-    ? panelsForPreset(product.defaultPreset, product.defaultWidth, useSample ? preset.sampleWidths : undefined)
-    : []
+  const layout = drawing ? layoutForPreset(product.defaultPreset, product.defaultWidth, product.defaultHeight) : undefined
+  const panels = layout ? flatPanels(layout, product.defaultWidth, product.defaultHeight) : []
   return {
     id: createId(),
     location: '',
@@ -57,7 +72,8 @@ export function createQuoteItem(productId = 'window', catalogue: Catalogue = cur
     internalColourId: 'white',
     glazingId: 'double',
     panels,
-    technical: technicalDefaults(drawing ?? 'window', 'upvc', 'double', panels.map((panel) => panel.kind)),
+    ...(layout ? { layout } : {}),
+    technical: technicalDefaults(drawing ?? 'window', 'upvc', 'double', layout ? layoutKinds(layout) : []),
     notes: '',
   }
 }
@@ -74,12 +90,7 @@ export function applyProductType(item: QuoteItem, productId: string): QuoteItem 
     externalColourId: item.externalColourId,
     internalColourId: item.internalColourId,
     materialId: item.materialId,
-    technical: technicalDefaults(
-      family,
-      item.materialId,
-      next.glazingId,
-      next.panels.map((panel) => panel.kind),
-    ),
+    technical: technicalDefaults(family, item.materialId, next.glazingId, next.layout ? layoutKinds(next.layout) : []),
   }
 }
 
@@ -110,11 +121,14 @@ export function createQuote(jobNo: string, taxPercent = pricingDefaults.taxPerce
   }
 }
 
-export function describeConfiguration(panels: Panel[]): string {
-  const preset = matchPreset(panels.map((panel) => panel.kind))
+/** The layout's name, or its cells in reading order when it is not a named layout. */
+export function describeConfiguration(item: Pick<QuoteItem, 'layout' | 'panels' | 'heightMm' | 'productType'>): string {
+  const layout = layoutOf(item)
+  const preset = matchPreset(layout, isDrawingFamily(item.productType) ? item.productType : 'window')
   if (preset) return preset.label
-  if (panels.length === 0) return 'Custom'
-  return panels.map((panel) => panelKindLabels[panel.kind]).join(' · ')
+  const kinds = layoutKinds(layout)
+  if (kinds.length === 0) return 'Custom'
+  return kinds.map((kind) => panelKindLabels[kind]).join(' · ')
 }
 
 export function panelWidthTotal(panels: Panel[]): number {
