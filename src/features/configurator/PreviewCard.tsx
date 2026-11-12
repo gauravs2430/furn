@@ -96,7 +96,7 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
         ) : null}
       </div>
       <div className="parts-intro">
-        <p>How price is built up ?</p>
+        <p>How the price is built up?</p>
         <Button variant="secondary" aria-expanded={partsOpen} onClick={() => setPartsOpen((open) => !open)}>
           {partsOpen ? 'Hide internal parts' : 'See internal parts'}
         </Button>
