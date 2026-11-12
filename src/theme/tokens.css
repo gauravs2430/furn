@@ -19,9 +19,9 @@
   --sidebar-line: rgba(255, 255, 255, 0.08);
 
   /* ── Text ── */
-  --ink: #123f40;
-  --ink-soft: #315c5d;
-  --muted: #668080;
+  --ink: #1f2a2e;
+  --ink-soft: #3c484d;
+  --muted: #6b777c;
 
   /* ── Borders ── */
   --line: #dbe7e5;
@@ -61,7 +61,7 @@
 
   /* ── Typography ── */
   --font: 'Inter', system-ui, -apple-system, sans-serif;
-  --display: 'Roboto Slab', Georgia, serif;
+  --display: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* ── Drawing background ── */
   --paper: #f6f4ef;
