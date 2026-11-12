@@ -581,14 +581,13 @@ h3 {
 }
 
 /* ── Sidebar navigation ── */
+/* Sections are separated by space rather than divider lines. */
 .side-group+.side-group {
   margin-top: 2px;
 }
 
 .shell-nav>.side-group+.side-group {
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid var(--sidebar-line);
+  margin-top: 14px;
 }
 
 .side-group-head {
@@ -603,13 +602,13 @@ h3 {
 .side-link,
 .shell-account,
 .shell-logout {
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .side-group-icon {
   flex: none;
-  opacity: 0.65;
-  transition: opacity 0.18s ease;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-group-link:hover .side-group-icon,
@@ -618,18 +617,23 @@ h3 {
   opacity: 1;
 }
 
+.side-group-link:hover .side-group-icon,
+.side-group-toggle:hover .side-group-icon {
+  transform: scale(1.08);
+}
+
 .side-group-link,
 .side-group-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 36px;
+  gap: 10px;
+  min-height: 38px;
   border: 0;
-  border-radius: var(--radius-xs);
+  border-radius: 8px;
   background: transparent;
   color: var(--sidebar-text-bright);
-  font-weight: 650;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 13.5px;
   text-align: left;
   text-decoration: none;
 }
@@ -637,13 +641,13 @@ h3 {
 .side-group-link {
   position: relative;
   flex: 1;
-  padding: 0 8px 0 10px;
+  padding: 0 10px;
 }
 
 .side-group-toggle {
   justify-content: space-between;
   width: 100%;
-  padding: 0 8px 0 10px;
+  padding: 0 6px 0 10px;
 }
 
 .side-group-toggle>span {
@@ -657,9 +661,10 @@ h3 {
   background: var(--sidebar-hover);
 }
 
+/* Active page: a soft green-tinted pill with a short accent bar. */
 .side-group-link.is-active,
 .side-link.is-active {
-  background: var(--sidebar-active);
+  background: rgba(32, 139, 88, 0.16);
   color: #ffffff;
 }
 
@@ -668,30 +673,40 @@ h3 {
   content: '';
   position: absolute;
   left: 0;
-  top: 7px;
-  bottom: 7px;
+  top: 50%;
   width: 3px;
-  border-radius: 0 2px 2px 0;
+  height: 16px;
+  border-radius: 0 3px 3px 0;
   background: var(--accent);
+  transform: translateY(-50%);
+  animation: side-bar-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-chevron {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   flex: none;
   border: 0;
-  border-radius: var(--radius-xs);
+  border-radius: 8px;
   background: transparent;
-  color: var(--sidebar-text);
+  color: rgba(203, 213, 225, 0.55);
+}
+
+.side-chevron:hover {
+  color: var(--sidebar-text-bright);
 }
 
 .side-chevron svg,
 .side-group-toggle svg:last-child {
   transform: rotate(-90deg);
-  transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-group-toggle svg:last-child {
+  color: rgba(203, 213, 225, 0.55);
 }
 
 .side-group.is-open>.side-group-head .side-chevron svg,
@@ -705,36 +720,44 @@ h3 {
   overflow: hidden;
   visibility: hidden;
   opacity: 0;
-  transform: translateY(-5px);
-  transform-origin: top;
-  will-change: grid-template-rows, opacity, transform;
+  will-change: grid-template-rows, opacity;
   transition:
-    grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.18s ease,
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    visibility 0s 0.28s;
+    grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease,
+    visibility 0s 0.3s;
 }
 
 .side-group.is-open>.side-panel {
   grid-template-rows: 1fr;
   visibility: visible;
   opacity: 1;
-  transform: translateY(0);
   transition:
-    grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.18s ease,
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease,
     visibility 0s;
 }
 
+/* Nested items hang off a thin guide line under their section icon. */
 .side-panel-inner {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-height: 0;
   overflow: hidden;
-  padding: 2px 0 4px 8px;
+  margin: 2px 0 4px 18px;
+  padding-left: 8px;
+  border-left: 1px solid var(--sidebar-line);
 }
+
+/* Items slide in one after another when a section opens. */
+.side-group.is-open>.side-panel>.side-panel-inner>* {
+  animation: side-item-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.side-group.is-open>.side-panel>.side-panel-inner>*:nth-child(2) { animation-delay: 0.03s; }
+.side-group.is-open>.side-panel>.side-panel-inner>*:nth-child(3) { animation-delay: 0.06s; }
+.side-group.is-open>.side-panel>.side-panel-inner>*:nth-child(4) { animation-delay: 0.09s; }
+.side-group.is-open>.side-panel>.side-panel-inner>*:nth-child(n+5) { animation-delay: 0.12s; }
 
 .side-link {
   display: flex;
@@ -742,32 +765,39 @@ h3 {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  min-height: 32px;
-  padding: 0 8px 0 12px;
+  min-height: 34px;
+  padding: 0 10px;
   border: 0;
-  border-radius: var(--radius-xs);
+  border-radius: 8px;
   background: transparent;
   color: var(--sidebar-text);
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 500;
+  font-size: 13.5px;
   text-align: left;
   text-decoration: none;
   position: relative;
 }
 
-.side-link svg {
-  flex: none;
-  color: rgba(148, 163, 184, 0.4);
-  transition: color 0.18s ease, transform 0.18s ease;
+.side-link>span {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.side-link:hover svg {
-  color: rgba(148, 163, 184, 0.7);
-  transform: translateX(2px);
+.side-link:hover {
+  color: var(--sidebar-text-bright);
 }
 
-.side-link.is-active svg {
-  color: rgba(255, 255, 255, 0.7);
+.side-link:hover>span {
+  transform: translateX(3px);
+}
+
+/* The per-link arrows were clutter; the guide line already shows nesting. */
+.side-link:not(.side-link-action)>svg {
+  display: none;
+}
+
+/* Active marker sits on the guide line. */
+.side-panel-inner .side-link.is-active::before {
+  left: -9px;
 }
 
 .side-link:disabled {
@@ -775,30 +805,57 @@ h3 {
   opacity: 0.5;
 }
 
-/* New quote action link */
+/* New quote: a light green pill so the main action stands out. */
 .side-link-action {
-  color: var(--accent);
-  font-weight: 650;
+  margin: 2px 0 4px;
+  background: rgba(32, 139, 88, 0.14);
+  color: #4cc98a;
+  font-weight: 600;
 }
 
 .side-link-action .side-link-icon {
-  color: var(--accent);
-  opacity: 0.9;
+  color: currentColor;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-link-action:hover {
-  background: var(--sidebar-active);
+  background: var(--accent);
   color: #ffffff;
 }
 
+.side-link-action:hover>span {
+  transform: none;
+}
+
 .side-link-action:hover .side-link-icon {
-  opacity: 1;
-  color: #ffffff;
+  transform: rotate(90deg);
 }
 
 .shell-side :focus-visible {
   outline-offset: -2px;
   outline-color: var(--accent);
+}
+
+@keyframes side-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes side-bar-in {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 16px;
+  }
 }
 
 /* ── Home page ── */
