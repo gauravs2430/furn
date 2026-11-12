@@ -173,7 +173,9 @@ export function ConfiguratorPage() {
           }}
         />
         <NewQuoteCustomerDialog
+          key={customerDialogOpen ? 'customer-open' : 'customer-closed'}
           open={customerDialogOpen}
+          customer={activeQuote.customer}
           onOpenChange={setCustomerDialogOpen}
           onSave={async (customer) => {
             const saved = await updateQuote(activeQuote.id, { customer })
@@ -243,14 +245,23 @@ export function ConfiguratorPage() {
     <div className="page quote-page">
       <div className="quote-bar">
         <div className="quote-identity">
+          <nav className="quote-nav" aria-label="Quote navigation">
           <Button
             variant="ghost"
             size="sm"
-            icon={<ArrowLeft size={16} />}
-            onClick={() => navigate(`/orders?status=${activeQuote.status}`)}
-          >
+            className="btn-icon"
+            icon={<ArrowLeft size={18} />}
+            aria-label="Back to the quote summary"
+            title="Back to the quote summary"
+            onClick={() => {
+              setProductEditorOpen(false)
+              window.scrollTo({ top: 0 })
+            }}
+          />
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/orders?status=${activeQuote.status}`)}>
             {activeQuote.status === 'draft' ? 'Drafts' : activeQuote.status === 'booked' ? 'Bookings' : 'Quotation'}
           </Button>
+          </nav>
           <div>
             <p className="eyebrow">Job {activeQuote.jobNo}</p>
             <h1>{activeQuote.customer.name.trim() || 'New quote'}</h1>

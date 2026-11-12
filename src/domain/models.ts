@@ -112,12 +112,27 @@ export interface QuoteItem {
   addedParts?: AddedPart[]
 }
 
+/** The fields of the customer form, kept so the form reopens exactly as it was filled in. */
+export interface CustomerDetails {
+  firstName: string
+  lastName: string
+  addressLine1: string
+  addressLine2: string
+  addressLine3: string
+  town: string
+  county: string
+  country: string
+  postcode: string
+}
+
 export interface Customer {
   name: string
   phone: string
   email: string
   address: string
   salesperson: string
+  /** Missing on customers saved before the form kept its fields. */
+  details?: CustomerDetails
 }
 
 export interface Quote {

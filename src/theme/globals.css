@@ -2085,6 +2085,21 @@ select.input {
   font-size: 13px;
 }
 
+/* Back arrow and list button sit together on the left of the quote bar. */
+.quote-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Square button with just an icon, e.g. the back arrow. */
+.btn.btn-icon {
+  width: 34px;
+  min-width: 34px;
+  padding: 0;
+}
+
 .btn-secondary,
 .btn-ghost {
   background: var(--surface);
@@ -4856,4 +4871,28 @@ select.input {
     border-radius: 0;
     box-shadow: none;
   }
+}
+
+/* Inline "save changes?" check inside a form. */
+.confirm-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-soft);
+  animation: rise-in 0.2s ease;
+}
+
+.confirm-strip p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.confirm-strip-actions {
+  display: flex;
+  gap: 8px;
 }
