@@ -19,6 +19,8 @@ interface OpeningDrawingProps {
   productType?: ProductTypeId
   className?: string
   title?: string
+  /** Called with a cell id when a panel is clicked. Makes the panels clickable. */
+  onCellClick?: (cellId: string) => void
 }
 
 export function OpeningDrawing({
@@ -32,6 +34,7 @@ export function OpeningDrawing({
   productType = 'window',
   className,
   title,
+  onCellClick,
 }: OpeningDrawingProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
@@ -103,6 +106,7 @@ export function OpeningDrawing({
               frameColor={frameColor}
               gradientId={gradientId}
               patternId={finish === 'oak' ? oakId : undefined}
+              onSelect={onCellClick}
             />
           ))}
           {model.gap ? (

@@ -9,6 +9,7 @@ interface PanelProps {
   frameColor: string
   gradientId: string
   patternId?: string
+  onSelect?: (cellId: string) => void
 }
 
 /** Handle in the frame colour with a brass key cylinder; lies flat on top-hung sashes. */
@@ -26,12 +27,30 @@ function Handle({ x, y, size, color, flat }: { x: number; y: number; size: numbe
   )
 }
 
-export function Panel({ panel, frameColor, gradientId, patternId }: PanelProps) {
+export function Panel({ panel, frameColor, gradientId, patternId, onSelect }: PanelProps) {
   const indicatorRect = panel.glass ?? panel.solid ?? panel.cell
   const sashInner = panel.glass ?? panel.solid
   const handleSize = Math.max(7, Math.min(34, Math.min(panel.cell.width, panel.cell.height) * 0.2))
+  const select = onSelect ? () => onSelect(panel.id) : undefined
   return (
-    <g>
+    <g
+      className={onSelect ? 'drawing-cell is-clickable' : 'drawing-cell'}
+      onClick={select}
+      onKeyDown={
+        select
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                select()
+              }
+            }
+          : undefined
+      }
+      role={select ? 'button' : undefined}
+      tabIndex={select ? 0 : undefined}
+      aria-label={select ? 'Edit the size of this panel' : undefined}
+    >
+      {select ? <rect x={panel.module.x} y={panel.module.y} width={panel.module.width} height={panel.module.height} fill="transparent" /> : null}
       {panel.sash && sashInner ? (
         <Profile outer={panel.sash} inner={sashInner} color={frameColor} patternId={patternId} />
       ) : null}

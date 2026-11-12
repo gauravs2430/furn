@@ -15,6 +15,7 @@ import { ConfirmDialog, Modal } from '../../components/ui/Dialog.tsx'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
 import { matchesQuery } from '../admin/filters.ts'
 import { layoutOf } from '../../domain/layout.ts'
+import { revealPanel } from './revealPanel.ts'
 
 interface PreviewCardProps {
   item: QuoteItem
@@ -72,6 +73,7 @@ export function PreviewCard({ item, pricing, issues, editing, locked = false, on
             showCill={item.technical.cill !== 'None'}
             productType={drawing}
             title={`${product.name}, ${item.widthMm} by ${item.heightMm} millimetres`}
+            onCellClick={locked ? undefined : revealPanel}
           />
         </div>
       ) : null}

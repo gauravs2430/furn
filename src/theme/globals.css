@@ -2169,6 +2169,8 @@ select.input {
 
 .config-forms {
   display: grid;
+  /* One column that never grows past its track, so long names wrap or trim instead of widening the forms. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   min-width: 0;
   margin: 0;
@@ -2430,6 +2432,50 @@ select.input {
   align-items: end;
 }
 
+/* Clicking a panel in the drawing jumps to its settings. */
+.drawing-cell.is-clickable {
+  cursor: pointer;
+  outline: none;
+}
+
+.drawing-cell.is-clickable:hover .glass-face,
+.drawing-cell.is-clickable:focus-visible .glass-face {
+  filter: brightness(0.94) saturate(1.2);
+}
+
+/* Room above the first row so its highlight never touches the hint text. */
+.panel-editor>.panel-list {
+  margin-top: 14px;
+}
+
+.panel-editor>.check-row+.panel-list {
+  margin-top: 8px;
+}
+
+/* Drawn as a layer behind the row with even space all round, so nothing inside moves or touches the edge. */
+.layout-section .panel-row {
+  position: relative;
+  isolation: isolate;
+}
+
+.layout-section .panel-row::before {
+  content: '';
+  position: absolute;
+  inset: -6px -10px;
+  z-index: -1;
+  border: 1.5px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.layout-section .panel-row.is-flash::before {
+  opacity: 1;
+  transition-duration: 0.15s;
+}
+
 /* Stacked parts (top lights) under a column or row. */
 .layout-section {
   display: grid;
@@ -2451,7 +2497,12 @@ select.input {
 }
 
 .panel-row.panel-cell-row {
-  grid-template-columns: minmax(0, 1fr) minmax(140px, 1fr) auto;
+  grid-template-columns: minmax(84px, 1fr) minmax(140px, 1.5fr) auto;
+}
+
+/* Width, opening type and Remove share the narrow form column; give the type the most room. */
+.layout-section>.panel-row {
+  grid-template-columns: 28px minmax(84px, 1fr) minmax(140px, 1.5fr) auto;
 }
 
 .panel-row-note {
@@ -3674,7 +3725,8 @@ select.input {
     margin-left: 0;
   }
 
-  .panel-row.panel-cell-row {
+  .panel-row.panel-cell-row,
+  .layout-section>.panel-row {
     grid-template-columns: 1fr;
   }
 

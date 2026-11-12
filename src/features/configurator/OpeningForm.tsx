@@ -74,7 +74,6 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
   // Overall width and height changes scale from the proportions the layout had
   // before the person started typing, so in-between values never distort it.
   const base = useRef({ key: sectionIds(layout), layout })
-  if (base.current.key !== sectionIds(layout)) base.current = { key: sectionIds(layout), layout }
 
   function commit(next: OpeningLayout, target: QuoteItem = item) {
     base.current = { key: sectionIds(next), layout: next }
@@ -87,6 +86,8 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
       onChange(next)
       return
     }
+    // A different layout (another opening loaded, or edited elsewhere) becomes the new base.
+    if (base.current.key !== sectionIds(layout)) base.current = { key: sectionIds(layout), layout }
     const resized = resizeLayout(base.current.layout, next.widthMm, next.heightMm)
     onChange(withLayout(next, resized))
   }
@@ -304,6 +305,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
             <div className="panel-editor-head">
               <p className="field-hint">
                 {label.sizes} must add up to the overall {label.main}. Changing a {label.cellSize} adjusts the part next to it.
+                Tip: click a panel in the drawing to jump to it.
               </p>
               <Button size="sm" variant="secondary" onClick={equalise}>
                 Equalise
@@ -323,10 +325,10 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
                 const onlyCell = section.cells[0]
                 return (
                   <li key={section.id} className="layout-section">
-                    <div className="panel-row">
+                    <div className="panel-row" data-cell-id={single ? onlyCell?.id : undefined}>
                       <span className="panel-index">{sectionIndex + 1}</span>
                       <NumberField
-                        label={`${label.section} ${sectionIndex + 1} ${label.main}`}
+                        label={label.main === 'width' ? 'Width' : 'Height'}
                         suffix="mm"
                         value={section.sizeMm}
                         min={1}
@@ -356,7 +358,7 @@ export function OpeningForm({ item, onChange }: OpeningFormProps) {
                     {!single ? (
                       <ul className="panel-cells">
                         {section.cells.map((cell, cellIndex) => (
-                          <li key={cell.id} className="panel-row panel-cell-row">
+                          <li key={cell.id} className="panel-row panel-cell-row" data-cell-id={cell.id}>
                             <NumberField
                               label={`${cellName(cellIndex, section.cells.length)} ${label.cellSize}`}
                               suffix="mm"
