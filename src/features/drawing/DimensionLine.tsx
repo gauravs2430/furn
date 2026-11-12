@@ -51,23 +51,23 @@ export function DimensionLine({ spec }: { spec: DimensionSpec }) {
           y1={line[1]}
           x2={line[2]}
           y2={line[3]}
-          stroke="#8d7040"
-          strokeWidth={0.7}
+          stroke="#9aa3a7"
+          strokeWidth={0.6}
         />
       ))}
-      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#9a6f12" strokeWidth={1.15} />
-      <path d={arrowHead(x1, y1, x1 - x2, y1 - y2)} fill="none" stroke="#9a6f12" strokeWidth={1.15} strokeLinejoin="miter" />
-      <path d={arrowHead(x2, y2, x2 - x1, y2 - y1)} fill="none" stroke="#9a6f12" strokeWidth={1.15} strokeLinejoin="miter" />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#7d878c" strokeWidth={0.9} />
+      <path d={arrowHead(x1, y1, x1 - x2, y1 - y2)} fill="none" stroke="#7d878c" strokeWidth={0.9} strokeLinejoin="miter" />
+      <path d={arrowHead(x2, y2, x2 - x1, y2 - y1)} fill="none" stroke="#7d878c" strokeWidth={0.9} strokeLinejoin="miter" />
       <text
         x={textX}
         y={textY}
         fill="#1c2830"
-        stroke="#f6f4ef"
+        stroke="#f5f5f3"
         strokeWidth={3.5}
         paintOrder="stroke"
-        fontFamily="Barlow, sans-serif"
+        fontFamily="Inter, system-ui, sans-serif"
         fontSize={12}
-        fontWeight={600}
+        fontWeight={500}
         textAnchor="middle"
         dominantBaseline="middle"
         transform={orientation === 'v' ? `rotate(-90 ${textX} ${textY})` : undefined}

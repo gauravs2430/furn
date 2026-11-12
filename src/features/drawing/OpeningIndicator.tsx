@@ -9,8 +9,8 @@ interface OpeningIndicatorProps {
 export function OpeningIndicator({ kind, rect }: OpeningIndicatorProps) {
   const { x, y, width: w, height: h } = rect
   if (w < 8 || h < 8) return null
-  const stroke = '#243038'
-  const shared = { fill: 'none', stroke, strokeWidth: 1.15, strokeLinejoin: 'miter' as const }
+  const stroke = '#5b666c'
+  const shared = { fill: 'none', stroke, strokeWidth: 0.9, strokeLinejoin: 'miter' as const }
 
   // Viewed from outside, the point of the V marks the hinge side (UK convention).
   if (kind === 'casement-left' || kind === 'tilt-left') {

@@ -45,6 +45,8 @@ export interface DrawModel {
   viewWidth: number
   viewHeight: number
   scale: number
+  /** Drawn width of the outer frame, in pixels. */
+  frameWidth: number
   outer: Rect
   cill: Rect | null
   panels: DrawnPanel[]
@@ -167,9 +169,9 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
   }
 
   const mini = !input.showDimensions
-  const framePx = clamp(70 * scale, mini ? 3 : 7, mini ? 9 : 20)
-  const mullionPx = clamp(48 * scale, mini ? 2.5 : 5, mini ? 7 : 13)
-  const sashPx = clamp(42 * scale, mini ? 2 : 4.5, mini ? 6 : 11)
+  const framePx = clamp(70 * scale, mini ? 3 : 7, mini ? 9 : 26)
+  const mullionPx = clamp(56 * scale, mini ? 2.5 : 5, mini ? 7 : 18)
+  const sashPx = clamp(66 * scale, mini ? 2 : 5, mini ? 6 : 24)
   const cillPx = input.showCill ? clamp(30 * scale, mini ? 3 : 5, mini ? 7 : 12) : 0
   const horn = input.showCill ? clamp(50 * scale, 4, 14) : 0
 
@@ -313,6 +315,7 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
     mullions,
     gap: null,
     dimensions,
+    frameWidth: framePx,
   }
 }
 
