@@ -1390,6 +1390,7 @@ select.input {
 
 /* ── Tables ── */
 .table-scroll {
+  position: relative;
   overflow-x: auto;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -1671,9 +1672,14 @@ select.input {
 
 .catalog-block-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 16px;
+}
+
+.catalog-block-head > div {
+  flex: 1 1 260px;
 }
 
 .catalog-block-head .subhead {
@@ -2674,6 +2680,7 @@ select.input {
 }
 
 .parts-scroll {
+  position: relative;
   overflow-x: auto;
 }
 
@@ -3066,7 +3073,6 @@ select.input {
 
   .config-layout,
   .order-layout,
-  .stat-row,
   .home-desk,
   .account-layout,
   .split-desk {
@@ -3081,10 +3087,6 @@ select.input {
     position: static;
   }
 
-  .quote-summary-grid,
-  .quote-notes-grid {
-    grid-template-columns: 1fr;
-  }
 
   .preview-sheet {
     height: 420px;
@@ -3094,6 +3096,15 @@ select.input {
   .page-head {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  /* In a column the 260px basis would become a height and leave a gap. */
+  .quote-identity {
+    flex-basis: auto;
+  }
+
+  .quote-actions {
+    justify-content: flex-start;
   }
 
   .bottom-bar {
@@ -3189,6 +3200,13 @@ select.input {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+@media (max-width: 1020px) {
+  .quote-summary-grid,
+  .quote-notes-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quote-summary-card,
@@ -3509,6 +3527,14 @@ select.input {
 
   .order-money {
     text-align: left;
+  }
+
+  .order-actions {
+    justify-content: flex-start;
+  }
+
+  .stat-row {
+    grid-template-columns: 1fr;
   }
 
   .bottom-bar {
@@ -4481,5 +4507,27 @@ select.input {
 
   .pp-qty-label {
     display: none;
+  }
+}
+
+/* ── Small phones: give the header and quote preview room ── */
+@media (max-width: 480px) {
+  .shell-logo {
+    width: 104px;
+  }
+
+  .shell-breadcrumbs {
+    margin-left: 8px;
+  }
+
+  .config-layout .preview-sheet {
+    height: 300px;
+  }
+}
+
+/* ── Laptops/landscape tablets: the quote form column is narrow beside the preview ── */
+@media (min-width: 1021px) and (max-width: 1180px) {
+  .config-forms .form-grid {
+    grid-template-columns: 1fr;
   }
 }

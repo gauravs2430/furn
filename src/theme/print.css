@@ -1,6 +1,8 @@
 .print-stage {
+  position: relative;
   min-height: 100vh;
   padding: 18px 12px 40px;
+  overflow-x: auto;
   background: #d5dde1;
 }
 
@@ -8,6 +10,7 @@
   width: min(210mm, 100%);
   margin: 0 auto 12px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -212,6 +215,7 @@
   .print-stage {
     background: white;
     padding: 0;
+    overflow: visible;
   }
 
   .print-sheet {
