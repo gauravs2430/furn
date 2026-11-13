@@ -1,0 +1,1005 @@
+[
+ {
+  "page": 1,
+  "name": "single leaf",
+  "w": 1200,
+  "h": 2100,
+  "secs": [
+   [
+    1200,
+    [
+     [
+      "door-left",
+      2100
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 2 950 [ - ]",
+   "Vert Bead 28mm Bead 2 1850 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1205 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2105 \\ - /",
+   "Hor Sash Door Sash Z 2 1125 \\ - / 28 x 44.5 U Steel Reinforcement 910",
+   "Vert Sash Door Sash Z 2 2025 \\ - / 28 x 44.5 U Steel Reinforcement 1810"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 01 12.56",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1",
+   "Gasket 02 5.56",
+   "Glazing Bridge Packer 8"
+  ],
+  "glass": [
+   [
+    940,
+    1840
+   ]
+  ]
+ },
+ {
+  "page": 2,
+  "name": "single leaf, hinged right",
+  "w": 1000,
+  "h": 1900,
+  "secs": [
+   [
+    1000,
+    [
+     [
+      "door-right",
+      1900
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 2 750 [ - ]",
+   "Vert Bead 28mm Bead 2 1650 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1005 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 1905 \\ - /",
+   "Hor Sash Door Sash Z 2 925 \\ - / 28 x 44.5 U Steel Reinforcement 710",
+   "Vert Sash Door Sash Z 2 1825 \\ - / 28 x 44.5 U Steel Reinforcement 1610"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 01 10.96",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1",
+   "Gasket 02 4.76",
+   "Glazing Bridge Packer 8"
+  ],
+  "glass": [
+   [
+    740,
+    1640
+   ]
+  ]
+ },
+ {
+  "page": 3,
+  "name": "top light over the leaf",
+  "w": 1000,
+  "h": 2000,
+  "secs": [
+   [
+    1000,
+    [
+     [
+      "fixed",
+      350
+     ],
+     [
+      "door-left",
+      1650
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 2 904 [ - ]",
+   "Vert Bead 28mm Bead 2 283 [ - ]",
+   "Hor Bead 28mm Bead 2 750 [ - ]",
+   "Vert Bead 28mm Bead 2 1429 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1005 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2005 \\ - /",
+   "Hor Frame T Transom/Mullion 1 1025 < - >",
+   "Hor Sash Door Sash Z 2 925 \\ - / 28 x 44.5 U Steel Reinforcement 710",
+   "Vert Sash Door Sash Z 2 1604 \\ - / 28 x 44.5 U Steel Reinforcement 1389"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 6.652",
+   "Glazing Bridge Packer 13",
+   "Gasket 01 10.076",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    894,
+    273
+   ],
+   [
+    740,
+    1419
+   ]
+  ]
+ },
+ {
+  "page": 4,
+  "name": "top light, hinged right",
+  "w": 900,
+  "h": 1900,
+  "secs": [
+   [
+    900,
+    [
+     [
+      "fixed",
+      300
+     ],
+     [
+      "door-right",
+      1600
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 2 804 [ - ]",
+   "Vert Bead 28mm Bead 2 233 [ - ]",
+   "Hor Bead 28mm Bead 2 650 [ - ]",
+   "Vert Bead 28mm Bead 2 1379 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 905 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 1905 \\ - /",
+   "Hor Frame T Transom/Mullion 1 925 < - >",
+   "Hor Sash Door Sash Z 2 825 \\ - / 28 x 44.5 U Steel Reinforcement 610",
+   "Vert Sash Door Sash Z 2 1554 \\ - / 28 x 44.5 U Steel Reinforcement 1339"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 6.052",
+   "Glazing Bridge Packer 13",
+   "Gasket 01 9.476",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    794,
+    223
+   ],
+   [
+    640,
+    1369
+   ]
+  ]
+ },
+ {
+  "page": 5,
+  "name": "side light, hinged away from it",
+  "w": 1400,
+  "h": 2000,
+  "secs": [
+   [
+    1000,
+    [
+     [
+      "door-left",
+      2000
+     ]
+    ]
+   ],
+   [
+    400,
+    [
+     [
+      "fixed",
+      2000
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Vert Bead 28mm Bead 2 1904 [ - ]",
+   "Hor Bead 28mm Bead 2 333 [ - ]",
+   "Vert Bead 28mm Bead 2 1750 [ - ]",
+   "Hor Bead 28mm Bead 2 779 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1405 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2005 \\ - /",
+   "Hor Frame T Transom/Mullion 1 2025 < - > 26 x 26 U Steel Reinforcement 1864",
+   "Vert Sash Door Sash Z 2 1925 \\ - / 28 x 44.5 U Steel Reinforcement 1710",
+   "Hor Sash Door Sash Z 2 954 \\ - / 28 x 44.5 U Steel Reinforcement 739"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 9.452",
+   "Glazing Bridge Packer 13",
+   "Gasket 01 11.476",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    769,
+    1740
+   ],
+   [
+    323,
+    1894
+   ]
+  ]
+ },
+ {
+  "page": 6,
+  "name": "side light on the left, hinged away",
+  "w": 1400,
+  "h": 2100,
+  "secs": [
+   [
+    400,
+    [
+     [
+      "fixed",
+      2100
+     ]
+    ]
+   ],
+   [
+    1000,
+    [
+     [
+      "door-right",
+      2100
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Vert Bead 28mm Bead 2 2004 [ - ]",
+   "Hor Bead 28mm Bead 2 333 [ - ]",
+   "Vert Bead 28mm Bead 2 1850 [ - ]",
+   "Hor Bead 28mm Bead 2 779 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1405 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2105 \\ - /",
+   "Hor Frame T Transom/Mullion 1 2125 < - > 26 x 26 U Steel Reinforcement 1964",
+   "Vert Sash Door Sash Z 2 2025 \\ - / 28 x 44.5 U Steel Reinforcement 1810",
+   "Hor Sash Door Sash Z 2 954 \\ - / 28 x 44.5 U Steel Reinforcement 739"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 9.852",
+   "Glazing Bridge Packer 13",
+   "Gasket 01 11.876",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    323,
+    1994
+   ],
+   [
+    769,
+    1840
+   ]
+  ]
+ },
+ {
+  "page": 7,
+  "name": "side light, hinged beside it",
+  "w": 1400,
+  "h": 2000,
+  "secs": [
+   [
+    950,
+    [
+     [
+      "door-right",
+      2000
+     ]
+    ]
+   ],
+   [
+    450,
+    [
+     [
+      "fixed",
+      2000
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Vert Bead 28mm Bead 2 1904 [ - ]",
+   "Hor Bead 28mm Bead 2 383 [ - ]",
+   "Vert Bead 28mm Bead 2 1750 [ - ]",
+   "Hor Bead 28mm Bead 2 729 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1405 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2005 \\ - /",
+   "Hor Frame T Transom/Mullion 1 2025 < - > 26 x 26 U Steel Reinforcement 1864",
+   "Vert Sash Door Sash Z 2 1925 \\ - / 28 x 44.5 U Steel Reinforcement 1710",
+   "Hor Sash Door Sash Z 2 904 \\ - / 28 x 44.5 U Steel Reinforcement 689"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 9.452",
+   "Glazing Bridge Packer 13",
+   "Gasket 01 11.276",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    719,
+    1740
+   ],
+   [
+    373,
+    1894
+   ]
+  ]
+ },
+ {
+  "page": 8,
+  "name": "side light on the left, hinged beside it",
+  "w": 1500,
+  "h": 2100,
+  "secs": [
+   [
+    450,
+    [
+     [
+      "fixed",
+      2100
+     ]
+    ]
+   ],
+   [
+    1050,
+    [
+     [
+      "door-left",
+      2100
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Vert Bead 28mm Bead 2 2004 [ - ]",
+   "Hor Bead 28mm Bead 2 383 [ - ]",
+   "Vert Bead 28mm Bead 2 1850 [ - ]",
+   "Hor Bead 28mm Bead 2 829 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1505 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2105 \\ - /",
+   "Hor Frame T Transom/Mullion 1 2125 < - > 26 x 26 U Steel Reinforcement 1964",
+   "Vert Sash Door Sash Z 2 2025 \\ - / 28 x 44.5 U Steel Reinforcement 1810",
+   "Hor Sash Door Sash Z 2 1004 \\ - / 28 x 44.5 U Steel Reinforcement 789"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 10.052",
+   "Glazing Bridge Packer 13",
+   "Gasket 01 12.076",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    373,
+    1994
+   ],
+   [
+    819,
+    1840
+   ]
+  ]
+ },
+ {
+  "page": 9,
+  "name": "side light with top lights",
+  "w": 1400,
+  "h": 2100,
+  "secs": [
+   [
+    1000,
+    [
+     [
+      "fixed",
+      400
+     ],
+     [
+      "door-left",
+      1700
+     ]
+    ]
+   ],
+   [
+    400,
+    [
+     [
+      "fixed",
+      400
+     ],
+     [
+      "fixed",
+      1700
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 2 933 [ - ]",
+   "Vert Bead 28mm Bead 4 333 [ - ]",
+   "Hor Bead 28mm Bead 4 333 [ - ]",
+   "Vert Bead 28mm Bead 2 1633 [ - ]",
+   "Hor Bead 28mm Bead 2 779 [ - ]",
+   "Vert Bead 28mm Bead 2 1479 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1405 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2105 \\ - /",
+   "Hor Frame T Transom/Mullion 1 2125 < - > 26 x 26 U Steel Reinforcement 1964",
+   "Hor Frame T Transom/Mullion 1 1054 < - >",
+   "Hor Frame T Transom/Mullion 1 454 < - >",
+   "Hor Sash Door Sash Z 2 954 \\ - / 28 x 44.5 U Steel Reinforcement 739",
+   "Vert Sash Door Sash Z 2 1654 \\ - / 28 x 44.5 U Steel Reinforcement 1439"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 12.152",
+   "Glazing Bridge Packer 23",
+   "Gasket 01 10.392",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    923,
+    323
+   ],
+   [
+    769,
+    1469
+   ],
+   [
+    323,
+    323
+   ],
+   [
+    323,
+    1623
+   ]
+  ]
+ },
+ {
+  "page": 11,
+  "name": "side light with top lights, flipped",
+  "w": 1400,
+  "h": 1900,
+  "secs": [
+   [
+    350,
+    [
+     [
+      "fixed",
+      350
+     ],
+     [
+      "fixed",
+      1550
+     ]
+    ]
+   ],
+   [
+    1050,
+    [
+     [
+      "fixed",
+      350
+     ],
+     [
+      "door-right",
+      1550
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 4 283 [ - ]",
+   "Vert Bead 28mm Bead 2 1483 [ - ]",
+   "Vert Bead 28mm Bead 4 283 [ - ]",
+   "Hor Bead 28mm Bead 2 983 [ - ]",
+   "Hor Bead 28mm Bead 2 829 [ - ]",
+   "Vert Bead 28mm Bead 2 1329 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1405 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 1905 \\ - /",
+   "Hor Frame T Transom/Mullion 1 1925 < - > 26 x 26 U Steel Reinforcement 1764",
+   "Hor Frame T Transom/Mullion 1 404 < - >",
+   "Hor Frame T Transom/Mullion 1 1104 < - > 26 x 26 U Steel Reinforcement 943",
+   "Hor Sash Door Sash Z 2 1004 \\ - / 28 x 44.5 U Steel Reinforcement 789",
+   "Vert Sash Door Sash Z 2 1504 \\ - / 28 x 44.5 U Steel Reinforcement 1289"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 11.352",
+   "Glazing Bridge Packer 23",
+   "Gasket 01 9.992",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    273,
+    273
+   ],
+   [
+    273,
+    1473
+   ],
+   [
+    973,
+    273
+   ],
+   [
+    819,
+    1319
+   ]
+  ]
+ },
+ {
+  "page": 13,
+  "name": "side light with top lights, hinged beside it",
+  "w": 1400,
+  "h": 2000,
+  "secs": [
+   [
+    1000,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "door-right",
+      1550
+     ]
+    ]
+   ],
+   [
+    400,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "fixed",
+      1550
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 2 933 [ - ]",
+   "Vert Bead 28mm Bead 4 383 [ - ]",
+   "Hor Bead 28mm Bead 4 333 [ - ]",
+   "Vert Bead 28mm Bead 2 1483 [ - ]",
+   "Hor Bead 28mm Bead 2 779 [ - ]",
+   "Vert Bead 28mm Bead 2 1329 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1405 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2005 \\ - /",
+   "Hor Frame T Transom/Mullion 1 2025 < - > 26 x 26 U Steel Reinforcement 1864",
+   "Hor Frame T Transom/Mullion 1 1054 < - >",
+   "Hor Frame T Transom/Mullion 1 454 < - >",
+   "Hor Sash Door Sash Z 2 954 \\ - / 28 x 44.5 U Steel Reinforcement 739",
+   "Vert Sash Door Sash Z 2 1504 \\ - / 28 x 44.5 U Steel Reinforcement 1289"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 11.752",
+   "Glazing Bridge Packer 23",
+   "Gasket 01 9.792",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    923,
+    373
+   ],
+   [
+    769,
+    1319
+   ],
+   [
+    323,
+    373
+   ],
+   [
+    323,
+    1473
+   ]
+  ]
+ },
+ {
+  "page": 15,
+  "name": "side light with top lights, hinged beside it, flipped",
+  "w": 1300,
+  "h": 1900,
+  "secs": [
+   [
+    300,
+    [
+     [
+      "fixed",
+      350
+     ],
+     [
+      "fixed",
+      1550
+     ]
+    ]
+   ],
+   [
+    1000,
+    [
+     [
+      "fixed",
+      350
+     ],
+     [
+      "door-left",
+      1550
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 4 233 [ - ]",
+   "Vert Bead 28mm Bead 2 1483 [ - ]",
+   "Vert Bead 28mm Bead 4 283 [ - ]",
+   "Hor Bead 28mm Bead 2 933 [ - ]",
+   "Hor Bead 28mm Bead 2 779 [ - ]",
+   "Vert Bead 28mm Bead 2 1329 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1305 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 1905 \\ - /",
+   "Hor Frame T Transom/Mullion 1 1925 < - > 26 x 26 U Steel Reinforcement 1764",
+   "Hor Frame T Transom/Mullion 1 354 < - >",
+   "Hor Frame T Transom/Mullion 1 1054 < - >",
+   "Hor Sash Door Sash Z 2 954 \\ - / 28 x 44.5 U Steel Reinforcement 739",
+   "Vert Sash Door Sash Z 2 1504 \\ - / 28 x 44.5 U Steel Reinforcement 1289"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 10.952",
+   "Glazing Bridge Packer 23",
+   "Gasket 01 9.792",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    223,
+    273
+   ],
+   [
+    223,
+    1473
+   ],
+   [
+    923,
+    273
+   ],
+   [
+    769,
+    1319
+   ]
+  ]
+ },
+ {
+  "page": 17,
+  "name": "leaf between side lights",
+  "w": 1800,
+  "h": 2100,
+  "secs": [
+   [
+    400,
+    [
+     [
+      "fixed",
+      2100
+     ]
+    ]
+   ],
+   [
+    1000,
+    [
+     [
+      "door-left",
+      2100
+     ]
+    ]
+   ],
+   [
+    400,
+    [
+     [
+      "fixed",
+      2100
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Vert Bead 28mm Bead 4 2004 [ - ]",
+   "Hor Bead 28mm Bead 4 333 [ - ]",
+   "Vert Bead 28mm Bead 2 1850 [ - ]",
+   "Hor Bead 28mm Bead 2 808 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1805 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2105 \\ - /",
+   "Hor Frame T Transom/Mullion 2 2125 < - > 26 x 26 U Steel Reinforcement 1964",
+   "Vert Sash Door Sash Z 2 2025 \\ - / 28 x 44.5 U Steel Reinforcement 1810",
+   "Hor Sash Door Sash Z 2 983 \\ - / 28 x 44.5 U Steel Reinforcement 768"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 14.544",
+   "Glazing Bridge Packer 18",
+   "Gasket 01 11.992",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    323,
+    1994
+   ],
+   [
+    798,
+    1840
+   ],
+   [
+    323,
+    1994
+   ]
+  ]
+ },
+ {
+  "page": 19,
+  "name": "between side lights with top lights",
+  "w": 1900,
+  "h": 2100,
+  "secs": [
+   [
+    450,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "fixed",
+      1650
+     ]
+    ]
+   ],
+   [
+    1000,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "door-left",
+      1650
+     ]
+    ]
+   ],
+   [
+    450,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "fixed",
+      1650
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 8 383 [ - ]",
+   "Vert Bead 28mm Bead 4 1583 [ - ]",
+   "Vert Bead 28mm Bead 6 383 [ - ]",
+   "Hor Bead 28mm Bead 2 962 [ - ]",
+   "Hor Bead 28mm Bead 2 808 [ - ]",
+   "Vert Bead 28mm Bead 2 1429 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1905 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2105 \\ - /",
+   "Hor Frame T Transom/Mullion 2 2125 < - > 26 x 26 U Steel Reinforcement 1964",
+   "Hor Frame T Transom/Mullion 2 504 < - >",
+   "Hor Frame T Transom/Mullion 1 1083 < - > 26 x 26 U Steel Reinforcement 922",
+   "Hor Sash Door Sash Z 2 983 \\ - / 28 x 44.5 U Steel Reinforcement 768",
+   "Vert Sash Door Sash Z 2 1604 \\ - / 28 x 44.5 U Steel Reinforcement 1389"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 17.852",
+   "Glazing Bridge Packer 33",
+   "Gasket 01 10.308",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "L/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    373,
+    373
+   ],
+   [
+    373,
+    1573
+   ],
+   [
+    952,
+    373
+   ],
+   [
+    798,
+    1419
+   ],
+   [
+    373,
+    373
+   ],
+   [
+    373,
+    1573
+   ]
+  ]
+ },
+ {
+  "page": 21,
+  "name": "between side lights with top lights, hinged right",
+  "w": 1800,
+  "h": 2000,
+  "secs": [
+   [
+    400,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "fixed",
+      1550
+     ]
+    ]
+   ],
+   [
+    1000,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "door-right",
+      1550
+     ]
+    ]
+   ],
+   [
+    400,
+    [
+     [
+      "fixed",
+      450
+     ],
+     [
+      "fixed",
+      1550
+     ]
+    ]
+   ]
+  ],
+  "sections": [
+   "Hor Bead 28mm Bead 8 333 [ - ]",
+   "Vert Bead 28mm Bead 4 1483 [ - ]",
+   "Vert Bead 28mm Bead 6 383 [ - ]",
+   "Hor Bead 28mm Bead 2 962 [ - ]",
+   "Hor Bead 28mm Bead 2 808 [ - ]",
+   "Vert Bead 28mm Bead 2 1329 [ - ]",
+   "Hor Frame Frame 6 Chamber 2 1805 \\ - /",
+   "Vert Frame Frame 6 Chamber 2 2005 \\ - /",
+   "Hor Frame T Transom/Mullion 2 2025 < - > 26 x 26 U Steel Reinforcement 1864",
+   "Hor Frame T Transom/Mullion 2 454 < - >",
+   "Hor Frame T Transom/Mullion 1 1083 < - > 26 x 26 U Steel Reinforcement 922",
+   "Hor Sash Door Sash Z 2 983 \\ - / 28 x 44.5 U Steel Reinforcement 768",
+   "Vert Sash Door Sash Z 2 1504 \\ - / 28 x 44.5 U Steel Reinforcement 1289"
+  ],
+  "accessories": [
+   "Run Up Block 1",
+   "Gasket 02 16.852",
+   "Glazing Bridge Packer 33",
+   "Gasket 01 9.908",
+   "White Handle Lever/Lever (Short Backplate) 1",
+   "Flag Hinge White 3",
+   "R/H Keep Set 1",
+   "Standard Door Lock 1",
+   "Brass Cylinder 1"
+  ],
+  "glass": [
+   [
+    323,
+    373
+   ],
+   [
+    323,
+    1473
+   ],
+   [
+    952,
+    373
+   ],
+   [
+    798,
+    1319
+   ],
+   [
+    323,
+    373
+   ],
+   [
+    323,
+    1473
+   ]
+  ]
+ }
+]

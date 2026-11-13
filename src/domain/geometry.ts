@@ -171,6 +171,28 @@ function frenchLeaves(id: string, module: Rect, cell: Rect, sashPx: number): Dra
   })
 }
 
+/** A single door leaf: three flag hinges on the hinge side, lever handle on the other. */
+function doorLeaf(id: string, module: Rect, cell: Rect, sashPx: number, side: 'left' | 'right'): DrawnPanel {
+  const glass = insetRect(cell, sashPx)
+  const hingeX = side === 'left' ? cell.x : cell.x + cell.width
+  const handleX = side === 'left' ? glass.x + glass.width + (cell.x + cell.width - glass.x - glass.width) / 2 : cell.x + (glass.x - cell.x) / 2
+  return {
+    id,
+    cellId: id,
+    kind: side === 'left' ? 'door-left' : 'door-right',
+    module,
+    cell,
+    sash: cell,
+    glass,
+    solid: null,
+    railY: null,
+    indicator: side === 'left' ? 'casement-left' : 'casement-right',
+    handle: { x: handleX, y: cell.y + cell.height * 0.55 },
+    lever: side,
+    hinges: [0.12, 0.5, 0.88].map((share) => ({ x: hingeX, y: cell.y + cell.height * share })),
+  }
+}
+
 export function layoutDrawing(input: LayoutInput): DrawModel {
   const viewWidth = Math.max(input.viewportWidth, 40)
   const viewHeight = Math.max(input.viewportHeight, 40)
@@ -263,6 +285,7 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
       }
     }
     if (kind === 'french-left' || kind === 'french-right') return frenchLeaves(box.id, module, cell, sashPx)
+    if (kind === 'door-left' || kind === 'door-right') return [doorLeaf(box.id, module, cell, sashPx, kind === 'door-left' ? 'left' : 'right')]
     const indicatorRect = glass ?? solid ?? cell
     return [
       {

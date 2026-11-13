@@ -3,6 +3,7 @@ import { findColour } from './catalogue.ts'
 import { formatMm } from '../utils/money.ts'
 import { buildLayoutWorkOrder, usesLayoutEngine } from './workOrderLayout.ts'
 import { buildFrenchWorkOrder, usesFrenchEngine } from './workOrderFrench.ts'
+import { buildSingleDoorWorkOrder, usesSingleDoorEngine } from './workOrderSingleDoor.ts'
 
 function isSash(kind: PanelKind): boolean {
   return (
@@ -29,6 +30,7 @@ function glassDeduction(kind: PanelKind): { width: number; height: number } | nu
 export function buildWorkOrder(item: QuoteItem): WorkOrderData {
   if (usesLayoutEngine(item)) return buildLayoutWorkOrder(item)
   if (usesFrenchEngine(item)) return buildFrenchWorkOrder(item)
+  if (usesSingleDoorEngine(item)) return buildSingleDoorWorkOrder(item)
   const external = findColour(item.externalColourId)
   const internal = findColour(item.internalColourId)
   const location = item.location.trim() || 'Please Specify'

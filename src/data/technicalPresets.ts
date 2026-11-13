@@ -68,6 +68,75 @@ function rows(id: string, label: string, width: number, height: number, sections
 const W: ProductTypeId[] = ['window']
 
 const FL: PanelKind = 'french-left'
+const DL: PanelKind = 'door-left'
+const DR: PanelKind = 'door-right'
+
+/** Single door layouts from the factory work orders; one per unique shape, Flip gives the rest. */
+function singleDoorPresets(): LayoutPreset[] {
+  const door = (id: string, label: string, width: number, height: number, sections: PresetSection[]): LayoutPreset => ({
+    id,
+    label,
+    products: ['door'],
+    split: 'cols',
+    sections,
+    sample: { width, height },
+  })
+  // Every drawing on the work order is its own tile (the "-flipped" ones are the other hand,
+  // at the sizes printed on their sheets); Flip still moves between each pair.
+  return [
+    door('single-door', 'Single Door, hinged left', 1200, 2100, [{ size: 1200, cells: [[DL, 2100]] }]),
+    door('single-door-flipped', 'Single Door, hinged right', 1000, 1900, [{ size: 1000, cells: [[DR, 1900]] }]),
+    door('single-door-top-light', 'Top Light over Door, hinged left', 1000, 2000, [{ size: 1000, cells: [[F, 350], [DL, 1650]] }]),
+    door('single-door-top-light-flipped', 'Top Light over Door, hinged right', 900, 1900, [{ size: 900, cells: [[F, 300], [DR, 1600]] }]),
+    door('single-door-side-light', 'Door + Side Light', 1400, 2000, [
+      { size: 1000, cells: [[DL, 2000]] },
+      { size: 400, cells: [[F, 2000]] },
+    ]),
+    door('single-door-side-light-flipped', 'Side Light + Door', 1400, 2100, [
+      { size: 400, cells: [[F, 2100]] },
+      { size: 1000, cells: [[DR, 2100]] },
+    ]),
+    door('single-door-side-light-hinge-side', 'Door + Side Light, hinged beside it', 1400, 2000, [
+      { size: 950, cells: [[DR, 2000]] },
+      { size: 450, cells: [[F, 2000]] },
+    ]),
+    door('single-door-side-light-hinge-side-flipped', 'Side Light + Door, hinged beside it', 1500, 2100, [
+      { size: 450, cells: [[F, 2100]] },
+      { size: 1050, cells: [[DL, 2100]] },
+    ]),
+    door('single-door-side-light-top-lights', 'Door + Side Light, with Top Lights', 1400, 2100, [
+      { size: 1000, cells: [[F, 400], [DL, 1700]] },
+      { size: 400, cells: [[F, 400], [F, 1700]] },
+    ]),
+    door('single-door-side-light-top-lights-flipped', 'Side Light + Door, with Top Lights', 1400, 1900, [
+      { size: 350, cells: [[F, 350], [F, 1550]] },
+      { size: 1050, cells: [[F, 350], [DR, 1550]] },
+    ]),
+    door('single-door-side-light-top-lights-hinge-side', 'Door + Side Light, with Top Lights, hinged beside it', 1400, 2000, [
+      { size: 1000, cells: [[F, 450], [DR, 1550]] },
+      { size: 400, cells: [[F, 450], [F, 1550]] },
+    ]),
+    door('single-door-side-light-top-lights-hinge-side-flipped', 'Side Light + Door, with Top Lights, hinged beside it', 1300, 1900, [
+      { size: 300, cells: [[F, 350], [F, 1550]] },
+      { size: 1000, cells: [[F, 350], [DL, 1550]] },
+    ]),
+    door('single-door-two-side-lights', 'Door between Side Lights', 1800, 2100, [
+      { size: 400, cells: [[F, 2100]] },
+      { size: 1000, cells: [[DL, 2100]] },
+      { size: 400, cells: [[F, 2100]] },
+    ]),
+    door('single-door-two-side-lights-top-lights', 'Door between Side Lights, with Top Lights, hinged left', 1900, 2100, [
+      { size: 450, cells: [[F, 450], [F, 1650]] },
+      { size: 1000, cells: [[F, 450], [DL, 1650]] },
+      { size: 450, cells: [[F, 450], [F, 1650]] },
+    ]),
+    door('single-door-two-side-lights-top-lights-flipped', 'Door between Side Lights, with Top Lights, hinged right', 1800, 2000, [
+      { size: 400, cells: [[F, 450], [F, 1550]] },
+      { size: 1000, cells: [[F, 450], [DR, 1550]] },
+      { size: 400, cells: [[F, 450], [F, 1550]] },
+    ]),
+  ]
+}
 
 /** French door layouts from the factory work orders for job 340; one per unique shape. */
 function frenchDoorPresets(): LayoutPreset[] {
@@ -218,6 +287,8 @@ const basePresets: LayoutPreset[] = [
   ]),
 
   // Doors and folding sets
+  // Single doors (work orders for the single door sample job): one glazed leaf opening in.
+  ...singleDoorPresets(),
   row('single-solid', 'Single solid', ['door'], ['solid']),
   row('single-half', 'Single half glazed', ['door'], ['half-glazed']),
   row('french', 'French pair', ['door'], ['casement-left', 'casement-right'], undefined, { hidden: true }),
@@ -302,10 +373,12 @@ export function tileFor(preset: LayoutPreset | undefined): LayoutPreset | undefi
   return findPreset(preset.mirrorOf) ?? preset
 }
 
-const frameProfiles: Record<string, { frame: string; mullion: string }> = {
+const frameProfiles: Record<string, { frame: string; mullion: string; doorMullion?: string }> = {
   upvc: {
     frame: 'SPQ-6-11252  68mm 6 Chamber',
     mullion: 'SPQ-05-20252/SPQ-005-30252 67mm',
+    // Door frames take the heavier transom/mullion (French and single door work orders).
+    doorMullion: 'SPQ-5-30252 78mm',
   },
   aluminium: {
     frame: 'AL-58mm Thermal Break',
@@ -371,11 +444,34 @@ export function technicalDefaults(
   const sliding = kinds.some((kind) => kind === 'sliding' || kind === 'bifold')
   const french = kinds.some(isFrenchKind)
 
+  const doorLeaf = kinds.find((kind) => kind === 'door-left' || kind === 'door-right')
+  if (doorLeaf) {
+    // Single doors follow the factory work orders for the single door sample job.
+    return {
+      frameProfile: profiles.frame,
+      mullion: kinds.length > 1 ? (profiles.doorMullion ?? profiles.mullion) : 'None',
+      cill: 'None',
+      joint: material.id === 'timber' ? 'Mechanical (Standard)' : 'Welded (Standard)',
+      bead: glazing.id === 'triple' ? '36mm' : '28mm',
+      sashType: doorLeaf === 'door-left' ? 'Door left hung' : 'Door right hung',
+      locking: 'Standard Door Lock',
+      handle: 'White Handle Lever/Lever (Short Backplate)',
+      hinge: 'Flag Hinge',
+      glassGroup: 'Standard',
+      glazingMethod: 'Glazed',
+      glassType: toughened(glazing.glassType),
+      gasFill: glazing.gasFill,
+      componentType: 'Glass',
+      drainage: 'Concealed Drainage',
+      horizontalSplit: 'By Dimensions',
+    }
+  }
+
   if (french) {
     // French doors follow the factory work orders for job 340.
     return {
       frameProfile: profiles.frame,
-      mullion: kinds.length > 1 ? profiles.mullion : 'None',
+      mullion: kinds.length > 1 ? (profiles.doorMullion ?? profiles.mullion) : 'None',
       cill: 'None',
       joint: material.id === 'timber' ? 'Mechanical (Standard)' : 'Welded (Standard)',
       bead: glazing.id === 'triple' ? '36mm' : '28mm',

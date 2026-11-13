@@ -20,6 +20,10 @@ function panelsOf(item: QuoteItem): Panel[] {
   )
 }
 
+function isDoorLeaf(kind: PanelKind): boolean {
+  return kind === 'door-left' || kind === 'door-right'
+}
+
 function isOpening(kind: PanelKind): boolean {
   return kind !== 'fixed'
 }
@@ -48,8 +52,11 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
     ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right', 'top-hung'].includes(panel.kind),
   ).length
   const slidingCount = panelsOf(item).filter((panel) => panel.kind === 'sliding' || panel.kind === 'bifold').length
-  const french = item.productType === 'door' && panelsOf(item).length >= 2 && panelsOf(item).every((panel) => isGlazed(panel.kind))
-  const solidLeaf = item.productType === 'door' && panelsOf(item).length === 1 && !french
+  // A single glazed leaf, alone or with side and top lights.
+  const doorLeaf = panelsOf(item).find((panel) => isDoorLeaf(panel.kind))
+  const french =
+    !doorLeaf && item.productType === 'door' && panelsOf(item).length >= 2 && panelsOf(item).every((panel) => isGlazed(panel.kind))
+  const solidLeaf = !doorLeaf && item.productType === 'door' && panelsOf(item).length === 1 && !french
   const glazed = glassFactor(item) > 0
   const isWindow = item.productType === 'window'
   const moving = item.productType === 'patio' || item.productType === 'bifold' || slidingCount > 0
@@ -68,7 +75,11 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
   return {
     frame: roundQty(perimeter),
     glass: glazed ? roundQty(area * glassFactor(item)) : 0,
-    leaf: solidLeaf ? roundQty(area * (panelsOf(item)[0]?.kind === 'solid' ? 0.95 : 0.5)) : 0,
+    leaf: doorLeaf
+      ? roundQty(calculateArea(doorLeaf.widthMm, item.heightMm) * 0.5)
+      : solidLeaf
+        ? roundQty(area * (panelsOf(item)[0]?.kind === 'solid' ? 0.95 : 0.5))
+        : 0,
     french: french ? 2 : 0,
     panel: item.productType === 'patio' || item.productType === 'bifold' ? Math.max(panelsOf(item).length, 1) : 0,
     track: moving ? 1 : 0,

@@ -21,6 +21,10 @@ export const PANEL_KINDS = [
   'tilt-turn-left',
   'tilt-turn-right',
   'top-hung',
+  /** A single glazed door leaf opening in, hinged on the left (seen from outside). */
+  'door-left',
+  /** The same leaf hinged on the right. */
+  'door-right',
   /** A French door pair: two leaves opening out from the middle, master leaf on the left. */
   'french-left',
   /** The same pair with the master leaf on the right. */
