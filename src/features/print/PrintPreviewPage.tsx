@@ -1,3 +1,4 @@
+import { useViewedQuote } from '../../components/layout/viewedQuote.ts'
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useReactToPrint } from 'react-to-print'
@@ -40,6 +41,13 @@ export function PrintPreviewPage({ kind }: PrintPreviewPageProps) {
   }, [hydrated, id, stored])
 
   const quote = stored ?? (fetched && fetched.id === id ? fetched.quote : null)
+
+  // Lets the header name a job fetched from someone else's list.
+  useEffect(() => {
+    if (stored || !quote) return
+    useViewedQuote.getState().set(quote)
+    return () => useViewedQuote.getState().set(null)
+  }, [stored, quote])
   const handlePrint = useReactToPrint({
     contentRef,
     documentTitle: quote

@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { useAppStore } from '../../store/useAppStore.ts'
 import type { QuoteStatus } from '../../domain/models.ts'
+import { useViewedQuote } from './viewedQuote.ts'
 
 /*
  * Where you are, in the same names and order as the sidebar (and the account menu),
@@ -20,6 +21,7 @@ const LIST_FOR_STATUS: Record<QuoteStatus, string> = {
 export function useBreadcrumbs(): string[] {
   const { pathname, search, hash } = useLocation()
   const quotes = useAppStore((state) => state.quotes)
+  const viewed = useViewedQuote((state) => state.quote)
 
   if (pathname === '/') return ['Home']
   if (pathname === '/account') return ['Account']
@@ -33,7 +35,8 @@ export function useBreadcrumbs(): string[] {
   // A quote sits under the list it belongs to (Drafts, Quotation or Bookings).
   const quoteMatch = pathname.match(/^\/quote\/([^/]+)(?:\/print\/(work-order|quote))?$/)
   if (quoteMatch) {
-    const quote = quotes.find((entry) => entry.id === quoteMatch[1])
+    const quote =
+      quotes.find((entry) => entry.id === quoteMatch[1]) ?? (viewed?.id === quoteMatch[1] ? viewed : undefined)
     const trail = [ORDERS]
     if (quote) trail.push(LIST_FOR_STATUS[quote.status])
     trail.push(quote?.jobNo ? `Quote ${quote.jobNo}` : 'Quote')

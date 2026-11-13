@@ -398,7 +398,7 @@ export function AdminPage() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>People</h1>
+          <h1>Users &amp; admins</h1>
         </div>
       </div>
 

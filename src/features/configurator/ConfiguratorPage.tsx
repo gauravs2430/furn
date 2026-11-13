@@ -1,3 +1,4 @@
+import { useViewedQuote } from '../../components/layout/viewedQuote.ts'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Printer } from 'lucide-react'
@@ -58,6 +59,12 @@ export function ConfiguratorPage() {
   useEffect(() => {
     booted.current = false
   }, [id])
+
+  // Lets the header name a job the admin opened from someone else's list.
+  useEffect(() => {
+    useViewedQuote.getState().set(lockedQuote)
+    return () => useViewedQuote.getState().set(null)
+  }, [lockedQuote])
 
   useEffect(() => {
     if (!hydrated || !id || quote) return

@@ -315,8 +315,8 @@ const basePresets: LayoutPreset[] = [
   // Doors and folding sets
   // Single doors (work orders for the single door sample job): one glazed leaf opening in.
   ...singleDoorPresets(),
-  row('single-solid', 'Single solid', ['door'], ['solid']),
-  row('single-half', 'Single half glazed', ['door'], ['half-glazed']),
+  row('single-solid', 'Single solid', ['door'], ['solid'], { widths: [900], height: 2100 }),
+  row('single-half', 'Single half glazed', ['door'], ['half-glazed'], { widths: [900], height: 2100 }),
   row('french', 'French pair', ['door'], ['casement-left', 'casement-right'], undefined, { hidden: true }),
   // French doors (job 340): one French pair cell draws both leaves; the master leaf is on the left.
   ...frenchDoorPresets(),
