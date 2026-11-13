@@ -109,18 +109,17 @@ Deno.serve(async (req) => {
       }
       const { error } = await admin.auth.admin.updateUserById(userId, { password })
       if (error) return json({ error: error.message }, 400)
-      const { error: stampError } = await admin
+      // Stamped as the signed-in admin: the profiles guard only lets an admin change
+      // another person's row, and the service key carries no user, so it was refused.
+      const { error: stampError } = await userClient
         .from('profiles')
         .update({ password_set_at: new Date().toISOString() })
         .eq('id', userId)
-      if (stampError) return json({ error: stampError.message }, 400)
-      const emailError = await credentialEmail(
-        String(target.email ?? ''),
-        'Your SunnyPlast password',
-        'Your SunnyPlast password has been changed.',
-        password,
-      )
-      return json({ email: target.email, temporaryPassword: password, ...emailError })
+      if (stampError) {
+        return json({ error: 'The password was changed, but its date could not be saved. Try again.' }, 400)
+      }
+      // No email: the admin copies the new password from the dialog and passes it on.
+      return json({ email: target.email, temporaryPassword: password })
     }
 
     if (action === 'set-active') {

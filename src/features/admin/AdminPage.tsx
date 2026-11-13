@@ -263,8 +263,7 @@ export function AdminPage() {
     setResetFor(null)
     setResetPassword('')
     setShown(next)
-    const emailError = emailErrorFrom(data)
-    pushToast(emailError ?? 'Email sent', emailError ? 'danger' : 'success')
+    pushToast('Password updated', 'success')
   }
 
   async function copyPassword() {
