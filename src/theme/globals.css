@@ -1522,29 +1522,107 @@ h3 {
 }
 
 /* ── Account page ── */
-.account-facts {
+.card.account-card {
+  max-width: 640px;
+  margin-top: 22px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-subtle);
+}
+
+.account-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--header-bg);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.account-head-copy {
   display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.account-head-copy h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.account-head-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.account-rows {
+  margin: 0;
+  padding: 4px 24px;
+}
+
+.account-rows > div {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
   gap: 16px;
-  margin: 18px 0 28px;
+  align-items: center;
+  min-height: 56px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
 }
 
-.account-facts div {
-  display: grid;
-  gap: 3px;
+.account-rows > div:last-child {
+  border-bottom: 0;
 }
 
-.account-facts dt {
+.account-rows dt {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.account-rows dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.account-reset {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-note {
+  max-width: 640px;
+  margin: 14px 0 0;
   color: var(--muted);
   font-size: 13px;
-  font-weight: 600;
 }
 
-.account-facts dd {
-  margin: 0;
-}
-
-.account-id {
-  overflow-wrap: anywhere;
+@media (max-width: 480px) {
+  .account-rows > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
 }
 
 .account-layout,
@@ -1562,7 +1640,6 @@ h3 {
 }
 
 .account-name,
-.account-details,
 .account-password,
 .desk-note,
 .account-side {
@@ -1574,7 +1651,6 @@ h3 {
 .account-side h2,
 .desk-note h2,
 .account-name h2,
-.account-details h2,
 .account-password h2 {
   font-size: 19px;
 }
