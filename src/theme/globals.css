@@ -1025,6 +1025,31 @@ h3 {
   font-size: 13px;
 }
 
+/* Narrow screens: the three counts stay side by side in one row, each card compact. */
+@media (max-width: 640px) {
+  .home-desk {
+    gap: 10px;
+  }
+
+  .home-stat {
+    gap: 6px;
+    min-height: 0;
+    padding: 14px 12px;
+  }
+
+  .home-stat strong {
+    font-size: 26px;
+  }
+
+  .home-stat span {
+    font-size: 12.5px;
+  }
+
+  .home-stat em {
+    display: none;
+  }
+}
+
 /* ── Home: today's activity ── */
 .today {
   margin-top: 24px;
@@ -3885,7 +3910,6 @@ select.input {
 
   .config-layout,
   .order-layout,
-  .home-desk,
   .account-layout,
   .split-desk {
     grid-template-columns: 1fr;
