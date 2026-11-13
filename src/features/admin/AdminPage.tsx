@@ -328,8 +328,7 @@ export function AdminPage() {
     }
     patchRow(person.id, { active: next })
     setActiveFor(null)
-    const emailError = emailErrorFrom(data)
-    if (emailError) pushToast(emailError, 'danger')
+    pushToast(next ? 'Account activated' : 'Account deactivated', 'success')
   }
 
   async function confirmUnlock() {
@@ -364,8 +363,7 @@ export function AdminPage() {
     setUnlockFor(null)
     setUnlockDate('')
     setUnlockError(null)
-    const emailError = emailErrorFrom(data)
-    if (emailError) pushToast(emailError, 'danger')
+    pushToast('Account unlocked', 'success')
   }
 
   async function confirmDeleteUser() {
@@ -633,8 +631,8 @@ export function AdminPage() {
         description={
           activeFor
             ? activeFor.next
-              ? `${displayName(activeFor.person)} will be marked active and can sign in again. An email will be sent.`
-              : `${displayName(activeFor.person)} will be marked inactive and signed out of the app. An email will be sent.`
+              ? `${displayName(activeFor.person)} will be marked active and can sign in again.`
+              : `${displayName(activeFor.person)} will be marked inactive. They can no longer sign in, and are signed out the next time they open a page.`
             : ''
         }
         confirmLabel={savingId && activeFor ? 'Saving…' : activeFor?.next ? 'Set active' : 'Set inactive'}
@@ -651,8 +649,8 @@ export function AdminPage() {
         description={
           unlockFor
             ? unlockNeedsDate
-              ? `${displayName(unlockFor)} will be unlocked. The current expiry is today or earlier, so choose a new date after today. An email will be sent.`
-              : `${displayName(unlockFor)} will be unlocked. An email will be sent.`
+              ? `${displayName(unlockFor)} will be unlocked. The current expiry is today or earlier, so choose a new date after today.`
+              : `${displayName(unlockFor)} will be unlocked and can sign in again.`
             : ''
         }
         confirmLabel={savingId && unlockFor ? 'Saving…' : 'Unlock'}

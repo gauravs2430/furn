@@ -140,13 +140,8 @@ Deno.serve(async (req) => {
         .select('id')
       if (error) return json({ error: error.message }, 400)
       if (!Array.isArray(data) || data.length === 0) return json({ error: 'Could not save that change.' }, 400)
-      const active = body.active === true
-      const emailError = await noticeEmail(
-        target.user.email,
-        active ? 'Your SunnyPlast account is active' : 'Your SunnyPlast account is inactive',
-        active ? 'Your SunnyPlast account is active.' : 'Your SunnyPlast account is inactive.',
-      )
-      return json({ ok: true, active, ...emailError })
+      // No email for this change: the admin page just confirms it on screen.
+      return json({ ok: true, active: body.active === true })
     }
 
     if (action === 'unlock') {
@@ -173,12 +168,8 @@ Deno.serve(async (req) => {
         .select('id')
       if (error) return json({ error: error.message }, 400)
       if (!Array.isArray(data) || data.length === 0) return json({ error: 'Could not unlock that user.' }, 400)
-      const emailError = await noticeEmail(
-        target.user.email,
-        'Your SunnyPlast account is unlocked',
-        'Your SunnyPlast account is unlocked.',
-      )
-      return json({ ok: true, ...emailError })
+      // No email for this change: the admin page just confirms it on screen.
+      return json({ ok: true })
     }
 
     if (action === 'delete-user') {
@@ -243,14 +234,6 @@ async function credentialEmail(to: string, subject: string, lead: string, passwo
   const link = loginLink()
   const reason = link
     ? await sendPlainEmail(to, subject, `${lead}\n\nLogin: ${link}\nEmail: ${to}\nPassword: ${password}\n`)
-    : 'SITE_URL is not configured.'
-  return mailFailure(reason)
-}
-
-async function noticeEmail(to: string, subject: string, lead: string) {
-  const link = loginLink()
-  const reason = link
-    ? await sendPlainEmail(to, subject, `${lead}\n\nLogin: ${link}\n`)
     : 'SITE_URL is not configured.'
   return mailFailure(reason)
 }

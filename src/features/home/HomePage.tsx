@@ -130,7 +130,7 @@ function DesignShowcase({ starting, onStart }: { starting: boolean; onStart: () 
         <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={onStart}>
           {starting ? 'Starting…' : 'Start a new quote'}
         </Button>
-        <p className="home-showcase-note">Over 30 window layouts, with top lights, side-hung and top-hung sashes.</p>
+        <p className="home-showcase-note">Over 60 layouts across windows, single doors, French doors and sliding patio doors.</p>
       </div>
     </section>
   )
