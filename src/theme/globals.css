@@ -134,8 +134,101 @@ h3 {
   display: none;
 }
 
+/* Collapsed: the wordmark gives way to the symbol alone. */
+.shell-symbol {
+  display: none;
+  width: 40px;
+  height: auto;
+  mix-blend-mode: multiply;
+}
+
 .app-shell.is-sidebar-collapsed .shell-logo {
-  width: 42px;
+  display: none;
+}
+
+.app-shell.is-sidebar-collapsed .shell-symbol {
+  display: block;
+}
+
+/* Collapsed rail: one icon per section, name on hover. */
+.shell-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: var(--shell-sidebar-collapsed-width);
+  padding: 6px 0 12px;
+}
+
+.shell-mini-rule {
+  width: 24px;
+  height: 1px;
+  margin: 4px 0;
+  background: var(--sidebar-line);
+}
+
+.shell-mini-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.shell-mini-item:hover,
+.shell-mini-item:focus-visible {
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text-bright);
+}
+
+.shell-mini-item.is-active {
+  background: var(--sidebar-hover);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--sidebar-text-bright);
+}
+
+.shell-mini-item.is-action {
+  border-color: var(--sidebar-line);
+}
+
+.shell-mini-item:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.shell-mini-item::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  z-index: 40;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.shell-mini-item:hover::after,
+.shell-mini-item:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
 }
 
 .shell-menu {
@@ -431,6 +524,8 @@ h3 {
 
 .app-shell.is-sidebar-collapsed .shell-side {
   width: var(--shell-sidebar-collapsed-width);
+  /* Lets the hover labels of the icon rail show beside it. */
+  overflow: visible;
 }
 
 .app-shell.is-sidebar-collapsed .shell-nav {

@@ -298,6 +298,7 @@ export function AppShell() {
           <div className="shell-brand-slot">
             <Link to="/" className="shell-brand">
               <img className="shell-logo" src="/sunnyplast-logo.jpeg" alt="SunnyPlast" />
+              <img className="shell-symbol" src="/sunnyplast-symbol.png" alt="" aria-hidden="true" />
             </Link>
           </div>
           <Breadcrumbs />
@@ -354,6 +355,9 @@ export function AppShell() {
               </button>
             </div>
           )}
+          {!narrow && collapsed ? (
+            <MiniNav isAdmin={isAdmin} location={location} starting={starting} onNewQuote={startQuote} />
+          ) : null}
           <div className="shell-nav">
             {nodes.map((node) => (
               <SideBranch
@@ -378,6 +382,74 @@ export function AppShell() {
         </main>
       </div>
       <Toasts />
+    </div>
+  )
+}
+
+type MiniItem = { label: string; icon: LucideIcon; to: string; current: (path: string) => boolean; admin?: boolean }
+
+const miniItems: MiniItem[] = [
+  { label: 'Home', icon: House, to: '/', current: (path) => path === '/' },
+  {
+    label: 'Orders and quotes',
+    icon: FileText,
+    to: '/orders?status=draft',
+    current: (path) => path.startsWith('/orders') || path.startsWith('/quote'),
+  },
+  { label: 'Admin Panel', icon: ShieldCheck, to: '/admin/orders', admin: true, current: (path) => path.startsWith('/admin/orders') },
+  {
+    label: 'Manage',
+    icon: Settings,
+    to: '/admin/users',
+    admin: true,
+    current: (path) => path.startsWith('/admin/users') || path.startsWith('/admin/prices') || path.startsWith('/admin/catalog'),
+  },
+]
+
+/** The collapsed sidebar: one icon per section, with its name shown on hover. */
+function MiniNav({
+  isAdmin,
+  location,
+  starting,
+  onNewQuote,
+}: {
+  isAdmin: boolean
+  location: { pathname: string }
+  starting: boolean
+  onNewQuote: () => void
+}) {
+  return (
+    <div className="shell-mini">
+      <button
+        type="button"
+        className="shell-mini-item is-action"
+        data-label={starting ? 'Starting…' : 'New quote'}
+        aria-label="New quote"
+        disabled={starting}
+        aria-busy={starting}
+        onClick={onNewQuote}
+      >
+        <Plus size={18} strokeWidth={2} aria-hidden="true" />
+      </button>
+      <span className="shell-mini-rule" aria-hidden="true" />
+      {miniItems
+        .filter((item) => isAdmin || !item.admin)
+        .map((item) => {
+          const active = item.current(location.pathname)
+          const Icon = item.icon
+          return (
+            <Link
+              key={item.label}
+              to={item.to}
+              className={cx('shell-mini-item', active && 'is-active')}
+              data-label={item.label}
+              aria-label={item.label}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon size={18} strokeWidth={1.75} aria-hidden="true" />
+            </Link>
+          )
+        })}
     </div>
   )
 }
