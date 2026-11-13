@@ -180,17 +180,19 @@ export function CatalogPage() {
                   <td onClick={() => setEditingId(row.id)}>{row.factor}</td>
                   <td onClick={() => setEditingId(row.id)}>{row.active ? 'Active' : 'Off'}</td>
                   <td onClick={() => setEditingId(row.id)}>{formatDateTime(row.updatedAt)}</td>
-                  <td className="catalog-actions">
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setPendingRemove(row)
-                      }}
-                    >
-                      Remove
-                    </Button>
+                  <td className="catalog-actions-cell">
+                    <div className="catalog-actions">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setPendingRemove(row)
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}

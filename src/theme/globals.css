@@ -897,11 +897,6 @@ h3 {
   color: var(--ink);
 }
 
-.home-welcome-actions {
-  display: flex;
-  margin-top: 18px;
-}
-
 .home-desk {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2258,12 +2253,18 @@ select.input {
   max-width: 100%;
 }
 
+/* The cell stays a table cell so its divider lines up with the rest of the row. */
+.catalog-actions-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .catalog-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .catalog-attach {

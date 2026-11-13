@@ -380,14 +380,16 @@ function PartRow({
           )}
         </td>
       ) : null}
-      <td className="catalog-actions">
-        <Button size="sm" disabled={busy} onClick={() => void save()}>
-          {busy ? 'Saving…' : 'Save'}
-        </Button>
-        <Button variant="danger" size="sm" disabled={busy} onClick={onRemove}>
-          Remove
-        </Button>
-        {error ? <span className="form-error">{error}</span> : null}
+      <td className="catalog-actions-cell">
+        <div className="catalog-actions">
+          <Button size="sm" disabled={busy} onClick={() => void save()}>
+            {busy ? 'Saving…' : 'Save'}
+          </Button>
+          <Button variant="danger" size="sm" disabled={busy} onClick={onRemove}>
+            Remove
+          </Button>
+          {error ? <span className="form-error">{error}</span> : null}
+        </div>
       </td>
     </tr>
   )

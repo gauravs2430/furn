@@ -8,6 +8,9 @@ import { Button } from '../../components/ui/Button.tsx'
 import { OpeningDrawing } from '../drawing/OpeningDrawing.tsx'
 import { TodayActivity } from './TodayActivity.tsx'
 
+/** The "Today" activity panel is hidden for now. Set to true to bring it back as it was. */
+const SHOW_TODAY_ACTIVITY = false
+
 export function HomePage() {
   const navigate = useNavigate()
   const profile = useAuthStore((state) => state.profile)
@@ -44,11 +47,6 @@ export function HomePage() {
         <p className="home-kicker">{profile?.role === 'admin' ? 'Admin' : 'Staff'}</p>
         <h1>Welcome back, {name}</h1>
         <p className="lede">Your own drafts, quotes, and booked jobs. Start a new quote or pick up where you left off.</p>
-        <div className="home-welcome-actions">
-          <Button icon={<Plus size={18} />} disabled={starting} aria-busy={starting} onClick={startQuote}>
-            {starting ? 'Starting…' : 'New quote'}
-          </Button>
-        </div>
       </header>
       <div className="home-desk">
         <Link className="home-stat" to="/orders?status=draft">
@@ -68,7 +66,7 @@ export function HomePage() {
         </Link>
       </div>
 
-      <TodayActivity />
+      {SHOW_TODAY_ACTIVITY ? <TodayActivity /> : null}
 
       <DesignShowcase starting={starting} onStart={startQuote} />
     </div>
