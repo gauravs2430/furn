@@ -25,6 +25,8 @@ export type IndicatorKind =
   | 'tilt-right'
   | 'top-hung'
   | 'sliding'
+  | 'slide-left'
+  | 'slide-right'
   | 'bifold'
   | 'door-swing'
 
@@ -111,6 +113,10 @@ function indicatorFor(kind: PanelKind): IndicatorKind | null {
       return 'top-hung'
     case 'sliding':
       return 'sliding'
+    case 'slide-left':
+      return 'slide-left'
+    case 'slide-right':
+      return 'slide-right'
     case 'bifold':
       return 'bifold'
     case 'solid':
@@ -130,6 +136,7 @@ function handlePoint(rect: Rect, kind: PanelKind, productType: ProductTypeId): {
     kind === 'solid' ||
     kind === 'half-glazed' ||
     kind === 'sliding' ||
+    kind === 'slide-left' ||
     kind === 'bifold'
   const tall = productType !== 'window'
   const y = rect.y + rect.height * (tall ? 0.62 : 0.5)
@@ -241,7 +248,11 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
   const innerH = Math.max(outer.height - cillPx, 1)
   const px = (mm: number) => outer.x + (mm / widthMm) * outer.width
   const py = (mm: number) => outer.y + (mm / heightMm) * innerH
-  const inset = (edge: 'frame' | 'bar') => (edge === 'frame' ? framePx : mullionPx / 2)
+  // A sliding patio has no mullions: every pane is a sash and they meet at the interlocks.
+  const slidingFrame =
+    input.productType === 'patio' &&
+    boxes.every((box) => box.kind === 'fixed' || box.kind === 'slide-left' || box.kind === 'slide-right')
+  const inset = (edge: 'frame' | 'bar') => (edge === 'frame' ? framePx : slidingFrame ? 0 : mullionPx / 2)
 
   const drawn: DrawnPanel[] = boxes.flatMap((box): DrawnPanel[] => {
     const module: Rect = {
@@ -262,7 +273,7 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
     }
     const kind = box.kind
     const openingInset =
-      kind === 'fixed' ? Math.min(2, cell.width / 5) : kind === 'sliding' || kind === 'bifold' ? sashPx * 0.72 : sashPx
+      slidingFrame ? sashPx : kind === 'fixed' ? Math.min(2, cell.width / 5) : kind === 'sliding' || kind === 'bifold' ? sashPx * 0.72 : sashPx
     const glassRect = insetRect(cell, openingInset)
     const solidKind = kind === 'solid'
     const half = kind === 'half-glazed'
@@ -294,7 +305,7 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
         kind,
         module,
         cell,
-        sash: kind === 'fixed' ? null : cell,
+        sash: kind === 'fixed' && !slidingFrame ? null : cell,
         glass,
         solid,
         railY,
@@ -305,7 +316,7 @@ export function layoutDrawing(input: LayoutInput): DrawModel {
   })
 
   // Sub bars first so the frame-to-frame bars sit over their ends.
-  const ordered = [...bars.filter((bar) => bar.level === 'sub'), ...bars.filter((bar) => bar.level === 'main')]
+  const ordered = slidingFrame ? [] : [...bars.filter((bar) => bar.level === 'sub'), ...bars.filter((bar) => bar.level === 'main')]
   const mullions: Rect[] = ordered.map((bar) => {
     const startInset = bar.startEdge === 'frame' ? framePx : mullionPx / 2
     const endInset = bar.endEdge === 'frame' ? framePx : mullionPx / 2

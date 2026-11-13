@@ -96,9 +96,9 @@ export const products: ProductDefinition[] = [
     id: 'patio',
     name: 'Patio Door',
     factor: 1.6,
-    defaultWidth: 2400,
-    defaultHeight: 2100,
-    defaultPreset: 'sliding-2',
+    defaultWidth: 1600,
+    defaultHeight: 1800,
+    defaultPreset: 'patio-2-fixed-slider',
     summary: 'In-line sliding panels',
   },
   {
@@ -121,6 +121,8 @@ export const panelKindLabels: Record<PanelKind, string> = {
   'tilt-turn-left': 'Tilt & turn left',
   'tilt-turn-right': 'Tilt & turn right',
   'top-hung': 'Top hung',
+  'slide-left': 'Sliding (opens to the left)',
+  'slide-right': 'Sliding (opens to the right)',
   'door-left': 'Door leaf (hinged left)',
   'door-right': 'Door leaf (hinged right)',
   'french-left': 'French pair (master left)',
@@ -137,7 +139,7 @@ export function panelKindsFor(product: ProductTypeId, group?: string): PanelKind
     case 'door':
       return ['door-left', 'door-right', 'fixed', 'solid', 'half-glazed']
     case 'patio':
-      return ['sliding', 'fixed']
+      return ['slide-left', 'slide-right', 'fixed']
     case 'bifold':
       return ['bifold', 'fixed']
     default:

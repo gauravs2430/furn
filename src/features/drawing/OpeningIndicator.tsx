@@ -44,6 +44,13 @@ export function OpeningIndicator({ kind, rect }: OpeningIndicatorProps) {
     return <path d={`M ${x} ${y + h} L ${x + w / 2} ${y} L ${x + w} ${y + h}`} {...shared} />
   }
 
+  // Patio sash: the point of the V shows which way it slides, with a line back to the handle.
+  if (kind === 'slide-left' || kind === 'slide-right') {
+    const tip = kind === 'slide-left' ? x : x + w
+    const back = kind === 'slide-left' ? x + w : x
+    return <path d={`M ${back} ${y} L ${tip} ${y + h / 2} L ${back} ${y + h} M ${tip} ${y + h / 2} H ${back}`} {...shared} />
+  }
+
   if (kind === 'sliding') {
     const mid = y + h / 2
     const start = x + w * 0.22

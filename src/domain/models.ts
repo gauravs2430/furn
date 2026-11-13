@@ -21,6 +21,10 @@ export const PANEL_KINDS = [
   'tilt-turn-left',
   'tilt-turn-right',
   'top-hung',
+  /** A patio sash that slides open to the left (seen from outside); handle on its right edge. */
+  'slide-left',
+  /** A patio sash that slides open to the right; handle on its left edge. */
+  'slide-right',
   /** A single glazed door leaf opening in, hinged on the left (seen from outside). */
   'door-left',
   /** The same leaf hinged on the right. */

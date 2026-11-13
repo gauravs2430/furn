@@ -51,7 +51,9 @@ export function partQuantities(item: QuoteItem): Record<string, number> {
   const sashCount = panelsOf(item).filter((panel) =>
     ['casement-left', 'casement-right', 'tilt-turn-left', 'tilt-turn-right', 'top-hung'].includes(panel.kind),
   ).length
-  const slidingCount = panelsOf(item).filter((panel) => panel.kind === 'sliding' || panel.kind === 'bifold').length
+  const slidingCount = panelsOf(item).filter((panel) =>
+    ['sliding', 'slide-left', 'slide-right', 'bifold'].includes(panel.kind),
+  ).length
   // A single glazed leaf, alone or with side and top lights.
   const doorLeaf = panelsOf(item).find((panel) => isDoorLeaf(panel.kind))
   const french =

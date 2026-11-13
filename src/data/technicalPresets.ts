@@ -68,6 +68,30 @@ function rows(id: string, label: string, width: number, height: number, sections
 const W: ProductTypeId[] = ['window']
 
 const FL: PanelKind = 'french-left'
+const PL: PanelKind = 'slide-left'
+const PR: PanelKind = 'slide-right'
+
+/** Sliding patio layouts from the factory work orders, at the sizes printed on each sheet. */
+function patioPresets(): LayoutPreset[] {
+  const patio = (id: string, label: string, width: number, height: number, kinds: PanelKind[]): LayoutPreset => ({
+    id,
+    label,
+    products: ['patio'],
+    split: 'cols',
+    sections: kinds.map((kind) => ({ size: width / kinds.length, cells: [[kind, height]] })),
+    sample: { width, height },
+  })
+  return [
+    patio('patio-2-fixed-slider', '2 Panels, right one slides', 1600, 1800, [F, PL]),
+    patio('patio-2-slider-fixed', '2 Panels, left one slides', 2000, 1800, [PR, F]),
+    patio('patio-3-middle-slides-left', '3 Panels, middle slides left', 2500, 1800, [F, PL, F]),
+    patio('patio-3-middle-slides-right', '3 Panels, middle slides right', 3600, 2100, [F, PR, F]),
+    patio('patio-3-right-slides', '3 Panels, right one slides', 2250, 1890, [F, F, PL]),
+    patio('patio-3-left-slides', '3 Panels, left one slides', 2000, 1750, [PR, F, F]),
+    patio('patio-4-middle-pair', '4 Panels, middle pair slides', 2700, 2100, [F, PL, PR, F]),
+  ]
+}
+
 const DL: PanelKind = 'door-left'
 const DR: PanelKind = 'door-right'
 
@@ -213,8 +237,10 @@ const basePresets: LayoutPreset[] = [
     widths: [400, 400, 350, 350],
     height: 1000,
   }),
-  row('sliding-2', 'Sliding 2-panel', ['window', 'patio'], ['sliding', 'sliding']),
-  row('sliding-3', 'Sliding 3-panel', ['window', 'patio'], ['sliding', 'fixed', 'sliding']),
+  row('sliding-2', 'Sliding 2-panel', ['window'], ['sliding', 'sliding']),
+  row('sliding-3', 'Sliding 3-panel', ['window'], ['sliding', 'fixed', 'sliding']),
+  // Sliding patio doors (work orders for job 316): every drawing is its own tile.
+  ...patioPresets(),
 
   // Top lights in a single column
   cols('fixed-over-fixed', 'Fixed Top Light over Fixed', 600, 1400, [{ size: 600, cells: [[F, 450], [F, 950]] }]),
@@ -443,6 +469,28 @@ export function technicalDefaults(
   const isWindow = product === 'window'
   const sliding = kinds.some((kind) => kind === 'sliding' || kind === 'bifold')
   const french = kinds.some(isFrenchKind)
+
+  if (kinds.some((kind) => kind === 'slide-left' || kind === 'slide-right')) {
+    // Sliding patios follow the factory work orders for job 316.
+    return {
+      frameProfile: 'Sliding Frame',
+      mullion: 'None',
+      cill: 'None',
+      joint: material.id === 'timber' ? 'Mechanical (Standard)' : 'Welded (Standard)',
+      bead: glazing.id === 'triple' ? '36mm' : '28mm',
+      sashType: 'Sliding sash',
+      locking: 'Patio Lock & Keep Set',
+      handle: 'Patio Handle',
+      hinge: 'None',
+      glassGroup: 'Standard',
+      glazingMethod: 'Glazed',
+      glassType: toughened(glazing.glassType),
+      gasFill: glazing.gasFill,
+      componentType: 'Glass',
+      drainage: 'Concealed Drainage',
+      horizontalSplit: 'By Dimensions',
+    }
+  }
 
   const doorLeaf = kinds.find((kind) => kind === 'door-left' || kind === 'door-right')
   if (doorLeaf) {

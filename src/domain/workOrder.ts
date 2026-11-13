@@ -4,6 +4,7 @@ import { formatMm } from '../utils/money.ts'
 import { buildLayoutWorkOrder, usesLayoutEngine } from './workOrderLayout.ts'
 import { buildFrenchWorkOrder, usesFrenchEngine } from './workOrderFrench.ts'
 import { buildSingleDoorWorkOrder, usesSingleDoorEngine } from './workOrderSingleDoor.ts'
+import { buildPatioWorkOrder, usesPatioEngine } from './workOrderPatio.ts'
 
 function isSash(kind: PanelKind): boolean {
   return (
@@ -31,6 +32,7 @@ export function buildWorkOrder(item: QuoteItem): WorkOrderData {
   if (usesLayoutEngine(item)) return buildLayoutWorkOrder(item)
   if (usesFrenchEngine(item)) return buildFrenchWorkOrder(item)
   if (usesSingleDoorEngine(item)) return buildSingleDoorWorkOrder(item)
+  if (usesPatioEngine(item)) return buildPatioWorkOrder(item)
   const external = findColour(item.externalColourId)
   const internal = findColour(item.internalColourId)
   const location = item.location.trim() || 'Please Specify'

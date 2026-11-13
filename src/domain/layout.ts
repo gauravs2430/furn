@@ -7,6 +7,8 @@ const MIRRORED: Partial<Record<PanelKind, PanelKind>> = {
   'casement-right': 'casement-left',
   'tilt-turn-left': 'tilt-turn-right',
   'tilt-turn-right': 'tilt-turn-left',
+  'slide-left': 'slide-right',
+  'slide-right': 'slide-left',
   'door-left': 'door-right',
   'door-right': 'door-left',
   'french-left': 'french-right',
