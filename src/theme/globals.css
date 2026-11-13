@@ -327,19 +327,6 @@ h3 {
   white-space: nowrap;
 }
 
-.shell-breadcrumb-link {
-  color: #ffffff;
-  text-decoration: none;
-  opacity: 0.92;
-  transition: opacity 0.15s ease, text-decoration 0.15s ease;
-}
-
-.shell-breadcrumb-link:hover {
-  opacity: 1;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .shell-breadcrumb-current {
   color: #ffffff;
   font-weight: 500;
